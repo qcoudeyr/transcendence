@@ -4,11 +4,11 @@ FROM node:14
 WORKDIR /app
 
 # Install dependencies
-COPY package*.json ./
-RUN npm install
+#COPY package*.json ./
+#RUN npm install
 
 # Copy project files
-COPY . .
+#COPY . .
 
 # Expose port and start the application
 EXPOSE 3000
