@@ -24,4 +24,4 @@ fclean:
 
 re: fclean all
 
-.PHONY: all install-docker check-directories build-and-up generate-ssh-keys fclean re
+.PHONY: all build-and-up fclean re

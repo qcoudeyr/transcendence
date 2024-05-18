@@ -95,6 +95,20 @@ services:
     depends_on:
       - prometheus
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "${PORTAINER_PORT}:${PORTAINER_PORT}"
+    env_file:
+      - .env
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.40
+
 volumes:
   postgres_data:
     driver: local
@@ -114,6 +128,12 @@ volumes:
       type: "none"
       o: "bind"
       device: "./data/es_data/"
+  portainer_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/portainer/"
 
 networks:
   transcendence:
