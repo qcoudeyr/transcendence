@@ -80,7 +80,7 @@ services:
     volumes:
       - ./requirements/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090"
+      - "9091:9090"
     networks:
       transcendence:
         ipv4_address: 10.0.10.30
@@ -133,7 +133,7 @@ volumes:
     driver_opts:
       type: "none"
       o: "bind"
-      device: "./data/portainer/"
+      device: "./data/portainer_data/"
 
 networks:
   transcendence:
