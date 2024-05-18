@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  postgresql:
+    build:
+      context: ./requirements/postgresql
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - 3306
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.12
+
+  django:
+    build:
+      context: ./requirements/django
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - django_data:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgresql
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.10
+
+  nodejs:
+    build:
+      context: ./requirements/nodejs
+    ports:
+      - "3000:3000"
+    command: npm start
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.11
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.20
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.10.1
+    volumes:
+      - ./requirements/logstash/config:/usr/share/logstash/config
+      - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5044:5044"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.21
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.1
+    ports:
+      - "5601:5601"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.22
+    depends_on:
+      - elasticsearch
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./requirements/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9091:9090"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.30
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.31
+    depends_on:
+      - prometheus
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "${PORTAINER_PORT}:${PORTAINER_PORT}"
+    env_file:
+      - .env
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.40
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/postgres_data/"
+  django_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/django_data/"
+  es_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/es_data/"
+  portainer_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/portainer_data/"
+
+networks:
+  transcendence:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.10.0/24
