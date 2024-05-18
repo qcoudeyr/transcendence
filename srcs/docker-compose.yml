@@ -2,25 +2,62 @@ version: '3.8'
 
 services:
   postgresql:
-    image: postgres:13.15
+    build:
+      context: ./requirements/postgresql
     volumes:
-      - postgres_data:./data/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - 3306
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.12
 
-  web:
-    build: ./srcs/requirements/postgresql
+  django:
+    build:
+      context: ./requirements/django
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./backend:/code
+      - django_data:/code
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      - postgresql
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.10
 
-  frontend:
-    build: ./frontend
+  nodejs:
+    build:
+      context: ./requirements/nodejs
     ports:
       - "3000:3000"
     command: npm start
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.11
+
 
 volumes:
   postgres_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/postgres_data/"
+  django_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/django_data/"
+
+networks:
+  transcendence:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.10.0/24
