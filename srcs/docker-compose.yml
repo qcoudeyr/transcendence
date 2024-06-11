@@ -10,31 +10,46 @@ services:
     env_file:
       - .env
     expose:
-      - 3306
+      - 5432
     networks:
       transcendence:
         ipv4_address: 10.0.10.12
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
 
   django:
     build:
       context: ./requirements/django
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - django_data:/code
+      - django_data:/app
     ports:
-      - "8000:8000"
+      - "8001:8000"
     depends_on:
       - postgresql
     networks:
       transcendence:
         ipv4_address: 10.0.10.10
+    environment:
+      DATABASE_NAME: mydatabase
+      DATABASE_USER: myuser
+      DATABASE_PASSWORD: mypassword
+      DATABASE_HOST: postgresql
+      DATABASE_PORT: 5432
 
   nodejs:
     build:
       context: ./requirements/nodejs
+    volumes:
+      - nodejs_data:/usr/src/app
     ports:
       - "3000:3000"
     command: npm start
+    working_dir: /usr/src/app/transcendence
     networks:
       transcendence:
         ipv4_address: 10.0.10.11
@@ -134,6 +149,12 @@ volumes:
       type: "none"
       o: "bind"
       device: "./data/portainer_data/"
+  nodejs_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/nodejs_data/"
 
 networks:
   transcendence:

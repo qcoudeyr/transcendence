@@ -1,7 +1,7 @@
-FROM postgres:13.5
+FROM postgres:13
 
-# Add custom configuration if needed
-# COPY conf /etc/postgresql/conf.d/
+ENV POSTGRES_DB=${POSTGRES_DB}
+ENV POSTGRES_USER=${POSTGRES_USER}
+ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
-# Add any custom tools or scripts
-# COPY tools /usr/local/bin/
+VOLUME ./data/postgres_data:/var/lib/postgresql/data
