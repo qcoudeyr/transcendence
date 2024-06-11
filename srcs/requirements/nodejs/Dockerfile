@@ -1,15 +1,14 @@
+# my_project/Dockerfile.node
 FROM node:14
 
-# Set the working directory
-WORKDIR /app
+WORKDIR /usr/src/app/transcendence
 
-# Install dependencies
-#COPY package*.json ./
-#RUN npm install
+COPY ./tools/package.json /usr/src/app/transcendence
 
-# Copy project files
-#COPY . .
+RUN npm install
 
-# Expose port and start the application
+COPY ./tools/app.js /usr/src/app/transcendence
+
 EXPOSE 3000
-CMD ["npm", "start"]
+
+CMD ["node", "app.js"]

@@ -7,20 +7,11 @@ build-and-up:
 
 fclean:
 	@cd ./srcs && sudo docker-compose down && cd ../
-	@sudo docker system prune -af
+	@sudo docker stop $(docker ps -aq) || true
+	@sudo docker rm $(docker ps -aq) || true
+	@sudo docker volume rm $(docker volume ls -q) || true
 	@echo "Checking for volumes..."
-	@if sudo docker volume ls | grep -q "srcs"; then \
-		echo "Removing volumes..."; \
-		sudo docker volume rm srcs_*; \
-	else \
-		echo "No volumes found."; \
-	fi
-	@echo "Docker cleaning is done !";
-	@if [ -d "$(HOME)/data" ]; then \
-		echo "Cleaning data folder..."; \
-		sudo rm -rf $(HOME)/data ;\
-	fi
-	@echo "Cleaning is done !";
+	@echo "Cleaning is done !"
 
 re: fclean all
 
