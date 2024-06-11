@@ -1,2 +1,6 @@
 *.env*
-
+srcs/data/django_data/
+srcs/data/es_data/
+srcs/data/nodejs_data/
+srcs/data/portainer_data/
+srcs/data/postgres_data/
