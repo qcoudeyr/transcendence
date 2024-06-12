@@ -35,11 +35,11 @@ services:
       transcendence:
         ipv4_address: 10.0.10.10
     environment:
-      DATABASE_NAME: mydatabase
-      DATABASE_USER: myuser
-      DATABASE_PASSWORD: mypassword
-      DATABASE_HOST: postgresql
-      DATABASE_PORT: 5432
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
 
   nodejs:
     build:
