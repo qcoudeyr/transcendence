@@ -20,6 +20,11 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   django:
     build:
@@ -40,6 +45,11 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   nodejs:
     build:
@@ -53,6 +63,11 @@ services:
     networks:
       transcendence:
         ipv4_address: 10.0.10.11
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
@@ -66,6 +81,11 @@ services:
     networks:
       transcendence:
         ipv4_address: 10.0.10.20
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   logstash:
     image: docker.elastic.co/logstash/logstash:7.10.1
@@ -79,6 +99,23 @@ services:
         ipv4_address: 10.0.10.21
     depends_on:
       - elasticsearch
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.13.4
+    volumes:
+      - ./requirements/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.50
+    depends_on:
+      - logstash
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.10.1
@@ -89,6 +126,11 @@ services:
         ipv4_address: 10.0.10.22
     depends_on:
       - elasticsearch
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   prometheus:
     image: prom/prometheus:latest
@@ -99,6 +141,11 @@ services:
     networks:
       transcendence:
         ipv4_address: 10.0.10.30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   grafana:
     image: grafana/grafana:latest
@@ -109,6 +156,11 @@ services:
         ipv4_address: 10.0.10.31
     depends_on:
       - prometheus
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   portainer:
     image: portainer/portainer-ce:latest
@@ -123,6 +175,11 @@ services:
     networks:
       transcendence:
         ipv4_address: 10.0.10.40
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
 volumes:
   postgres_data:
