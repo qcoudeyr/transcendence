@@ -3,12 +3,12 @@
 
 # =================== System: Kibana Server ===================
 # Kibana is served by a back end server. This setting specifies the port to use.
-#server.port: 5601
+server.port: 5601
 
 # Specifies the address to which the Kibana server will bind. IP addresses and host names are both valid values.
 # The default is 'localhost', which usually means remote machines will not be able to connect.
 # To allow connections from remote users, set this parameter to a non-loopback address.
-#server.host: "localhost"
+server.host: "10.0.10.22"
 
 # Enables you to specify a path to mount Kibana at if you are running behind a proxy.
 # Use the `server.rewriteBasePath` setting to tell Kibana if it should remove the basePath
@@ -181,3 +181,7 @@ elasticsearch.ssl.key: /path/to/your/client.key
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
+
+xpack.reporting.capture.browser.chromium.disableSandbox: true
+
+xpack.encryptedSavedObjects.encryptionKey
