@@ -314,6 +314,7 @@ nav a {
     padding-top: 0;
     width: 100%; /* Ensure it takes full width */
     height: auto; /* Allow height to adjust based on content */
+	font-family: 'DM Sans', sans-serif;
 }
 
 .connexion-content {
