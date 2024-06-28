@@ -321,63 +321,13 @@ nav a {
     margin: 0 auto;
 }
 
-
-
-
 .statistiques-section{
-	position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #ff124d00; /* Maroon */
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-top: 0;
-    width: 100%; /* Ensure it takes full width */
-    height: auto; /* Allow height to adjust based on content */
-}
-
-.statistiques-divs{
-	padding: 30px;
-    margin: 0 20px; /* Add horizontal margin to create space between divs */
-    border-radius: 20px;
-    box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
-    background: linear-gradient(135deg, #ff00ff00, #00ffff00);
-    width: 50%;
-    max-width: 200px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    opacity: 1;
-    transition: transform 0.3s ease; 
-}
-
-.statistiques-divs-mid{
-	padding: 30px;
-    margin: 0 20px; /* Add horizontal margin to create space between divs */
-    border-radius: 20px;
-    box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
-    background: linear-gradient(135deg, #ff00ff00, #00ffff00);
-    width: 50%;
-    max-width: 200px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    opacity: 1;
-	scale: 1.1;
-	transition: transform 0.3s ease; 
-}
-
-.statistiques-divs:hover {
-    transform: scale(1.4); /* Scale up the div when hovered */
-}
-
-.statistiques-divs-mid:hover {
-    transform: scale(1.3); /* Scale up the div when hovered */
+	display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 10px;
+            font-family: 'DM Sans', sans-serif;
+            background-color: #ff000000;
 }
 
 /* play section styles */
