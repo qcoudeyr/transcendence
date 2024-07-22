@@ -37,11 +37,16 @@ build-and-up:
 
 fclean:
 	@cd ./srcs && sudo docker-compose down && cd ../
-	@sudo docker stop $(docker ps -aq) || true
-	@sudo docker rm $(docker ps -aq) || true
-	@sudo docker volume rm $(docker volume ls -q) || true
-	@echo "Checking for volumes..."
-	@echo "Cleaning is done !"
+	@echo "Stopping and removing all Docker containers..."
+	docker stop $$(docker ps -q) || true
+	docker rm $$(docker ps -a -q) || true
+	@echo "Removing all Docker images..."
+	docker rmi $$(docker images -q) || true
+	@echo "Removing all Docker volumes..."
+	docker volume rm $$(docker volume ls -q) || true
+	@echo "Removing all Docker networks..."
+	docker network rm $$(docker network ls -q) || true
+	@echo "Cleanup complete."
 
 re: fclean all
 
