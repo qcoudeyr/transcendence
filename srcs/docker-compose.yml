@@ -51,19 +51,19 @@ services:
         max-size: "200k"
         max-file: "10"
 
-  nginx:
-    image: nginx:latest
+  nginxproxymanager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '81:81'
+      - '443:443'
     volumes:
-      - ./requirements/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./data/website_data/:/usr/share/nginx/html
+      - ./data/nginx_proxy_manager_data/data:/data
+      - ./data/nginx_proxy_manager_data/letsencrypt:/etc/letsencrypt
     networks:
       transcendence:
-        ipv4_address: 10.0.10.1
-    depends_on:
-      - django
+        ipv4_address: 10.0.10.2
 
   redis:
     image: "redis:latest"
