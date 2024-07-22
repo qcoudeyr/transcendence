@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgresql:
     build:
@@ -45,21 +43,18 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: "200k"
         max-file: "10"
 
-  nodejs:
-    build:
-      context: ./requirements/nodejs
-    volumes:
-      - nodejs_data:/usr/src/app
+  redis:
+    image: "redis:latest"
     ports:
-      - "3000:3000"
-    command: npm start
-    working_dir: /usr/src/app/transcendence
+      - "6379:6379"
     networks:
       transcendence:
         ipv4_address: 10.0.10.11
