@@ -61,6 +61,7 @@ services:
     volumes:
       - ./data/nginx_proxy_manager_data/data:/data
       - ./data/nginx_proxy_manager_data/letsencrypt:/etc/letsencrypt
+      - ./data/website_data:/usr/share/nginx/html
     networks:
       transcendence:
         ipv4_address: 10.0.10.2
