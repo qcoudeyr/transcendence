@@ -58,11 +58,12 @@ services:
       - "443:443"
     volumes:
       - ./requirements/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./frontend/build:/usr/share/nginx/html
-      - ./static:/path/to/your/static/files
+      - ./data/website_data/:/usr/share/nginx/html
     networks:
       transcendence:
-        ipv4_address: 10.0.10.12
+        ipv4_address: 10.0.10.1
+    depends_on:
+      - django
 
   redis:
     image: "redis:latest"
