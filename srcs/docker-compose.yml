@@ -61,7 +61,7 @@ services:
       - ./data/website_data/:/usr/share/nginx/html
     networks:
       transcendence:
-        ipv4_address: 10.0.10.1
+        ipv4_address: 10.0.10.2
     depends_on:
       - django
     logging:
