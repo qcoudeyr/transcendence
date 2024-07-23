@@ -66,4 +66,11 @@ document.addEventListener('DOMContentLoaded', function() {
             clickSound.play(); // Play the click sound
         });
     });
+
+    if (window.location.hash === '#404') {
+        var notFoundSection = document.getElementById('not-found');
+        if (notFoundSection) {
+            notFoundSection.style.display = 'block';
+        }
+    }
 });
