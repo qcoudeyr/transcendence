@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.location.hash === '#404') {
         var notFoundSection = document.getElementById('not-found');
         if (notFoundSection) {
-            notFoundSection.style.display = 'block';
+            notFoundSection.style.display = 'block'; // Ceci déclenchera l'animation
         }
     }
 });
