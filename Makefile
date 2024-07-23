@@ -48,6 +48,11 @@ fclean:
 	docker network rm $$(docker network ls -q) || true
 	@echo "Cleanup complete."
 
+restart:
+	@echo "Restarting all Docker containers..."
+	docker ps -q | xargs -r docker restart
+	@echo "All Docker containers have been restarted."
+
 re: fclean all
 
-.PHONY: all build-and-up fclean re
+.PHONY: all build-and-up fclean re restart
