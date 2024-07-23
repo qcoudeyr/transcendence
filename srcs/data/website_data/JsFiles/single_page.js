@@ -7,19 +7,13 @@ document.addEventListener('DOMContentLoaded', function() {
     clickSound.volume = 0.2; // Adjust this value to your desired volume (0.2 is 20% of full volume)
 
     function navigateToSection(sectionId) {
-        let sectionFound = false;
         sections.forEach(section => {
             if (section.id === sectionId) {
                 section.style.display = 'block';
-                sectionFound = true;
             } else {
                 section.style.display = 'none';
             }
         });
-        // Si aucune section correspondante n'est trouvée, affichez la section 404
-        if (!sectionFound) {
-            document.getElementById('not-found').style.display = 'block';
-        }
     }
 
     function changePages(sectionId) {
