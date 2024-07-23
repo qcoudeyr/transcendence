@@ -11,4 +11,11 @@ WORKDIR /app
 # Install dependencies
 COPY ./tools/requirements.txt /app/
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+# Expose port 8000 for the Gunicorn server
+EXPOSE 8000
+
+# Run Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "transcendence.wsgi:application"]
