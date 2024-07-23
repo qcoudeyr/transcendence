@@ -53,6 +53,11 @@ restart:
 	docker ps -q | xargs -r docker restart
 	@echo "All Docker containers have been restarted."
 
+stop:
+	@echo "Stopping Docker deamon and all containers..."
+	@sudo systemctl stop docker* > /dev/null 2>&1
+	@echo "All Docker containers stopped!"
+
 re: fclean all
 
-.PHONY: all build-and-up fclean re restart
+.PHONY: all build-and-up fclean re restart stop
