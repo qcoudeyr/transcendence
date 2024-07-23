@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         // Si aucune section correspondante n'est trouvée, affichez la section 404
         if (!sectionFound) {
-            document.getElementById('404').style.display = 'block';
+            document.getElementById('not-found').style.display = 'block';
         }
     }
 
