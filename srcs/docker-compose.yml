@@ -1,4 +1,7 @@
 services:
+##########################
+########POSTGRESQL########
+##########################
   postgresql:
     build:
       context: ./requirements/postgresql
@@ -24,6 +27,9 @@ services:
         max-size: "200k"
         max-file: "10"
 
+######################
+########DJANGO########
+######################
   django:
     build:
       context: ./requirements/django
@@ -52,6 +58,9 @@ services:
         max-size: "200k"
         max-file: "10"
 
+#####################
+########NGINX########
+#####################
   nginx:
     image: nginx:latest
     ports:
@@ -72,6 +81,9 @@ services:
         max-size: "200k"
         max-file: "10"
 
+#############################
+########ELASTICSEARCH########
+#############################
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
     environment:
@@ -93,6 +105,9 @@ services:
         max-size: "200k"
         max-file: "10"
 
+########################
+########LOGSTASH########
+########################
   logstash:
     image: docker.elastic.co/logstash/logstash:7.10.1
     volumes:
@@ -111,6 +126,9 @@ services:
         max-size: "200k"
         max-file: "10"
 
+########################
+########FILEBEAT########
+########################
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.13.4
     volumes:
@@ -126,6 +144,9 @@ services:
     depends_on:
       - logstash
 
+######################
+########KIBANA########
+######################
   kibana:
     image: docker.elastic.co/kibana/kibana:7.10.1
     ports:
@@ -147,6 +168,9 @@ services:
         max-size: "200k"
         max-file: "10"
 
+##########################
+########PROMETHEUS########
+##########################
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -162,6 +186,9 @@ services:
         max-size: "200k"
         max-file: "10"
 
+#######################
+########GRAFANA########
+#######################
   grafana:
     image: grafana/grafana:latest
     ports:
@@ -177,6 +204,9 @@ services:
         max-size: "200k"
         max-file: "10"
 
+#########################
+########PORTAINER########
+#########################
   portainer:
     image: portainer/portainer-ce:2.20.3
     command: -H unix:///var/run/docker.sock
@@ -196,6 +226,32 @@ services:
         max-size: "200k"
         max-file: "10"
 
+#####################
+########VAULT########
+#####################
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_DEV_ROOT_TOKEN_ID=myroot
+    cap_add:
+      - IPC_LOCK
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.69
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+
+#######################
+########VOLUMES########
+#######################
 volumes:
   postgres_data:
     driver: local
@@ -228,6 +284,9 @@ volumes:
       o: "bind"
       device: "./data/nodejs_data/"
 
+########################
+########NETWORKS########
+########################
 networks:
   transcendence:
     driver: bridge
