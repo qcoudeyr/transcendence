@@ -61,14 +61,14 @@ services:
 #####################
 ########NGINX########
 #####################
-  nginx:
-    image: nginx:latest
+  nginx_modsecurity_crs:
+    image: owasp/modsecurity-crs:4.3.0-nginx-202406090906
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./requirements/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./requirements/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./requirements/nginx/nginx.conf:/etc/nginx/transcendence.conf
+      - ./requirements/nginx/default.conf:/etc/nginx/conf.d/transcendence.conf
       - ./data/website_data/:/app/static/
     networks:
       transcendence:
