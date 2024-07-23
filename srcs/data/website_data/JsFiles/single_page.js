@@ -16,6 +16,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+	function changePages(page) {
+		if (page === 'home') {
+			window.location.href = '/'; // Redirige vers la page d'accueil
+		}
+		// Ajoutez d'autres cas si nécessaire
+	}
+    var myButton = document.getElementById('myButtonId'); // Assurez-vous que l'ID correspond à votre élément
+    if (myButton) {
+        myButton.addEventListener('click', function() {
+            changePages('home');
+        });
+    }
+
     function changePages(sectionId) {
         history.pushState({ section: sectionId }, '', `#${sectionId}`);
         navigateToSection(sectionId);
