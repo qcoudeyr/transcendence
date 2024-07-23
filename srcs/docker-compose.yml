@@ -29,7 +29,8 @@ services:
       context: ./requirements/django
     command: gunicorn --bind 0.0.0.0:8000 transcendence.wsgi:application
     volumes:
-      - django_data:/app
+      - ./data/django_data:/app
+      - ./data/website_data:/app/transcendence/static/
     ports:
       - "8000:8000"
       - "8001:8001"
