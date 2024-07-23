@@ -10,7 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+import environ
+
+# Initialise environ
+env = environ.Env(
+    # Définissez les valeurs par défaut et les types de conversion
+    DEBUG=(bool, False)
+)
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +29,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)((d1@t^eyr-i7n%kn3rs^n^d4vef(d5wd1l5#xi47@%)^mr#o'
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-)((d1@t^eyr-i7n%kn3rs^n^d4vef(d5wd1l5#xi47@%)^mr#o')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG', default=True)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
 
 
 # Application definition
@@ -78,39 +87,33 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',  # Changez ce niveau pour voir différents types de logs, par exemple DEBUG, INFO, WARNING, ERROR, CRITICAL
+            'level': 'INFO',
             'propagate': True,
         },
         'django.request': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Pour voir les détails des requêtes, y compris les requêtes d'information
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
 
 WSGI_APPLICATION = 'transcendence.wsgi.application'
-
+ASGI_APPLICATION = 'transcendence.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# settings.py
-import os
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST', '10.0.10.12'),
-        'PORT': os.environ.get('DATABASE_PORT', '5432'),
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': env('DATABASE_PORT'),
     }
 }
-
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -130,7 +133,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -143,7 +145,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
