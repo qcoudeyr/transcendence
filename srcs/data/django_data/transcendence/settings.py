@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 import environ
+import hvac
 
 # Initialise environ
 env = environ.Env(
@@ -20,6 +21,15 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
+# Configuration de Vault
+VAULT_URL = env('VAULT_URL', default='http://10.0.10.69:8200')
+VAULT_TOKEN = env('VAULT_TOKEN', default='your-vault-token')
+
+client = hvac.Client(url=VAULT_URL, token=VAULT_TOKEN)
+
+# Exemple de récupération d'un secret depuis Vault
+secret = client.secrets.kv.v2.read_secret_version(path='secret/data/mysecret')
+MY_SECRET = secret['data']['data']['mysecret']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
