@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-all: build-and-up
+all: create-data-dirs build-and-up
 
 detect-and-install-docker:
 	@echo "Checking for Docker..."
@@ -31,6 +31,11 @@ detect-and-install-docker:
 	else \
 		echo "Symlink for Docker Compose V2 already exists."; \
 	fi
+
+create-data-dirs:
+	@echo "Creating data directories if they do not exist..."
+	@mkdir -p ./srcs/data/django_data ./srcs/data/es_data ./srcs/data/portainer_data ./srcs/data/postgres_data ./srcs/data/vault_data ./srcs/data/website_data
+	@echo "Data directories created."
 
 build-and-up:
 	@cd ./srcs && docker compose up -d
