@@ -5,6 +5,7 @@ services:
   postgresql:
     build:
       context: ./requirements/postgresql
+    container_name: postgresql
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
@@ -31,6 +32,7 @@ services:
 ########DJANGO########
 ######################
   django:
+    container_name: django
     build:
       context: ./requirements/django
     command: uvicorn transcendence.asgi:application --host 0.0.0.0 --port 8000
@@ -63,6 +65,7 @@ services:
 #####################
   nginx_modsecurity_crs:
     image: owasp/modsecurity-crs:4.3.0-nginx-202406090906
+    container_name: nginx_modsecurity_crs
     ports:
       - "80:80"
       - "443:443"
@@ -86,6 +89,7 @@ services:
 #############################
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
@@ -110,6 +114,7 @@ services:
 ########################
   logstash:
     image: docker.elastic.co/logstash/logstash:7.10.1
+    container_name: logstash
     volumes:
       - ./requirements/logstash/config:/usr/share/logstash/config
       - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline
@@ -131,6 +136,7 @@ services:
 ########################
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.13.4
+    container_name: filebeat
     volumes:
       - ./requirements/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -149,6 +155,7 @@ services:
 ######################
   kibana:
     image: docker.elastic.co/kibana/kibana:7.10.1
+    container_name: kibana
     ports:
       - "5601:5601"
     networks:
@@ -173,6 +180,7 @@ services:
 ##########################
   prometheus:
     image: prom/prometheus:latest
+    container_name: prometheus
     volumes:
       - ./requirements/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -191,6 +199,7 @@ services:
 #######################
   grafana:
     image: grafana/grafana:latest
+    container_name: grafana
     ports:
       - "3001:3000"
     networks:
@@ -209,6 +218,7 @@ services:
 #########################
   portainer:
     image: portainer/portainer-ce:2.20.3
+    container_name: portainer
     command: -H unix:///var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -224,7 +234,6 @@ services:
       driver: "json-file"
       options:
         max-size: "200k"
-        max-file: "10"
 
 #####################
 ########VAULT########

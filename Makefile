@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-all: detect-and-install-docker build-and-up
+all: build-and-up
 
 detect-and-install-docker:
 	@echo "Checking for Docker..."
@@ -33,10 +33,10 @@ detect-and-install-docker:
 	fi
 
 build-and-up:
-	@cd ./srcs && sudo docker compose up -d
+	@cd ./srcs && docker compose up -d
 
 fclean:
-	@cd ./srcs && sudo docker-compose down && cd ../
+	@cd ./srcs && docker-compose down && cd ../
 	@echo "Stopping and removing all Docker containers..."
 	docker stop $$(docker ps -q) || true
 	docker rm $$(docker ps -a -q) || true
@@ -54,10 +54,15 @@ restart:
 	@echo "All Docker containers have been restarted."
 
 stop:
-	@echo "Stopping Docker deamon and all containers..."
+	@echo "Stopping Docker daemon and all containers..."
 	@sudo systemctl stop docker* > /dev/null 2>&1
 	@echo "All Docker containers stopped!"
 
+start:
+	@echo "Starting Docker daemon..."
+	@sudo systemctl start docker.service docker.socket > /dev/null 2>&1
+	@echo "Docker daemon started!"
+
 re: fclean all
 
-.PHONY: all build-and-up fclean re restart stop
+.PHONY: all build-and-up fclean re restart stop start
