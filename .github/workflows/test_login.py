@@ -25,7 +25,7 @@ print(driver.title)
 driver.save_screenshot('django_login_page.png')
 
 # Test Grafana login page
-driver.get("http://0.0.0.0:3000/")
+driver.get("http://0.0.0.0:3001")
 print(driver.title)
 driver.save_screenshot('grafana_login_page.png')
 
@@ -45,7 +45,7 @@ print(driver.title)
 driver.save_screenshot('portainer_page.png')
 
 # Test Prometheus page
-driver.get("http://0.0.0.0:9090/")
+driver.get("http://0.0.0.0:9091/")
 print(driver.title)
 driver.save_screenshot('prometheus_page.png')
 
