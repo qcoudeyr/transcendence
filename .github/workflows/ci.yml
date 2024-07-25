@@ -78,7 +78,7 @@ jobs:
       run: docker-compose -f srcs/docker-compose.yml up -d
     - name: Run Selenium tests
       run: |
-       python test_login.py
+       python .github/workflow/test_login.py
     - name: Get Docker container logs
       if: failure()
       run: docker-compose -f srcs/docker-compose.yml logs
