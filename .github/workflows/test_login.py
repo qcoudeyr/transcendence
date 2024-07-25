@@ -33,11 +33,6 @@ driver.get("http://0.0.0.0:3001")
 print(driver.title)
 driver.save_screenshot('grafana_login_page.png')
 
-# Test Kibana page
-driver.get("http://0.0.0.0:5601/")
-print(driver.title)
-driver.save_screenshot('kibana_page.png')
-
 # Test Nginx SPA page
 driver.get("http://0.0.0.0/")
 print(driver.title)
