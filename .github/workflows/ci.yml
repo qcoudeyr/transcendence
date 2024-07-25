@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test_user -d test_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r srcs/requirements/django/requirements.txt
+
+    - name: Run Django tests
+      run: |
+        cd srcs/data/django_data
+        python manage.py test
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build Docker images
+      run: docker-compose -f srcs/docker-compose.yml build
+
+    - name: Run Docker containers
+      run: docker-compose -f srcs/docker-compose.yml up -d
+
+    - name: Run tests in Docker containers
+      run: |
+        # Add commands to run tests inside your Docker containers
+        docker-compose -f srcs/docker-compose.yml exec web python manage.py test
+
+    - name: Tear down Docker containers
+      if: always()
+      run: docker-compose -f srcs/docker-compose.yml down
