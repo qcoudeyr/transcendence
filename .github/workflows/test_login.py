@@ -20,32 +20,32 @@ service = Service(executable_path=chrome_driver_path)
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # Test Django login page
-driver.get("http://10.0.10.10:8000/")
+driver.get("http://0.0.0.0:8000/")
 print(driver.title)
 driver.save_screenshot('django_login_page.png')
 
 # Test Grafana login page
-driver.get("http://10.0.10.31:3000/")
+driver.get("http://0.0.0.0:3000/")
 print(driver.title)
 driver.save_screenshot('grafana_login_page.png')
 
 # Test Kibana page
-driver.get("http://10.0.10.22:5601/")
+driver.get("http://0.0.0.0:5601/")
 print(driver.title)
 driver.save_screenshot('kibana_page.png')
 
 # Test Nginx SPA page
-driver.get("http://10.0.10.2/")
+driver.get("http://0.0.0.0/")
 print(driver.title)
 driver.save_screenshot('nginx_spa_page.png')
 
 # Test Portainer page
-driver.get("http://10.0.10.40:9000/#!/auth")
+driver.get("http://0.0.0.0:9000/#!/auth")
 print(driver.title)
 driver.save_screenshot('portainer_page.png')
 
 # Test Prometheus page
-driver.get("http://10.0.10.30:9090/")
+driver.get("http://0.0.0.0:9090/")
 print(driver.title)
 driver.save_screenshot('prometheus_page.png')
 
