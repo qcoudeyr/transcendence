@@ -80,6 +80,17 @@ jobs:
     - name: Run Selenium tests
       run: |
        sudo python .github/workflows/test_login.py
+    - name: Upload screenshots
+      uses: actions/upload-artifact@v2
+      with:
+        name: screenshots
+        path: |
+          django_login_page.png
+          grafana_login_page.png
+          kibana_page.png
+          nginx_spa_page.png
+          portainer_page.png
+          prometheus_page.png
     - name: Get Docker container logs
       if: failure()
       run: docker-compose -f srcs/docker-compose.yml logs
