@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 # Configure Chrome options
 chrome_options = Options()
@@ -9,15 +10,19 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
+# Spécifiez le chemin vers le binaire de ChromeDriver
+chrome_driver_path = "/snap/bin/chromium.chromedriver"
+service = Service(executable_path=chrome_driver_path)
+
 # Initialize the WebDriver
-driver = webdriver.Chrome(options=chrome_options)
+driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # Test Django login page
 driver.get("http://10.0.10.10:8000/")
 assert "Django" in driver.title
 
 # Test Grafana login page
-driver.get("http://10.0.10.31:3000/login")
+driver.get("http://10.0.10.31:3000/")
 assert "Grafana" in driver.title
 
 # Test Kibana page
