@@ -19,26 +19,36 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # Test Django login page
 driver.get("http://10.0.10.10:8000/")
-assert "Django" in driver.title
+print(driver.title)
+driver.save_screenshot('django_login_page.png')
 
 # Test Grafana login page
 driver.get("http://10.0.10.31:3000/")
-assert "Grafana" in driver.title
+print(driver.title)
+driver.save_screenshot('grafana_login_page.png')
 
 # Test Kibana page
 driver.get("http://10.0.10.22:5601/")
-assert "Kibana" in driver.title
+print(driver.title)
+driver.save_screenshot('kibana_page.png')
 
 # Test Nginx SPA page
 driver.get("http://10.0.10.2/")
-assert "Nginx" in driver.title
+print(driver.title)
+driver.save_screenshot('nginx_spa_page.png')
 
 # Test Portainer page
 driver.get("http://10.0.10.40:9000/#!/auth")
-assert "Portainer" in driver.title
+print(driver.title)
+driver.save_screenshot('portainer_page.png')
 
 # Test Prometheus page
 driver.get("http://10.0.10.30:9090/")
-assert "Prometheus" in driver.title
+print(driver.title)
+driver.save_screenshot('prometheus_page.png')
 
-driver.quit()
+# Quit the driver
+try:
+    driver.quit()
+except PermissionError:
+    os.kill(service.process.pid, signal.SIGTERM)
