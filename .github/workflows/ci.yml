@@ -75,8 +75,10 @@ jobs:
       run: docker-compose -f srcs/docker-compose.yml up -d
     - name: Run tests in Docker containers
       run: |
-        # Add commands to run tests inside your Docker containers
         docker-compose -f srcs/docker-compose.yml exec web python manage.py test
+    - name: Get Docker container logs
+      if: failure()
+      run: docker-compose -f srcs/docker-compose.yml logs
     - name: Tear down Docker containers
       if: always()
       run: docker-compose -f srcs/docker-compose.yml down
