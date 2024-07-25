@@ -9,8 +9,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
-    env_file:
-      - .env
     expose:
       - 5432
     networks:
@@ -225,8 +223,11 @@ services:
       - portainer_data:/data
     ports:
       - "${PORTAINER_PORT}:${PORTAINER_PORT}"
-    env_file:
-      - .env
+    environment:
+      - PORTAINER_USER=${PORTAINER_USER}
+      - PORTAINER_PASSWORD=${PORTAINER_PASSWORD}
+      - PORTAINER_HOST=${PORTAINER_HOST}
+      - PORTAINER_PORT=${PORTAINER_PORTY}
     networks:
       transcendence:
         ipv4_address: 10.0.10.40
