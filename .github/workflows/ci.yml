@@ -58,6 +58,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r srcs/requirements/django/tools/requirements.txt
+    - name: Create necessary directories
+      run: |
+        mkdir -p /home/runner/work/transcendence/transcendence/data/postgres_data
+        mkdir -p /home/runner/work/transcendence/transcendence/data/es_data
+        mkdir -p /home/runner/work/transcendence/transcendence/data/portainer_data
     - name: Run Django tests
       run: |
         cd srcs/data/django_data
