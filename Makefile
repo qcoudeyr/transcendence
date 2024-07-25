@@ -55,7 +55,9 @@ fclean:
 
 restart:
 	@echo "Restarting all Docker containers..."
-	docker ps -q | xargs -r docker restart
+	@cd ./srcs/ && \
+		docker-compose down && \
+		docker-compose up -d
 	@echo "All Docker containers have been restarted."
 
 stop:
