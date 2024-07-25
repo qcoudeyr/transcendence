@@ -5,6 +5,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import os
 import signal
+import time
+
 
 # Configure Chrome options
 chrome_options = Options()
@@ -19,6 +21,8 @@ service = Service(executable_path=chrome_driver_path)
 # Initialize the WebDriver
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
+time.sleep(15)
+
 # Test Django login page
 driver.get("http://0.0.0.0:8000/")
 print(driver.title)
@@ -29,13 +33,18 @@ driver.get("http://0.0.0.0:3001")
 print(driver.title)
 driver.save_screenshot('grafana_login_page.png')
 
+# Test Kibana page
+driver.get("http://0.0.0.0:5601/")
+print(driver.title)
+driver.save_screenshot('kibana_page.png')
+
 # Test Nginx SPA page
 driver.get("http://0.0.0.0/")
 print(driver.title)
 driver.save_screenshot('nginx_spa_page.png')
 
 # Test Portainer page
-driver.get("http://0.0.0.0:9000/")
+driver.get("http://0.0.0.0:9000/#!/auth")
 print(driver.title)
 driver.save_screenshot('portainer_page.png')
 
