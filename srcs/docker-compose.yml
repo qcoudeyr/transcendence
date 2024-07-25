@@ -227,7 +227,7 @@ services:
       - PORTAINER_USER=${PORTAINER_USER}
       - PORTAINER_PASSWORD=${PORTAINER_PASSWORD}
       - PORTAINER_HOST=${PORTAINER_HOST}
-      - PORTAINER_PORT=${PORTAINER_PORTY}
+      - PORTAINER_PORT=${PORTAINER_PORT}
     networks:
       transcendence:
         ipv4_address: 10.0.10.40
