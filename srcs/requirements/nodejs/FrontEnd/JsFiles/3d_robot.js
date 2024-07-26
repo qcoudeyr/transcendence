@@ -11,8 +11,8 @@ const aspectRatio = containerWidth / containerHeight;
 const cameraSize = 1000; // Adjust this value based on how zoomed in or out you want the view to be
 
 const robotCamera = new THREE.OrthographicCamera(
-  -cameraSize * aspectRatio / 2,
-  cameraSize * aspectRatio / 2,
+  (-cameraSize * aspectRatio) / 2,
+  (cameraSize * aspectRatio) / 2,
   cameraSize / 2,
   -cameraSize / 2,
   -100000,
@@ -37,15 +37,18 @@ let robotController; // Variable to store the loaded robot controller object
 const initialRotation = { x: 0, y: 0 };
 
 robotLoader.load(
-	'https://prod.spline.design/KYNdbTcnGM3bvnVs/scene.splinecode',
+  'https://prod.spline.design/KYNdbTcnGM3bvnVs/scene.splinecode',
   (splineScene) => {
     robotController = splineScene;
     robotScene.add(splineScene);
-    
+
     // Store initial rotation
     if (robotController) {
       initialRotation.x = robotController.rotation.x;
       initialRotation.y = robotController.rotation.y;
+
+      // Adjust the height of the robot to match the remote
+      robotController.position.y = 0; // Adjust this value as needed to match the height
     }
   }
 );
@@ -74,8 +77,8 @@ function onWindowResizeRobot() {
 
   // Update camera to maintain correct aspect ratio
   const newAspectRatio = newWidth / newHeight;
-  robotCamera.left = -cameraSize * newAspectRatio / 2;
-  robotCamera.right = cameraSize * newAspectRatio / 2;
+  robotCamera.left = (-cameraSize * newAspectRatio) / 2;
+  robotCamera.right = (cameraSize * newAspectRatio) / 2;
   robotCamera.top = cameraSize / 2;
   robotCamera.bottom = -cameraSize / 2;
   robotCamera.updateProjectionMatrix();
@@ -94,35 +97,29 @@ function updateRobotControllerRotation(event) {
 
   const rotationRange = Math.PI / 4; // 45 degrees
 
-  // Update the robot controller's rotation
-  robotController.rotation.y = -x * rotationRange;
-  robotController.rotation.x = -y * rotationRange;
+  // Calculate target rotations
+  const targetRotationY = -x * rotationRange;
+  const targetRotationX = -y * rotationRange;
+
+  // Smoothly interpolate the current rotation towards the target rotation
+  const smoothingFactor = 0.1; // Adjust this value for more or less smoothing
+  robotController.rotation.y += (targetRotationY - robotController.rotation.y) * smoothingFactor;
+  robotController.rotation.x += (targetRotationX - robotController.rotation.x) * smoothingFactor;
 }
 
 // Function to smoothly animate rotation back to the initial state
 function animateRotationToInitial() {
   if (!robotController) return;
 
-  // Calculate the difference between the current and initial rotations
-  const deltaX = initialRotation.x - robotController.rotation.x;
-  const deltaY = initialRotation.y - robotController.rotation.y;
+  // Smoothly interpolate the current rotation back to the initial rotation
+  const smoothingFactor = 0.05; // Adjust this value for more or less smoothing
+  robotController.rotation.x += (initialRotation.x - robotController.rotation.x) * smoothingFactor;
+  robotController.rotation.y += (initialRotation.y - robotController.rotation.y) * smoothingFactor;
 
-  // Define a speed for the animation
-  const animationSpeed = 0.05; // Adjust this value for smoother or faster animations
-
-  // If the difference is small enough, snap to the initial position
-  if (Math.abs(deltaX) < 0.01 && Math.abs(deltaY) < 0.01) {
-    robotController.rotation.x = initialRotation.x;
-    robotController.rotation.y = initialRotation.y;
-    return;
+  // Continue animation if not close enough to the initial rotation
+  if (Math.abs(initialRotation.x - robotController.rotation.x) > 0.01 || Math.abs(initialRotation.y - robotController.rotation.y) > 0.01) {
+    requestAnimationFrame(animateRotationToInitial);
   }
-
-  // Update the rotation incrementally towards the initial rotation
-  robotController.rotation.x += deltaX * animationSpeed;
-  robotController.rotation.y += deltaY * animationSpeed;
-
-  // Request the next frame for the animation
-  requestAnimationFrame(animateRotationToInitial);
 }
 
 // Event listener for mouse movement
