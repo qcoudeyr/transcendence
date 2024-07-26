@@ -99,6 +99,32 @@ function updateRobotControllerRotation(event) {
   robotController.rotation.x = -y * rotationRange;
 }
 
+// Function to smoothly animate rotation back to the initial state
+function animateRotationToInitial() {
+  if (!robotController) return;
+
+  // Calculate the difference between the current and initial rotations
+  const deltaX = initialRotation.x - robotController.rotation.x;
+  const deltaY = initialRotation.y - robotController.rotation.y;
+
+  // Define a speed for the animation
+  const animationSpeed = 0.05; // Adjust this value for smoother or faster animations
+
+  // If the difference is small enough, snap to the initial position
+  if (Math.abs(deltaX) < 0.01 && Math.abs(deltaY) < 0.01) {
+    robotController.rotation.x = initialRotation.x;
+    robotController.rotation.y = initialRotation.y;
+    return;
+  }
+
+  // Update the rotation incrementally towards the initial rotation
+  robotController.rotation.x += deltaX * animationSpeed;
+  robotController.rotation.y += deltaY * animationSpeed;
+
+  // Request the next frame for the animation
+  requestAnimationFrame(animateRotationToInitial);
+}
+
 // Event listener for mouse movement
 window.addEventListener('mousemove', updateRobotControllerRotation);
 
@@ -110,11 +136,8 @@ robotContainer.addEventListener('mouseenter', () => {
 robotContainer.addEventListener('mouseleave', () => {
   isCursorInside = false;
 
-  // Reset rotation when cursor leaves
-  if (robotController) {
-    robotController.rotation.x = initialRotation.x;
-    robotController.rotation.y = initialRotation.y;
-  }
+  // Start the smooth rotation animation when the cursor leaves
+  requestAnimationFrame(animateRotationToInitial);
 });
 
 // Event listener for window resize

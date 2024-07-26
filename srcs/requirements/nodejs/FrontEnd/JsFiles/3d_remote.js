@@ -41,6 +41,9 @@ remoteLoader.load(
     if (remoteController) {
       initialRotation.x = remoteController.rotation.x;
       initialRotation.y = remoteController.rotation.y;
+      
+      // Adjust the height of the robot to match the remote
+      remoteController.position.y = -150; // Adjust this value as needed to match the height
     }
   }
 );
@@ -94,6 +97,32 @@ function updateRemoteControllerRotation(event) {
   remoteController.rotation.x = -y * rotationRange;
 }
 
+// Function to smoothly animate rotation back to the initial state
+function animateRotationToInitial() {
+  if (!remoteController) return;
+
+  // Calculate the difference between the current and initial rotations
+  const deltaX = initialRotation.x - remoteController.rotation.x;
+  const deltaY = initialRotation.y - remoteController.rotation.y;
+
+  // Define a speed for the animation
+  const animationSpeed = 0.05; // Adjust this value for smoother or faster animations
+
+  // If the difference is small enough, snap to the initial position
+  if (Math.abs(deltaX) < 0.01 && Math.abs(deltaY) < 0.01) {
+    remoteController.rotation.x = initialRotation.x;
+    remoteController.rotation.y = initialRotation.y;
+    return;
+  }
+
+  // Update the rotation incrementally towards the initial rotation
+  remoteController.rotation.x += deltaX * animationSpeed;
+  remoteController.rotation.y += deltaY * animationSpeed;
+
+  // Request the next frame for the animation
+  requestAnimationFrame(animateRotationToInitial);
+}
+
 // Event listener for mouse movement
 window.addEventListener('mousemove', updateRemoteControllerRotation);
 
@@ -105,11 +134,8 @@ remoteContainer.addEventListener('mouseenter', () => {
 remoteContainer.addEventListener('mouseleave', () => {
   isCursorInside = false;
 
-  // Reset rotation when cursor leaves
-  if (remoteController) {
-    remoteController.rotation.x = initialRotation.x;
-    remoteController.rotation.y = initialRotation.y;
-  }
+  // Start the smooth rotation animation when the cursor leaves
+  requestAnimationFrame(animateRotationToInitial);
 });
 
 // Event listener for window resize
