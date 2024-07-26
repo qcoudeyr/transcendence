@@ -52,6 +52,27 @@ nav a {
 
 /*image stack*/
 
+#robotConainer {
+	width: 500px;
+	height: 500px;
+	position: center;
+  }
+
+#remoteContainer {
+	width: 500px;
+	height: 500px;
+	position: center;
+  }
+  
+  canvas {
+	width: 100%;
+	height: 100%;
+	position: center;
+	top: 0;
+	left: 0;
+  }
+  
+
 .image-stack {
     position: relative;
     width: 500px; /* Set the width of the container to match the image width */
