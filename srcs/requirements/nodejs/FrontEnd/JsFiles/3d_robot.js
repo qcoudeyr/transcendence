@@ -98,7 +98,7 @@ function updateRobotControllerRotation(event) {
   const rotationRange = Math.PI / 4; // 45 degrees
 
   // Calculate target rotations
-  const targetRotationY = -x * rotationRange;
+  const targetRotationY = x * rotationRange;
   const targetRotationX = -y * rotationRange;
 
   // Smoothly interpolate the current rotation towards the target rotation
