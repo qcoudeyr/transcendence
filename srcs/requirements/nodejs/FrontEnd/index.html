@@ -44,10 +44,8 @@
 	<section id="play" class="play-section">
 		<div class="play-content">
 			<div class="blob-container">
-				<!-- Image stack container for Spline viewer -->
 				<div id="remoteContainer" class="image-stack">
 				  <!-- The Three.js or Spline viewer will be injected here -->
-				  
 				</div>
 				<div id="robotContainer" class="image-stack">
 				  <!-- Ensure the Spline viewer is placed within the correct div -->
@@ -87,7 +85,21 @@
 
     <section id="playing" class="playing-section">
         <button id="resizeButton">Big Screen</button>
+        <div class="scoreboard">
+                <h1>Scoreboard</h1>
+                <div class="scores">
+                    <div class="player">
+                        <h2>Player 1</h2>
+                        <div class="score" id="score1">0</div>
+                    </div>
+                    <div class="player">
+                        <h2>Player 2</h2>
+                        <div class="score" id="score2">0</div>
+                    </div>
+                </div>
+            </div>
         <div id="splineContainer">
+            
             <!-- The canvas for the Three.js scene will be appended here -->
         </div>
 

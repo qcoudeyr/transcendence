@@ -1,3 +1,4 @@
+// Import necessary modules from Three.js and SplineLoader
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import SplineLoader from '@splinetool/loader';
@@ -83,12 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       // When in full screen mode, switch to small mode
       splineContainer.classList.add('small');
+      renderer.setSize(640, 480);
+      camera.aspect = 640 / 480;
       button.textContent = 'Full Screen';
-      renderer.setSize(300, 300);
-      camera.aspect = 300 / 300;
-      controls.enabled = false; // Disable controls when in small mode
+      controls.enabled = true; // Enable controls if needed
     }
+
+    // Update the camera projection matrix and controls
     camera.updateProjectionMatrix();
-    console.log('Button clicked. Class toggled.');
   });
 });
