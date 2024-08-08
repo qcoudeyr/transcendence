@@ -26,6 +26,7 @@ VAULT_URL = env('VAULT_URL', default='http://10.0.10.69:8200')
 VAULT_TOKEN = env('VAULT_TOKEN', default='myroot')
 
 client = hvac.Client(url=VAULT_URL, token=VAULT_TOKEN)
+client.is_authenticated()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
