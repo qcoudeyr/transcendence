@@ -17,8 +17,7 @@ import hvac
 
 # Initialise environ
 env = environ.Env(
-    # Définissez les valeurs par défaut et les types de conversion
-    DEBUG=(bool, False)
+	DEBUG=(bool, False)
 )
 
 # Configuration de Vault
