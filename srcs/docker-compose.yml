@@ -92,7 +92,7 @@ services:
     environment:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=true
+      - xpack.security.enabled=false
       - ELASTIC_USERNAME=${ELASTIC_USERNAME}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     volumes:
@@ -166,6 +166,8 @@ services:
     networks:
       transcendence:
         ipv4_address: 10.0.10.22
+    volumes:
+      - ./requirements/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
     depends_on:
       - elasticsearch
     environment:

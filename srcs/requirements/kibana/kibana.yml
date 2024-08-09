@@ -1,5 +1,5 @@
 server.name: kibana
-elasticsearch.hosts: ["http://0.0.0.0:9200"]
+elasticsearch.hosts: ["http://elasticsearch:9200"]
 elasticsearch.username: ${ELASTIC_USERNAME}
 elasticsearch.password: ${ELASTIC_PASSWORD}
 
@@ -7,7 +7,7 @@ elasticsearch.password: ${ELASTIC_PASSWORD}
 server.host: "0.0.0.0"
 
 # Add encryption keys for xpack
-xpack.security.enabled: true
+xpack.security.enabled: false
 xpack.security.encryptionKey: ${XPACK_SECURITY_ENCRYPTIONKEY}
 xpack.encryptedSavedObjects.encryptionKey: ${XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY}
 xpack.reporting.encryptionKey: ${XPACK_REPORTING_ENCRYPTIONKEY}
