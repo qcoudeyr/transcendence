@@ -6,8 +6,9 @@ filebeat.inputs:
       - add_docker_metadata: ~
 
 output.elasticsearch:
-  hosts: ["10.0.10.20:9200"]
+  hosts: ["elasticsearch:9200"]
   username: ${ELASTIC_USERNAME}
   password: ${ELASTIC_PASSWORD}
 setup.kibana:
-  host: "10.0.10.22:5601"
+  host: "kibana:5601"
+
