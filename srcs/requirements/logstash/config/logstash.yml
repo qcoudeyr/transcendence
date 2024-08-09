@@ -1,7 +1,7 @@
 http.host: "0.0.0.0"
 path.config: "/usr/share/logstash/pipeline"
 xpack.monitoring.enabled: false
-xpack.monitoring.elasticsearch.hosts: ["http://10.0.10.20:9200"]
+xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
 xpack.monitoring.elasticsearch.username: ${ELASTIC_USERNAME}
 xpack.monitoring.elasticsearch.password: ${ELASTIC_PASSWORD}
 # Settings file in YAML
