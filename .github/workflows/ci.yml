@@ -64,9 +64,9 @@ jobs:
         sudo rm /usr/bin/google-chrome && sudo chmod 777 /snap/bin/chromium.chromedriver && sudo ln -s /snap/bin/chromium /usr/bin/google-chrome
     - name: Create necessary directories
       run: |
-        mkdir -p /home/runner/work/transcendence/transcendence/data/postgres_data
-        mkdir -p /home/runner/work/transcendence/transcendence/data/es_data
-        mkdir -p /home/runner/work/transcendence/transcendence/data/portainer_data
+       mkdir -p /home/runner/work/transcendence/transcendence/srcs/data/postgres_data
+       mkdir -p /home/runner/work/transcendence/transcendence/srcs/data/es_data
+       mkdir -p /home/runner/work/transcendence/transcendence/srcs/data/portainer_data
     - name: Install Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/download/$(curl --silent https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
