@@ -21,11 +21,11 @@ env = environ.Env(
 )
 
 # Configuration de Vault
-VAULT_URL = env('VAULT_URL', default='http://vault:8200')
+""" VAULT_URL = env('VAULT_URL', default='http://vault:8200')
 VAULT_TOKEN = env('VAULT_TOKEN', default='myroot')
 
 client = hvac.Client(url=VAULT_URL, token=VAULT_TOKEN)
-print("INFO:     Vault client Authenticated =",client.is_authenticated())
+print("INFO:     Vault client Authenticated =",client.is_authenticated()) """
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
