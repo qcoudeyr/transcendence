@@ -34,6 +34,7 @@ services:
     build:
       context: ./requirements/django
     command: uvicorn transcendence.asgi:application --host 0.0.0.0 --port 8000
+    restart: always
     volumes:
       - ./data/django_data:/app
       - ./data/website_data:/app/transcendence/static
@@ -91,7 +92,7 @@ services:
     environment:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=true
+      - xpack.security.enabled=false
       - ELASTIC_USERNAME=${ELASTIC_USERNAME}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     volumes:
@@ -106,6 +107,7 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+    restart: always
 
 ########################
 ########LOGSTASH########
@@ -113,6 +115,9 @@ services:
   logstash:
     image: docker.elastic.co/logstash/logstash:7.10.1
     container_name: logstash
+    environment:
+      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     volumes:
       - ./requirements/logstash/config:/usr/share/logstash/config
       - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline
@@ -128,6 +133,7 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+    restart: always
 
 ########################
 ########FILEBEAT########
@@ -147,6 +153,7 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     depends_on:
       - logstash
+    restart: always
 
 ######################
 ########KIBANA########
@@ -159,6 +166,8 @@ services:
     networks:
       transcendence:
         ipv4_address: 10.0.10.22
+    volumes:
+      - ./requirements/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
     depends_on:
       - elasticsearch
     environment:
@@ -172,6 +181,7 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+    restart: always
 
 ##########################
 ########PROMETHEUS########
@@ -191,6 +201,7 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+    restart: always
 
 #######################
 ########GRAFANA########
@@ -210,6 +221,7 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+    restart: always
 
 #########################
 ########PORTAINER########
@@ -257,7 +269,7 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
-
+    restart: always
 
 #######################
 ########VOLUMES########
