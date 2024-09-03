@@ -1,7 +1,7 @@
 function switchForm(event) {
 	event.preventDefault();
-	const loginForm = document.querySelector('.login-form');
-	const registerForm = document.querySelector('.register-form');
+	const loginForm = document.querySelector('.login');
+	const registerForm = document.querySelector('.register');
 	loginForm.classList.toggle('fade-out');
 	loginForm.classList.toggle('fade-in');
 	registerForm.classList.toggle('fade-out');
@@ -13,7 +13,7 @@ async function submitRegisterForm(event) {
     event.preventDefault(); // Empêche le rechargement de la page
 
     // Assurez-vous que le formulaire est correctement sélectionné
-    const registerForm = document.querySelector('.register-form'); // Assurez-vous que le sélecteur est correct
+    const registerForm = document.querySelector('.register'); // Assurez-vous que le sélecteur est correct
 
     // Vérifiez que registerForm est bien un élément de formulaire
     if (!(registerForm instanceof HTMLFormElement)) {
@@ -53,7 +53,7 @@ async function submitLoginForm(event) {
     event.preventDefault(); // Empêche le rechargement de la page
 
     // Assurez-vous que le formulaire est correctement sélectionné
-    const loginForm = document.querySelector('.login-form'); // Assurez-vous que le sélecteur est correct
+    const loginForm = document.querySelector('.login'); // Assurez-vous que le sélecteur est correct
 
     // Vérifiez que loginForm est bien un élément de formulaire
     if (!(loginForm instanceof HTMLFormElement)) {
@@ -87,6 +87,6 @@ async function submitLoginForm(event) {
 }
 
 // Ajoutez un écouteur d'événements sur le formulaire de connexion pour gérer la soumission
-document.querySelector('.login-form').addEventListener('submit', submitLoginForm);
-document.querySelector('.register-form').addEventListener('submit', submitRegisterForm);
+document.querySelector('.login').addEventListener('submit', submitLoginForm);
+document.querySelector('.register').addEventListener('submit', submitRegisterForm);
 

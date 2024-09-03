@@ -8,7 +8,7 @@
 }
 
 /* Form container styling */
-.login-box, .register-box {
+.login-form, .register-form {
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
@@ -131,7 +131,7 @@ a:hover {
 
 /* Responsive design for smaller screens */
 @media (max-width: 600px) {
-    .login-box, .register-box {
+    .login-form, .register-form {
         padding: 20px;
         width: 100%;
     }

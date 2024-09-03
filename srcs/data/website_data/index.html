@@ -148,12 +148,16 @@
 </section>
 <section id="connexion" class="connexion-section">
     <div class="container">
-        <div class="login-box fade-in">
+        <div class="login-form fade-in">
             <h2 class="darkerNeonText">Login</h2>
-            <form class="login-form" action="/api/login" method="post">
-                <input type="text" placeholder="Username" required>
-                <input type="password" placeholder="Password" required>
-                <button type="submit">Login</button>
+            <form class="login" action="/api/login" method="post">
+				<label for="username">Nom d'utilisateur:</label>
+				<input type="text" id="username" name="username" required>
+				<br>
+				<label for="password">Mot de passe:</label>
+				<input type="password" id="password" name="password" required>
+				<br>
+				<input type="submit" value="Login">
                 <div class="social-buttons">
                     <button class="google-btn">
                         <img src="images/7123025_logo_google_g_icon.png" alt="Google Logo" class="btn-logo">
@@ -165,9 +169,9 @@
             </form>
             <p class="darkerNeonText">Don't have an account? <a href="#" onclick="switchForm(event)">Register</a></p>
         </div>
-        <div class="register-box fade-out">
+        <div class="register-form fade-out">
             <h2 class="darkerNeonText">Register</h2>
-			<form class="register-form" action="/api/register" method="post">
+			<form class="register" action="/api/register" method="post">
 				<label for="username">Nom d'utilisateur:</label>
 				<input type="text" id="username" name="username" required>
 				<br>
