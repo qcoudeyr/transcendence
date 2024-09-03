@@ -41,8 +41,8 @@ build-and-up:
 	@cd ./srcs && docker compose up -d
 
 fclean:
-	@cd ./srcs && docker-compose down && cd ../
 	@echo "Stopping and removing all Docker containers..."
+	@cd ./srcs && docker-compose down || true
 	docker stop $$(docker ps -q) || true
 	docker rm $$(docker ps -a -q) || true
 	@echo "Removing all Docker images..."
