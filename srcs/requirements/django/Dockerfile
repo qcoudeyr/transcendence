@@ -13,6 +13,8 @@ COPY ./tools/requirements.txt /app/
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN python manage.py makemigrations
+RUN python manage.py migrate
 
 # Expose port 8000 for the Gunicorn server
 EXPOSE 8000
