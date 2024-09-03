@@ -47,7 +47,6 @@ async function submitRegisterForm(event) {
 }
 
 // Ajoutez un écouteur d'événements sur le formulaire d'inscription pour gérer la soumission
-document.querySelector('.register-form').addEventListener('submit', submitRegisterForm);
 
 // Fonction pour envoyer les données du formulaire de connexion au backend
 async function submitLoginForm(event) {
@@ -89,3 +88,5 @@ async function submitLoginForm(event) {
 
 // Ajoutez un écouteur d'événements sur le formulaire de connexion pour gérer la soumission
 document.querySelector('.login-form').addEventListener('submit', submitLoginForm);
+document.querySelector('.register-form').addEventListener('submit', submitRegisterForm);
+
