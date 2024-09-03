@@ -13,12 +13,6 @@ COPY ./tools/requirements.txt /app/
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /app/transcendence
-RUN python manage.py makemigrations
-RUN python manage.py migrate
-
-WORKDIR /app
-
 # Expose port 8000 for the Gunicorn server
 EXPOSE 8000
 
