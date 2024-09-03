@@ -52,7 +52,7 @@ jobs:
         echo "PORTAINER_PASSWORD=portainer_password" >> $GITHUB_ENV
         echo "PORTAINER_HOST=10.0.10.40" >> $GITHUB_ENV
         echo "PORTAINER_PORT=9000" >> $GITHUB_ENV
-        echo "VAULT_URL=http://10.0.10.69:8201" >> $GITHUB_ENV
+        echo "VAULT_URL=http://vault:8201" >> $GITHUB_ENV
         echo "VAULT_TOKEN=vault_token" >> $GITHUB_ENV
     - name: Install dependencies
       run: |
@@ -67,16 +67,16 @@ jobs:
         mkdir -p /home/runner/work/transcendence/transcendence/data/postgres_data
         mkdir -p /home/runner/work/transcendence/transcendence/data/es_data
         mkdir -p /home/runner/work/transcendence/transcendence/data/portainer_data
-    - name: Run Django tests
-      run: |
-        cd srcs/data/django_data
-        python manage.py test
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
     - name: Build Docker images
       run: docker-compose -f srcs/docker-compose.yml build
     - name: Run Docker containers
       run: docker-compose -f srcs/docker-compose.yml up -d
+    - name: Run Django tests
+      run: |
+        cd srcs/data/django_data
+        python manage.py test
     - name: Run Selenium tests
       run: |
        sudo -i; python .github/workflows/test_login.py

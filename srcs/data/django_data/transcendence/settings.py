@@ -21,7 +21,7 @@ env = environ.Env(
 )
 
 # Configuration de Vault
-VAULT_URL = env('VAULT_URL', default='http://10.0.10.69:8200')
+VAULT_URL = env('VAULT_URL', default='http://vault:8200')
 VAULT_TOKEN = env('VAULT_TOKEN', default='myroot')
 
 client = hvac.Client(url=VAULT_URL, token=VAULT_TOKEN)
