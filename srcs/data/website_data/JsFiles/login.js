@@ -13,7 +13,7 @@ async function submitRegisterForm(event) {
     event.preventDefault(); // Empêche le rechargement de la page
 
     // Assurez-vous que le formulaire est correctement sélectionné
-    const registerForm = document.querySelector('.register-form form'); // Assurez-vous que le sélecteur est correct
+    const registerForm = document.querySelector('.register-form'); // Assurez-vous que le sélecteur est correct
 
     // Vérifiez que registerForm est bien un élément de formulaire
     if (!(registerForm instanceof HTMLFormElement)) {
