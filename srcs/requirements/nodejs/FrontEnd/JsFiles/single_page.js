@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sections = document.querySelectorAll('section');
     const links = document.querySelectorAll('nav a');
     const clickSound = document.getElementById('navsound'); // Reference to the audio element
+    const playButton = document.getElementById('playButton'); // Reference to the play button
 
     // Set the volume to a lower level
     clickSound.volume = 0.2; // Adjust this value to your desired volume (0.2 is 20% of full volume)
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         navigateToSection(sectionId);
         // Increase font size of the clicked link smoothly
         links.forEach(link => {
-            if (link.getAttribute('onclick').includes(sectionId)) {
+            if (link.dataset.section === sectionId) {
                 link.style.transition = 'font-size 0.3s ease-in-out';
                 link.style.fontSize = '1.5em';
             } else {
@@ -36,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
             navigateToSection(event.state.section);
             // Increase font size of the link corresponding to the current section
             links.forEach(link => {
-                if (link.getAttribute('onclick').includes(event.state.section)) {
+                if (link.dataset.section === event.state.section) {
                     link.style.transition = 'font-size 0.3s ease-in-out';
                     link.style.fontSize = '1.5em';
                 } else {
@@ -61,9 +62,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     links.forEach(link => {
         link.addEventListener('click', function(event) {
-            const sectionId = event.target.getAttribute('onclick').match(/'([^']+)'/)[1];
+            event.preventDefault(); // Prevent default anchor behavior
+            const sectionId = link.dataset.section;
             changePages(sectionId);
             clickSound.play(); // Play the click sound
         });
+    });
+
+    // Handle play button separately
+    playButton.addEventListener('click', function() {
+        changePages('playing');
+        clickSound.play(); // Play the click sound
     });
 });
