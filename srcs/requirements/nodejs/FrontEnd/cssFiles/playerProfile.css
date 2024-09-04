@@ -1,0 +1,293 @@
+body {
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-color: #120458; /* Dark blue */
+    color: #000000;
+    background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(14,4,65,1) 100%, rgba(18,4,88,1) 100%);
+    font-family: 'EB Neon', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.profile-wrapper body {
+    background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(14,4,65,1) 100%, rgba(18,4,88,1) 100%);
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.profile_container {
+    display: flex;
+    width: 100%;
+    max-width: 1400px;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+
+
+/* Sidebar */
+.profile_sidebar {
+    width: 250px;
+    padding: 20px;
+    background: rgba(76, 4, 100, 0.466);
+    border-radius: 10px;
+    position: relative;
+}
+
+.profile_sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    border: 2px solid #FF00FF;
+    opacity: 0.5;
+    box-shadow: 0 0 20px #FF00FF;
+    animation: profile_neonGlow 1.5s ease-in-out infinite alternate;
+}
+
+.profile_sidebar .profile_logo {
+    width: 100px;
+    height: 100px;
+    background: url('gdornic.jpg') center/cover no-repeat;
+    border-radius: 50%;
+    border: 2px solid #FF00FF;
+    box-shadow: 0 0 20px #FF00FF;
+    margin-bottom: 30px;
+}
+
+.profile_sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile_sidebar nav ul li {
+    margin-bottom: 20px;
+}
+
+.profile_sidebar nav ul li a {
+    color: #ffffff;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 20px;
+    display: block;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.profile_sidebar nav ul li a:hover, .profile_sidebar nav ul li a.profile_active {
+    color: #000;
+    background: #FF00FF;
+}
+
+.profile_sidebar nav ul li a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    border: 2px solid #FF00FF;
+    opacity: 0.5;
+    box-shadow: 0 0 20px #FF00FF;
+    transition: transform 0.3s ease;
+}
+
+.profile_sidebar nav ul li a:hover::before, .profile_sidebar nav ul li a.profile_active::before {
+    transform: scaleX(1.05) scaleY(1.1);
+}
+
+/* Main Content */
+profile_main {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    flex-direction: column; /* Ensure elements stack vertically */
+}
+
+.profile_content-section {
+    position: absolute;
+    width: 60%;
+    background: rgba(0, 0, 0, 0.298);
+    padding: 30px;
+    border-radius: 10px;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+    visibility: hidden;
+	border: 2px solid #FF00FF;
+    opacity: 0;
+}
+
+.profile_content-section.profile_active {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Centering h2 in its container */
+.profile_h2 {
+    font-size: 28px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    color: #FF00FF;
+    text-shadow: 0 0 10px #FF00FF, 0 0 20px #FF00FF;
+    text-align: center; /* Center text horizontally */
+    width: 100%;
+}
+
+/* Centering neon sign */
+.profile_neon-sign {
+    font-size: 30px;
+    color: #ff4d4d;
+    text-shadow: 
+        0 0 5px #ff4d4d,
+        0 0 10px #ff4d4d,
+        0 0 20px #ff4d4d,
+        0 0 40px #ff1a1a,
+        0 0 80px #ff1a1a,
+        0 0 90px #ff1a1a,
+        0 0 100px #ff1a1a,
+        0 0 150px #ff1a1a;
+    animation: profile_flicker 1.5s infinite alternate;
+    text-align: center;
+	padding-top: 15px;
+}
+
+/* Flickering effect */
+@keyframes profile_flicker {
+    0%, 18%, 22%, 25%, 53%, 57%, 100% {
+        text-shadow: 
+            0 0 5px #ff4d4d,
+            0 0 10px #ff4d4d,
+            0 0 20px #ff4d4d,
+            0 0 40px #ff1a1a,
+            0 0 80px #ff1a1a,
+            0 0 90px #ff1a1a,
+            0 0 100px #ff1a1a,
+            0 0 150px #ff1a1a;
+    }
+    20%, 24%, 55% {
+        text-shadow: none;
+    }
+}
+
+/* Centering .profile_button_card */
+.profile_button_card-container {
+    display: flex;
+    justify-content: center; /* Centers the button horizontally */
+    align-items: center;     /* Centers the button vertically */
+    height: 100%;            /* Make sure the container takes up the full height */
+}
+
+/* Button Styles */
+.profile_button_card {
+    background-color: red;
+    border-radius: 10px;
+    box-shadow: 0 0 20px red;
+    border: 2px solid red;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.6s ease; /* Smooth transition for color and transform */
+    z-index: 1; /* Ensure the button is above the pseudo-element */
+}
+
+/* Expanding effect on hover */
+.profile_button_card::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background-color: red;
+    z-index: -1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease, transform 0.6s ease; /* Smooth transition */
+}
+
+.profile_button_card:hover::before {
+    width: 300vw;
+    height: 300vw;
+    transform: translate(-50%, -50%) scale(1); /* Ensure it stays centered */
+}
+
+.profile_button_card:hover {
+    color: white;
+    transform: scale(1.2); /* Slightly scale the button */
+}
+
+.profile_card, .profile_project-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    position: relative;
+    text-align: center;
+}
+
+.profile_card::before, .profile_project-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    border: 2px solid #FF00FF;
+    opacity: 0.5;
+    box-shadow: 0 0 20px #FF00FF;
+}
+
+/* Drop Area */
+.profile_drop_here {
+    margin: 15px 0;
+    padding: 30px;
+    border: 2px dashed #FF00FF;
+    border-radius: 10px;
+    text-align: center;
+    color: #FF00FF;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 20px #FF00FF;
+}
+
+.profile_drop_here:hover {
+    background: rgba(255, 0, 255, 0.2);
+    box-shadow: 0 0 30px #FF00FF;
+    transform: scale(1.05);
+}
+
+/* Keyframes for Neon Glow Effect */
+@keyframes profile_neonGlow {
+    from {
+        opacity: 0.5;
+        box-shadow: 0 0 20px #FF00FF, 0 0 40px #FF00FF, 0 0 60px #FF00FF;
+    }
+    to {
+        opacity: 1;
+        box-shadow: 0 0 40px #FF00FF, 0 0 80px #FF00FF, 0 0 100px #00FFFF;
+    }
+}
