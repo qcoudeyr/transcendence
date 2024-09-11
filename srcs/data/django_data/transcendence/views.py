@@ -1,8 +1,12 @@
+import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login
+
+# Configurer le logger
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def register(request):
@@ -14,7 +18,14 @@ def register(request):
 
         # Valider les données
         if not username or not password or not email:
+            if not username:
+                logger.warning('Le champ username est manquant')
+            if not password:
+                logger.warning('Le champ password est manquant')
+            if not email:
+                logger.warning('Le champ email est manquant')
             return JsonResponse({'error': 'Tous les champs sont requis'}, status=400)
+
 
         # Vérifier si l'utilisateur existe déjà
         if User.objects.filter(username=username).exists():
