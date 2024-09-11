@@ -150,10 +150,14 @@
     <div class="container">
         <div class="login-form fade-in">
             <h2 class="darkerNeonText">Login</h2>
-            <form>
-                <input type="text" placeholder="Username" required>
-                <input type="password" placeholder="Password" required>
-                <button type="submit">Login</button>
+            <form class="login" action="/api/login" method="post">
+				<label for="username">Nom d'utilisateur:</label>
+				<input type="text" id="username" name="username" required>
+				<br>
+				<label for="password">Mot de passe:</label>
+				<input type="password" id="password" name="password" required>
+				<br>
+				<input type="submit" value="Login">
                 <div class="social-buttons">
                     <button class="google-btn">
                         <img src="images/7123025_logo_google_g_icon.png" alt="Google Logo" class="btn-logo">
@@ -167,12 +171,17 @@
         </div>
         <div class="register-form fade-out">
             <h2 class="darkerNeonText">Register</h2>
-            <form>
-                <input type="text" placeholder="Username" required>
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Password" required>
-                <input type="password" placeholder="Confirm Password" required>
-                <button type="submit">Register</button>
+			<form class="register" action="/api/register" method="post">
+				<label for="username">Nom d'utilisateur:</label>
+				<input type="text" id="username" name="username" required>
+				<br>
+				<label for="password">Mot de passe:</label>
+				<input type="password" id="password" name="password" required>
+				<br>
+				<label for="email">Email:</label>
+				<input type="email" id="email" name="email" required>
+				<br>
+				<input type="submit" value="S'inscrire">
                 <div class="social-buttons">
                     <button class="google-btn">
                         <img src="images/7123025_logo_google_g_icon.png" alt="Google Logo" class="btn-logo">
