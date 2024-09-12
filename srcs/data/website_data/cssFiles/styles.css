@@ -224,7 +224,7 @@ nav a {
 .checkbox-wrapper-63 *,
 .checkbox-wrapper-63 ::after,
 .checkbox-wrapper-63 ::before {
-  box-sizing: border-box;
+  box-sizing: border-form;
 }
 
 /* The switch - the box around the slider */

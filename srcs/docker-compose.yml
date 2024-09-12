@@ -299,12 +299,6 @@ volumes:
       type: "none"
       o: "bind"
       device: "./data/portainer_data/"
-  nodejs_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/nodejs_data/"
 
 ########################
 ########NETWORKS########
