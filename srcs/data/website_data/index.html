@@ -36,7 +36,7 @@
 		<a href="#profile" data-section="profile" class="neonText">Profile</a>
     </nav>
     <audio id="navsound" src="sounds/interface-1-126517.mp3" volume="0.1"></audio>
-
+    
     <section id="home" class="hero-section">
         <div class="hero-content">
             <h1 class="fontNeonText flicker">Welcome to transcendance</h1>
@@ -53,7 +53,7 @@
 				  <!-- Ensure the Spline viewer is placed within the correct div -->
 				</div>
 			  </div>
-
+			  
             <audio id="switchsound">
                 <source src="sounds/switch-sound.mp3" type="audio/mpeg">
                 Your browser does not support the audio element.
@@ -101,12 +101,12 @@
                 </div>
             </div>
         <div id="splineContainer">
-
+            
             <!-- The canvas for the Three.js scene will be appended here -->
         </div>
 
         <!-- Import maps polyfill -->
-
+        
     </section>
 
     <section id="tournaments" class="tournaments-section">
@@ -178,64 +178,64 @@
             </div>
         </div>
     </section>
-<section id="connexion" class="connexion-section">
-	<div class="container">
-		<div class="login-form fade-in">
-			<h2 class="darkerNeonText">Login</h2>
-			<form class="login" action="/api/login" method="post">
-				<input type="text" name="username" placeholder="Username" required>
-				<input type="password" name="password" placeholder="Password" required>
-				<button type="submit">Login</button>
-				<div class="social-buttons">
-					<button class="google-btn">
-						<img src="images/7123025_logo_google_g_icon.png" alt="Google Logo" class="btn-logo">
-					</button>
-					<button class="school-btn">
-						<img src="images/42icon.png" alt="42 Logo" class="btn-logo">
-					</button>
-				</div>
-			</form>
-			<p class="darkerNeonText">Don't have an account? <a href="#" onclick="switchForm(event)">Register</a></p>
-		</div>
-		<div class="register-form fade-out">
-			<h2 class="darkerNeonText">Register</h2>
-			<form class="register" action="/api/register" method="post">
-				<input type="text" name="username" placeholder="Username" required>
-				<input type="email" name="email" placeholder="Email" required>
-				<input type="password" name="password" placeholder="Password" required>
-				<input type="password" name="confirm_password" placeholder="Confirm Password" required>
-				<button type="submit">Register</button>
-				<div class="social-buttons">
-					<button class="google-btn">
-						<img src="images/7123025_logo_google_g_icon.png" alt="Google Logo" class="btn-logo">
-					</button>
-					<button class="school-btn">
-						<img src="images/42icon.png" alt="42 Logo" class="btn-logo">
-					</button>
-				</div>
-			</form>
-			<p class="darkerNeonText">Already have an account? <a href="#" onclick="switchForm(event)">Login</a></p>
-		</div>
-	</div>
-</section>
+    <section id="connexion" class="connexion-section">
+        <div class="container">
+            <div class="login-form fade-in">
+                <h2 class="darkerNeonText">Login</h2>
+                <form>
+                    <input type="text" placeholder="Username" required>
+                    <input type="password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                    <div class="social-buttons">
+                        <button class="google-btn">
+                            <img src="images/7123025_logo_google_g_icon.png" alt="Google Logo" class="btn-logo">
+                        </button>
+                        <button class="school-btn">
+                            <img src="images/42icon.png" alt="42 Logo" class="btn-logo">
+                        </button>
+                    </div>
+                </form>
+                <p class="darkerNeonText">Don't have an account? <a href="#" onclick="switchForm(event)">Register</a></p>
+            </div>
+            <div class="register-form fade-out">
+                <h2 class="darkerNeonText">Register</h2>
+                <form>
+                    <input type="text" placeholder="Username" required>
+                    <input type="email" placeholder="Email" required>
+                    <input type="password" placeholder="Password" required>
+                    <input type="password" placeholder="Confirm Password" required>
+                    <button type="submit">Register</button>
+                    <div class="social-buttons">
+                        <button class="google-btn">
+                            <img src="images/7123025_logo_google_g_icon.png" alt="Google Logo" class="btn-logo">
+                        </button>
+                        <button class="school-btn">
+                            <img src="images/42icon.png" alt="42 Logo" class="btn-logo">
+                        </button>
+                    </div>
+                </form>
+                <p class="darkerNeonText">Already have an account? <a href="#" onclick="switchForm(event)">Login</a></p>
+            </div>
+        </div>
+    </section>
 	<section id="profile" class="profile_profile-section">
 		<div class="profile_container">
 			<aside class="profile_sidebar">
-				<div class="profile_logo"></div>
 				<nav>
 					<ul>
-						<li><a href="#profile-overview" class="profile_nav-link profile_active">Profile Overview</a></li>
-						<li><a href="#customise" class="profile_nav-link">Edit</a></li>
-						<li><a href="#settings" class="profile_nav-link">Settings</a></li>
-						<li><a href="#password" class="profile_nav-link">Account Deletion</a></li>
-						<li><a href="#contact" class="profile_nav-link">JSP</a></li>
+						<li><a href="#profile-overview" class="profile_nav-link profile_active" data-profile-section="profile-overview">Profile Overview</a></li>
+						<li><a href="#customise" class="profile_nav-link" data-profile-section="customise">Edit</a></li>
+						<li><a href="#settings" class="profile_nav-link" data-profile-section="settings">Settings</a></li>
+						<li><a href="#password" class="profile_nav-link" data-profile-section="password">Account Deletion</a></li>
+						<li><a href="#contact" class="profile_nav-link" data-profile-section="contact">JSP</a></li>
 					</ul>
 				</nav>
-			</aside>
+			</aside>			
 			<main class="profile_main">
 				<!-- Additional sections for Edit, Settings, Account Deletion, etc. -->
 				<section id="profile-overview" class="profile_content-section profile_active">
 					<h2 class="profile_h2">Profile Overview</h2>
+					<!-- Profile content here -->
 					<div class="profile_card">
 						<p>Name: _USERNAME_</p>
 					</div>
@@ -271,7 +271,7 @@
 						<button class="profile_button_card">Delete</button>
 					</div>
 					<div class="profile_neon-sign">
-						WARNING! THIS IS NOT REVERSIBLE
+						WARNING! THIS IS NOT REVERSIBLE!
 					</div>
 				</section>
 				<section id="contact" class="profile_content-section">
@@ -292,6 +292,7 @@
     <script type="module" src="JsFiles/3d.js"></script>
 	<script type="module" src="JsFiles/3d_remote.js"></script>
 	<script type="module" src="JsFiles/3d_robot.js"></script>
-
+	<script type="module" src="JsFiles/test.js"></script>
+	
 </body>
 </html>

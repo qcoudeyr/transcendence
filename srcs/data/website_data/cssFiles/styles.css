@@ -16,7 +16,7 @@ body {
 /*text font*/
 @font-face {
     font-family: 'EB Neon';
-    src: url('neonfonts.TTF') format('woff2'),
+    src: url('neonfonts.TTF') format('woff2'), 
          url('neonfonts.TTF') format('woff');
     /* You can add more font formats if necessary */
 }
@@ -51,6 +51,27 @@ nav a {
 
 
 /*image stack*/
+
+#robotConainer {
+	width: 500px;
+	height: 500px;
+	position: center;
+  }
+
+#remoteContainer {
+	width: 500px;
+	height: 500px;
+	position: center;
+  }
+  
+  canvas {
+	width: 100%;
+	height: 100%;
+	position: center;
+	top: 0;
+	left: 0;
+  }
+  
 
 .image-stack {
     position: relative;
@@ -89,15 +110,15 @@ nav a {
 @keyframes flicker {
     0%, 10%, 70%, 80%, 90%, 100% {
         opacity: 1;
-        text-shadow:
+        text-shadow: 
             0 0 5px #fe75fe, 0 0 10px #fe75fe, 0 0 20px #fe75fe, 0 0 40px #fe75fe,
             0 0 5px #ff0055, 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 40px #ff0055;
     }
-    20%, 40%, 60% {
+    20%, 40%, 60% { 
         opacity: 0.2;
         text-shadow: none;
     }
-    50% {
+    50% { 
         opacity: 0.5;
         text-shadow: none;
     }
@@ -224,7 +245,7 @@ nav a {
 .checkbox-wrapper-63 *,
 .checkbox-wrapper-63 ::after,
 .checkbox-wrapper-63 ::before {
-  box-sizing: border-form;
+  box-sizing: border-box;
 }
 
 /* The switch - the box around the slider */
@@ -448,46 +469,4 @@ footer {
 }
 .button-82-pushable:focus:not(:focus-visible) {
     outline: none;
-}
-
-/* Animation de fondu et de descente pour la section 404 */
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translate3d(0, -100%, 0);
-    }
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
-.not-found-section .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh; /* Assure que le conteneur prend toute la hauteur de la vue */
-    text-align: center; /* Centre le texte de tous les éléments enfants */
-	animation: fadeInDown 0.5s ease-out forwards;
-}
-
-.not-found-section h1 {
-    font-size: 4em; /* Taille de police plus grande pour le H1 */
-    color: #ff2d55; /* Couleur néon pour le texte, ajustez selon vos besoins */
-}
-
-.not-found-section p {
-    font-size: 1.5em; /* Taille de police plus petite pour le paragraphe */
-    color: white; /* Couleur blanche pour le texte */
-    margin: 20px 0; /* Ajoute un peu d'espace au-dessus et en dessous */
-}
-
-.not-found-section a {
-    font-size: 1.2em; /* Taille de police pour le lien */
-    color: #0af; /* Couleur néon pour le lien, ajustez selon vos besoins */
-    text-decoration: none; /* Supprime le soulignement par défaut des liens */
-    padding: 10px 20px; /* Ajoute un peu d'espace autour du texte du lien */
-    border: 1px solid #0af; /* Bordure néon autour du lien */
-    border-radius: 5px; /* Coins arrondis pour le lien */
 }
