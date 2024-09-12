@@ -1,5 +1,5 @@
 # ft_transcendence
-
+[![CI](https://github.com/qcoudeyr/transcendence/actions/workflows/ci.yml/badge.svg)](https://github.com/qcoudeyr/transcendence/actions/workflows/ci.yml)
 ## Overview
 `ft_transcendence` is an innovative project that encompasses various modules to enhance security, accessibility, graphical interface, and gameplay experience. This project integrates advanced techniques and technologies to provide a robust, secure, and immersive experience to users.
 
