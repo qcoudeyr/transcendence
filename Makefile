@@ -65,20 +65,21 @@ start:
 
 restart:
 	@if [ -z "$(container)" ]; then \
-		echo "Error: No container name provided. Usage: make restart container=<container_name>"; \
-		exit 1  > /dev/null 2>&1; \
-	fi
-	@if docker ps -a --format '{{.Names}}' | grep -q "^$(container)$$"; then \
-		echo "Restarting Docker container '$(container)'..."; \
-		docker restart $(container)  > /dev/null 2>&1; \
-		echo "Docker container '$(container)' has been restarted."; \
+		echo "Restarting all Docker containers..."; \
+		docker restart $$(docker ps -q) > /dev/null 2>&1; \
+		echo "All Docker containers have been restarted."; \
 	else \
-		echo "Error: Docker container '$(container)' not found."; \
-		echo "Here is the list of available containers to restart:"; \
-		docker ps -a --format '{{.Names}}'; \
-		exit 1  > /dev/null 2>&1; \
+		if docker ps -a --format '{{.Names}}' | grep -q "^$(container)$$"; then \
+			echo "Restarting Docker container '$(container)'..."; \
+			docker restart $(container) > /dev/null 2>&1; \
+			echo "Docker container '$(container)' has been restarted."; \
+		else \
+			echo "Error: Docker container '$(container)' not found."; \
+			echo "Here is the list of available containers to restart:"; \
+			docker ps -a --format '{{.Names}}'; \
+			exit 1; \
+		fi \
 	fi
-
 %:
 	@$(MAKE) restart container=$@
 
