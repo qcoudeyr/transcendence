@@ -18,6 +18,23 @@
     <div id="preloader">
         <div id="loader"></div>
     </div>
+	<script type="importmap">
+		{
+		  "imports": {
+			"@splinetool/loader": "https://unpkg.com/@splinetool/loader@1.9.3/build/SplineLoader.js",
+			"three": "https://unpkg.com/three@0.149.0/build/three.module.js",
+			"three/": "https://unpkg.com/three@0.149.0/"
+		  }
+		}
+	  </script>
+	  <script type="importmap">
+		{
+		  "imports": {
+			"three": "https://unpkg.com/three@0.146.0/build/three.module.js",
+			"three/addons/": "https://unpkg.com/three@0.146.0/examples/jsm/"
+		  }
+		}
+	  </script>
     <nav>
         <a href="#home" data-section="home" class="neonText">Home</a>
         <a href="#play" data-section="play" class="neonText">QuickPlay</a>
@@ -93,8 +110,6 @@
             </div>
         <div id="splineContainer">
         </div>
-
-        
     </section>
 
     <section id="tournaments" class="tournaments-section">
