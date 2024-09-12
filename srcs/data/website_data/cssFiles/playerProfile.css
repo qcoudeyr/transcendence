@@ -116,7 +116,7 @@ body {
 }
 
 /* Main Content */
-profile_main {
+.profile_main {
     flex-grow: 1;
     display: flex;
     justify-content: center;
@@ -126,6 +126,7 @@ profile_main {
 }
 
 .profile_content-section {
+	display: none;
     position: absolute;
     width: 60%;
     background: rgba(0, 0, 0, 0.298);
@@ -140,6 +141,7 @@ profile_main {
 .profile_content-section.profile_active {
     visibility: visible;
     opacity: 1;
+	display: block;
 }
 
 /* Centering h2 in its container */
