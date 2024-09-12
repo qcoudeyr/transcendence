@@ -53,13 +53,6 @@ fclean:
 	docker network rm $$(docker network ls -q) || true
 	@echo "Cleanup complete."
 
-restart:
-	@echo "Restarting all Docker containers..."
-	@cd ./srcs/ && \
-		docker-compose down && \
-		docker-compose up -d
-	@echo "All Docker containers have been restarted."
-
 stop:
 	@echo "Stopping Docker daemon and all containers..."
 	@sudo systemctl stop docker* > /dev/null 2>&1
@@ -69,6 +62,25 @@ start:
 	@echo "Starting Docker daemon..."
 	@sudo systemctl start docker.service docker.socket > /dev/null 2>&1
 	@echo "Docker daemon started!"
+
+restart:
+	@if [ -z "$(container)" ]; then \
+		echo "Error: No container name provided. Usage: make restart container=<container_name>"; \
+		exit 1  > /dev/null 2>&1; \
+	fi
+	@if docker ps -a --format '{{.Names}}' | grep -q "^$(container)$$"; then \
+		echo "Restarting Docker container '$(container)'..."; \
+		docker restart $(container)  > /dev/null 2>&1; \
+		echo "Docker container '$(container)' has been restarted."; \
+	else \
+		echo "Error: Docker container '$(container)' not found."; \
+		echo "Here is the list of available containers to restart:"; \
+		docker ps -a --format '{{.Names}}'; \
+		exit 1  > /dev/null 2>&1; \
+	fi
+
+%:
+	@$(MAKE) restart container=$@
 
 re: fclean all
 
