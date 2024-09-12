@@ -1,6 +1,0 @@
-{
-    "url": "10.0.10.12:5432",
-    "db_name": "mydatabase",
-    "username": "myuser",
-    "password": "mypassword"
-}
