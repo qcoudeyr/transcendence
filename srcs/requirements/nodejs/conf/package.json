@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "express": "5.0.0",
-	"three": "0.168.0"
+	"three": "0.168.0",
+	"@logto/browser": "2.2.17"
   }
 }
