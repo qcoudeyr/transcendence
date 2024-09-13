@@ -59,6 +59,29 @@ services:
         max-size: "200k"
         max-file: "10"
 
+######################
+########NODEJS########
+######################
+  nodejs:
+    build:
+      context: ./requirements/nodejs
+    container_name: nodejs
+    volumes:
+      - ./data/website_data:/app/static
+    ports:
+      - "3000:3000"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.60
+    depends_on:
+      - django
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+
 #####################
 ########NGINX########
 #####################
