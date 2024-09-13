@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import SplineLoader from '@splinetool/loader';
 
 // Get the robot container element
 const robotContainer = document.getElementById('robotContainer');
@@ -36,22 +35,7 @@ let robotController; // Variable to store the loaded robot controller object
 // Store initial rotation state
 const initialRotation = { x: 0, y: 0 };
 
-robotLoader.load(
-  'https://prod.spline.design/KYNdbTcnGM3bvnVs/scene.splinecode',
-  (splineScene) => {
-    robotController = splineScene;
-    robotScene.add(splineScene);
-
-    // Store initial rotation
-    if (robotController) {
-      initialRotation.x = robotController.rotation.x;
-      initialRotation.y = robotController.rotation.y;
-
-      // Adjust the height of the robot to match the remote
-      robotController.position.y = 0; // Adjust this value as needed to match the height
-    }
-  }
-);
+//WE NEED TO LOAD A NEW ROBOT MODEL HERE																			TODO
 
 // Set up the renderer for the robot control
 const robotRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });

@@ -1,15 +1,14 @@
+// Get the button element
+var playButton = document.getElementById("playButton");
 
-  // Get the button element
-  var playButton = document.getElementById("playButton");
+// Get the audio element
+var clickSound = document.getElementById("clickSound");
 
-  // Get the audio element
-  var clickSound = document.getElementById("clickSound");
-
-  // Add click event listener to the button
-  playButton.addEventListener("click", function() {
+// Add click event listener to the button
+playButton.addEventListener("click", function() {
     // Play the click sound
     clickSound.play();
-  });
+});
 
 function toggleSwitch(activeSwitch) {
 	var switch1 = document.getElementById("switch1");
@@ -27,26 +26,6 @@ function toggleSwitch(activeSwitch) {
     audio.play();
 }
 
-
-
-document.addEventListener('DOMContentLoaded', function () {
-	const ledBackground = document.querySelector('.led-background');
-	const numLEDs = Math.ceil(window.innerWidth / 20) * Math.ceil(window.innerHeight / 20);
-
-	for (let i = 0; i < numLEDs; i++) {
-		const led = document.createElement('div');
-		led.classList.add('led');
-
-		// Random blink delay and duration for each LED
-		const delay = Math.random() * 5;
-		const duration = Math.random() * 3 + 2;
-		led.style.animation = `blink ${duration}s infinite ${delay}s alternate`;
-
-		ledBackground.appendChild(led);
-	}
-});
-
-
 //nav bar
 // Add an active class to the current page link
 // Function to add active class to the current navigation link
@@ -58,16 +37,17 @@ function setActiveLink() {
     var currentHash = window.location.hash;
     
     // Add active class to the navigation link corresponding to the current hash
-    document.querySelector(`nav a[href="${currentHash}"]`).classList.add('active');
+    var activeLink = document.querySelector(`nav a[href="${currentHash}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
 }
 
 // Call the setActiveLink function when the page loads and when the hash changes
 window.onload = setActiveLink;
 window.onhashchange = setActiveLink;
 
-
 //LOADER
-
 document.addEventListener("DOMContentLoaded", function() {
 	const preloader = document.getElementById('preloader');
 	// Simulate loading time
