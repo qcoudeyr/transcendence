@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import SplineLoader from '@splinetool/loader';
 
 // Get the remote container element
 const remoteContainer = document.getElementById('remoteContainer');
@@ -31,22 +30,7 @@ let remoteController; // Variable to store the loaded remote controller object
 // Store initial rotation state
 const initialRotation = { x: 0, y: 0 };
 
-remoteLoader.load(
-  'https://prod.spline.design/70lI1f4u6GTMzTOX/scene.splinecode',
-  (splineScene) => {
-    remoteController = splineScene;
-    remoteScene.add(splineScene);
-
-    // Store initial rotation
-    if (remoteController) {
-      initialRotation.x = remoteController.rotation.x;
-      initialRotation.y = remoteController.rotation.y;
-
-      // Adjust the height of the robot to match the remote
-      remoteController.position.y = -150; // Adjust this value as needed to match the height
-    }
-  }
-);
+//			WE NEED TO LOAD A NEW 3D REMOTE HERE															TODO
 
 // Set up the renderer for the remote control
 const remoteRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
