@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="cssFiles/tournament.css">
     <link rel="stylesheet" type="text/css" href="cssFiles/playing-section.css">
 	<link rel="stylesheet" type="text/css" href="cssFiles/playerProfile.css">
+	<link rel="stylesheet" type="text/css" href="cssFiles/cyber-buttons.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P|VT323|Nova+Square&display=swap">
 	<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
 </head>
@@ -32,7 +33,7 @@
         <a href="#tournaments" data-section="tournaments" class="neonText">Tournaments</a>
         <a href="#statistiques" data-section="statistiques" class="neonText">Statistiques</a>
         <a href="#connexion" data-section="connexion" class="neonText">Connexion</a>
-		<!-- <a href="#profile" data-section="profile" class="neonText">Profile</a> -->
+		<a href="#profile" data-section="profile" class="neonText">Profile</a>
     </nav>
     <audio id="navsound" src="sounds/interface-1-126517.mp3" volume="0.1"></audio>
     
@@ -208,78 +209,44 @@
                         </button>
                     </div>
                 </form>
-                <p class="darkerNeonText">Already have an account? <a href="#" onclick="switchForm(event)">Login</a></p>
+                <p class="darkerNeonText">Already have a account? <a href="#" onclick="switchForm(event)">Login</a></p>
             </div>
         </div>
     </section>
-	<section id="profile" class="profile_profile-section">
-		<div class="profile_container">
-			<aside class="profile_sidebar">
-				<nav>
-					<ul>
-						<li><a href="#profile-overview" class="profile_nav-link profile_active" data-profile-section="profile-overview">Profile Overview</a></li>
-						<li><a href="#customise" class="profile_nav-link" data-profile-section="customise">Edit</a></li>
-						<li><a href="#settings" class="profile_nav-link" data-profile-section="settings">Settings</a></li>
-						<li><a href="#password" class="profile_nav-link" data-profile-section="password">Account Deletion</a></li>
-						<li><a href="#contact" class="profile_nav-link" data-profile-section="contact">JSP</a></li>
-					</ul>
-				</nav>
-			</aside>			
-			<main class="profile_main">
-				<!-- Additional sections for Edit, Settings, Account Deletion, etc. -->
-				<section id="profile-overview" class="profile_content-section profile_active">
-					<h2 class="profile_h2">Profile Overview</h2>
-					<!-- Profile content here -->
-					<div class="profile_card">
-						<p>Name:  </p>
+	<section id="profile" class="profile-section">
+		<div class="profile-container">
+				<h1 class="darkerNeonText">User Profile</h1>
+			<div class="profile-content">
+				<div class="profile-picture">
+					<img id="profileImage" src="./images/42icon.png" alt="Profile Image">
+					<button class="cybr-btn pink">
+						Edit Profile<span aria-hidden>_</span>
+						<span aria-hidden class="cybr-btn__glitch">Edit Profile</span>
+						<span aria-hidden class="cybr-btn__tag">R25</span>
+					</button>
+				</div>
+				<div class="profile-details">
+					<div class="detail">
+						<strong class="neon-text">Name:</strong>
+						<span id="userName">_NAME_</span>
 					</div>
-					<div class="profile_card">
-						<p>Email: _EMAIL_</p>
+					<div class="detail">
+						<strong class="neon-text">Phone:</strong>
+						<span id="userPhone">_PHONENUMBER_</span>
 					</div>
-					<div class="profile_card">
-						<p>Phone: _NUMERO_</p>
+					<div class="detail">
+						<strong class="neon-text">Email:</strong>
+						<span id="userEmail">_EMAIL_</span>
 					</div>
-				</section>
-				<section id="customise" class="profile_content-section profile_active">
-					<h2 class="profile_h2">Edit</h2>
-					<div class="profile_project-card">Change picture
-						<div class="profile_drop_here">Drop here</div>
-					</div>
-					<div class="profile_project-card">Project 2</div>
-				</section>
-				<section id="settings" class="profile_content-section">
-					<h2 class="profile_h2">Settings</h2>
-					<div class="profile_card">
-						<p>Bot Difficulty</p>
-						<button class="profile_button_card"> EASY</button>
-						<button class="profile_button_card"> MEDIUM</button>
-						<button class="profile_button_card"> HARD</button>
-					</div>
-					<div class="profile_card">
-						<p>idk what to say here</p>
-					</div>
-				</section>
-				<section id="password" class="profile_content-section">
-					<h2 class="profile_h2">Account Deletion</h2>
-					<div class="profile_button_card-container">
-						<button class="profile_button_card">Delete</button>
-					</div>
-					<div class="profile_neon-sign">
-						WARNING! THIS IS NOT REVERSIBLE!
-					</div>
-				</section>
-				<section id="contact" class="profile_content-section">
-					<h2 class="profile_h2">JSP</h2>
-					<div class="profile_card">
-						<p>Contact form or information goes here.</p>
-					</div>
-				</section>
-			</main>
+				</div>
+					<button class="cybr-btn">
+						Delete Account<span aria-hidden>_</span>
+						<span aria-hidden class="cybr-btn__glitch">Delete</span>
+						<span aria-hidden class="cybr-btn__tag">Not reversible</span>
+					  </button>
+			</div>
 		</div>
-	</section>
-    <footer>
-        <p>42 ft_transcendance Project. All rights reserved.</p>
-    </footer>
+		</section>
     <script src="JsFiles/script.js"></script>
     <script src="JsFiles/single_page.js"></script>
     <script src="JsFiles/login.js"></script>
