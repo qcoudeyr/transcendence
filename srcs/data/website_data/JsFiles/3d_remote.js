@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 // Get the remote container element
 const remoteContainer = document.getElementById('remoteContainer');
@@ -7,7 +9,7 @@ const containerHeight = remoteContainer.clientHeight;
 
 // Orthographic camera for remote control
 const aspectRatio = containerWidth / containerHeight;
-const cameraSize = 1000; // Adjust this value based on how zoomed in or out you want the view to be
+const cameraSize = 50; // Adjust this value based on how zoomed in or out you want the view to be
 
 const remoteCamera = new THREE.OrthographicCamera(
   (-cameraSize * aspectRatio) / 2,
@@ -23,18 +25,52 @@ remoteCamera.lookAt(new THREE.Vector3(0, 0, 0));
 // Scene for remote control
 const remoteScene = new THREE.Scene();
 
-// Load the Spline remote control
-const remoteLoader = new SplineLoader();
-let remoteController; // Variable to store the loaded remote controller object
-
 // Store initial rotation state
 const initialRotation = { x: 0, y: 0 };
 
-//			WE NEED TO LOAD A NEW 3D REMOTE HERE															TODO
+let remoteController; // Declare the remoteController variable
+
+// Load the GLTF model
+const gltfLoader = new GLTFLoader();
+gltfLoader.load(
+  './low_poly_earth.glb',
+  (gltf) => {
+    remoteController = gltf.scene; // Assign the loaded scene to remoteController
+    remoteScene.add(remoteController);
+    remoteController.position.set(0, 0, 0);
+    remoteController.scale.set(10, 10, 10);
+  },
+  (xhr) => {
+    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+  },
+  (error) => {
+    console.error('An error happened during GLTF loading:', error);
+  }
+);
+
+// Set up the lighting
+// Ambient light for general illumination
+const ambientLight = new THREE.AmbientLight(0x404040, 8); // Soft white light with some intensity
+remoteScene.add(ambientLight);
+
+// Directional light to simulate a main light source
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(10, 20, 10); // Position the light above and in front of the remote
+directionalLight.castShadow = true; // Enable shadows
+directionalLight.shadow.mapSize.width = 1024; // Shadow map resolution
+directionalLight.shadow.mapSize.height = 1024;
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 500;
+remoteScene.add(directionalLight);
+
+// Optionally, add a point light to add a nice highlight
+const pointLight = new THREE.PointLight(0xffffff, 0.6);
+pointLight.position.set(0, 20, 20); // Position the point light to shine directly on the remote
+remoteScene.add(pointLight);
 
 // Set up the renderer for the remote control
 const remoteRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-remoteRenderer.setClearColor(0x000000, 0); // Transparent background
+remoteRenderer.setClearColor(0xFFFFFF, 0); // Transparent background
 
 // Attach the renderer to the remote container
 if (remoteContainer) {
@@ -68,7 +104,7 @@ function onWindowResizeRemote() {
 
 // Function to update the rotation of the remote controller based on mouse movement
 function updateRemoteControllerRotation(event) {
-  if (!remoteController || !isCursorInside) return;
+  if (!remoteController) return; // Check if remoteController is loaded
 
   const rect = remoteContainer.getBoundingClientRect();
   const x = ((event.clientX - rect.left) / remoteContainer.clientWidth) * 2 - 1;
