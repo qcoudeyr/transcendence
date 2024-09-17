@@ -106,6 +106,27 @@ services:
         max-size: "200k"
         max-file: "10"
 
+#####################
+########REDIS########
+#####################
+  redis:
+    image: redis:7.4.0-alpine3.20
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.70
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+
+
 #############################
 ########ELASTICSEARCH########
 #############################
@@ -323,6 +344,12 @@ volumes:
       type: "none"
       o: "bind"
       device: "./data/portainer_data/"
+  redis_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/redis_data/"
 
 ########################
 ########NETWORKS########
