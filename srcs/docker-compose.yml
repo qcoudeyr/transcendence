@@ -59,6 +59,29 @@ services:
         max-size: "200k"
         max-file: "10"
 
+######################
+########NODEJS########
+######################
+  nodejs:
+    build:
+      context: ./requirements/nodejs
+    container_name: nodejs
+    volumes:
+      - ./data/website_data:/app/static
+    ports:
+      - "3000:3000"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.60
+    depends_on:
+      - django
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+
 #####################
 ########NGINX########
 #####################
@@ -91,7 +114,7 @@ services:
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
       - xpack.security.enabled=false
       - ELASTIC_USERNAME=${ELASTIC_USERNAME}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
@@ -116,6 +139,7 @@ services:
     image: docker.elastic.co/logstash/logstash:7.10.1
     container_name: logstash
     environment:
+      - "LS_JAVA_OPTS=-Xms128m -Xmx128m"
       - ELASTIC_USERNAME=${ELASTIC_USERNAME}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     volumes:
