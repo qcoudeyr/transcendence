@@ -33,11 +33,10 @@ services:
     container_name: django
     build:
       context: ./requirements/django
-    command: uvicorn transcendence.asgi:application --host 0.0.0.0 --port 8000
+    # command: uvicorn transcendence.asgi:application --host 0.0.0.0 --port 8000
     restart: always
     volumes:
       - ./data/django_data:/app
-      - ./data/website_data:/app/transcendence/static
     ports:
       - "8000:8000"
       - "8001:8001"
@@ -47,12 +46,14 @@ services:
       transcendence:
         ipv4_address: 10.0.10.10
     environment:
-      - DJANGO_SETTINGS_MODULE=transcendence.settings
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_USER=${DATABASE_USER}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
+      - DJANGO_SUPERUSER_NAME=${DJANGO_SUPERUSER_NAME}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
     logging:
       driver: "json-file"
       options:
