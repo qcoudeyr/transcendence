@@ -101,5 +101,3 @@ jobs:
     - name: Tear down Docker containers
       if: always()
       run: docker-compose -f srcs/docker-compose.yml down
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@v3.0.0
