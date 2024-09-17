@@ -5,9 +5,11 @@
     height: 100vh; /* Full viewport height */
     padding: 20px; /* Add padding for better spacing on small screens */
 	background: #00ffff00;
+	margin-bottom: 5%;
 }
 
 .profile-container {
+	scale: 0.9;
 	top: 50px;
 	bottom: 50px;
 	position: relative;
