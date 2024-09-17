@@ -143,8 +143,8 @@ services:
     container_name: filebeat
     volumes:
       - ./requirements/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:rshared,ro
+      - /var/run/docker.sock:/var/run/docker.sock:rshared,ro
     networks:
       transcendence:
         ipv4_address: 10.0.10.50
