@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
@@ -15,12 +15,6 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-
-    # Vérifie si 'collectstatic_now' est passé en argument
-    if 'collectstatic_now' in sys.argv:
-        # Remplace sys.argv pour simuler 'manage.py collectstatic --noinput'
-        sys.argv = [sys.argv[0], 'collectstatic', '--noinput']
-
     execute_from_command_line(sys.argv)
 
 
