@@ -33,7 +33,6 @@ services:
     container_name: django
     build:
       context: ./requirements/django
-    # command: uvicorn transcendence.asgi:application --host 0.0.0.0 --port 8000
     restart: always
     volumes:
       - ./data/django_data:/app
