@@ -25,9 +25,9 @@ jobs:
           --health-retries=5
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4.1.7
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5.2.0
       with:
         python-version: 3.12
     - name: Set environment variables
@@ -79,7 +79,7 @@ jobs:
       run: docker-compose -f srcs/docker-compose.yml up -d
     - name: Run Django tests
       run: |
-        cd srcs/data/django_data
+        cd srcs/data/django_data/transcendence
         python manage.py test
     - name: Run Selenium tests
       run: |
@@ -101,3 +101,5 @@ jobs:
     - name: Tear down Docker containers
       if: always()
       run: docker-compose -f srcs/docker-compose.yml down
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@v3.0.0
