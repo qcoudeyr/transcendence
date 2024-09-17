@@ -29,7 +29,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.12
     - name: Set environment variables
       run: |
         echo "POSTGRES_DB=test_db" >> $GITHUB_ENV
