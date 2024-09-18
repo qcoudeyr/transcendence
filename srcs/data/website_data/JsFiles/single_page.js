@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function changePages(sectionId) {
+	function changePages(sectionId) {
         history.pushState({ section: sectionId }, '', `#${sectionId}`);
         navigateToSection(sectionId);
         // Increase font size of the clicked link smoothly
@@ -96,4 +96,100 @@ document.addEventListener('DOMContentLoaded', function() {
         changePages('playing');
         clickSound.play(); // Play the click sound
     });
+
+
+			/// get to see how geoffrey wants it to work but its work also make a Logout Button							TODO
+		const connexionLink = document.querySelector('a[data-section="connexion"]');
+		const profileLink = document.querySelector('a[data-section="profile"]');
+	  
+		function updateNavbar() {
+		  if (localStorage.getItem('accessToken')) {
+			connexionLink.style.display = 'none';
+			profileLink.style.display = 'inline-block';
+		  } else {
+			connexionLink.style.display = 'inline-block';
+			profileLink.style.display = 'none';
+		  }
+		}
+	  
+		// Initial update
+		updateNavbar();
+	  
+		// Listen for changes in localStorage	every time theirs a change it listens
+		window.addEventListener('storage', function(event) {
+		  if (event.key === 'token') {
+			updateNavbar();
+		  }
+		});
+
+
+		//logout
+
+		LogoutButton.addEventListener('click', function(){
+			changePages('home');
+			localStorage.removeItem('accessToken');
+			location.reload(true);
+		});
+	//LOGIN SECTION WITH API
+
+	LoginForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		const LoginUsername = document.getElementById('LoginFormUsername').value;
+		const LoginPassword = document.getElementById('LoginFormPassword').value;
+		
+		const apiUrl = '/api/login/';
+	
+		const postData = {
+			username: LoginUsername,
+			password: LoginPassword
+		};
+	
+		// Make the POST request
+		fetch(apiUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(postData)
+		})
+		.then(response => {
+			if (response.ok) {
+				return response.json();
+			} else if (response.status === 401) {
+				// Handle 401 error: Unauthorized
+				displayError('Wrong Credentials, please try again.');
+				return; // Return early to avoid throwing an error
+			} else {
+				// Throw error for other unexpected statuses
+				throw new Error('Unexpected error occurred');
+			}
+		})
+		.then(data => {
+			if (data) { // Only proceed if there's data (successful response)
+				console.log('Response:', data);
+				// Store tokens in localStorage
+				localStorage.setItem('accessToken', data.access);
+				localStorage.setItem('refreshToken', data.refresh);
+				console.log("Tokens logged in localStorage: ", localStorage.getItem('accessToken'))
+				location.reload(true);
+
+				changePages('home');
+				// Redirect or perform other actions
+			}
+		})
+		.catch(error => {
+			// Log unexpected errors only
+			if (error.message !== '401 Error: Unauthorized') {
+				console.error('Error during the request:', error);
+			}
+		});
+	});
+	
+	// Function to display an error message
+	function displayError(message) {
+		const errorMessageDiv = document.getElementById('error-message');
+		errorMessageDiv.textContent = message;
+		errorMessageDiv.style.display = 'block';
+	}
 });
