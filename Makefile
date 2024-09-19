@@ -34,7 +34,7 @@ detect-and-install-docker:
 
 create-data-dirs:
 	@echo "Creating data directories if they do not exist..."
-	@mkdir -p ./srcs/data/django_data ./srcs/data/es_data ./srcs/data/portainer_data ./srcs/data/postgres_data ./srcs/data/vault_data ./srcs/data/website_data
+	@mkdir -p ./srcs/data/django_data ./srcs/data/es_data ./srcs/data/portainer_data ./srcs/data/postgres_data ./srcs/data/vault_data ./srcs/data/website_data ./srcs/data/media_data
 	@echo "Data directories created."
 
 build-and-up:

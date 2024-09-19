@@ -36,6 +36,7 @@ services:
     restart: always
     volumes:
       - ./data/django_data:/app
+      - ./data/media_data:/app/media
     ports:
       - "8000:8000"
       - "8001:8001"
@@ -95,6 +96,7 @@ services:
       - ./requirements/nginx/nginx.conf:/etc/nginx/transcendence.conf
       - ./requirements/nginx/default.conf:/etc/nginx/conf.d/transcendence.conf
       - ./data/website_data/:/app/static/
+      - ./data/media_data/:/app/media/
     networks:
       transcendence:
         ipv4_address: 10.0.10.2
@@ -350,6 +352,12 @@ volumes:
       type: "none"
       o: "bind"
       device: "./data/redis_data/"
+  media_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/media_data/"
 
 ########################
 ########NETWORKS########

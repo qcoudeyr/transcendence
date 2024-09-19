@@ -19,15 +19,18 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from users.views import UserViewset
+
 # Create router
 router = routers.SimpleRouter()
 
 # Add endpoints to the router here, like that:
 # router.register('collection', CollectionViewset, basename='collection')
+router.register('user', UserViewset, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/login/', TokenObtainPairView.as_view(), name='login'),
-    path('api/token/refresh', TokenRefreshView.as_view(), name='refresh_token'),
+    path('api/tokenRefresh/', TokenRefreshView.as_view(), name='token-refresh'),
 ]
