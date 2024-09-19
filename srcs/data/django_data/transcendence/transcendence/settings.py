@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import environ
 
 env = environ.Env(
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -135,5 +137,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Rest Framework settings
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',)
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
+# Root for medias (images)
+MEDIA_ROOT = '/app/media/'
+MEDIA_URL = '/media/'
+
+# Default profile values
+DEFAULT_NAME = 'Recruit'
+DEFAULT_AVATAR = 'avatars/sen.png'
+DEFAULT_BIOGRAPHY = 'A l\'huile !'
+
+# Simple JWT settings
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1)
 }
