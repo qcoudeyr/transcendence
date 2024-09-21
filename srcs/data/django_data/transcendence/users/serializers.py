@@ -47,33 +47,37 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     username = serializers.CharField(validators=[UniqueValidator(queryset=User.objects.all())])
     email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
-    password = serializers.CharField(
+    password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(
         write_only=True,
+        required=False,
         validators=[validate_password]
     )
-    password_confirmation = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'password_confirmation']
+        fields = ['username', 'email', 'password', 'new_password']
 
-    def validate(self, data):
-        if ('password' in data) != ('password_confirmation' in data):
-            raise serializers.ValidationError({'password': 'Password need confirmation, and vice-versa.'})
-        if 'password' in data and data['password'] != data['password_confirmation']:
-            raise serializers.ValidationError({'password': 'Different passwords.'})
-        return data
+    def validate_password(self, value):
+        user = self.instance
+        if not user.check_password(value):
+            raise serializers.ValidationError("Incorrect password.")
+        return value
+
+    def validate(self, attrs):
+        if 'password' not in attrs:
+            raise serializers.ValidationError("Password needed.")
+        return super().validate(attrs)
 
     def update(self, instance, validated_data):
         if 'username' in validated_data:
-            instance.name = validated_data['username']
-            instance.save()
+            instance.username = validated_data['username']
         if 'email' in validated_data:
             instance.email = validated_data['email']
-            instance.save()
-        if 'password' in validated_data:
-            instance.set_password(validated_data['password'])
-        return super().update(instance, validated_data)
+        if 'new_password' in validated_data:
+            instance.set_password(validated_data['new_password'])
+        instance.save()
+        return instance
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -91,11 +95,14 @@ class UserDestroySerializer(serializers.ModelSerializer):
         fields = ['password']
 
     def validate_password(self, value):
-        user = self.context['request'].user
+        # user = self.context['request'].user
+        user = self.instance
         if not user.check_password(value):
             raise serializers.ValidationError("Incorrect password.")
         return value
 
     def delete(self):
-        user = self.context['request'].user
+        # user = self.context['request'].user
+        # user.delete()
+        user = self.instance
         user.delete()
