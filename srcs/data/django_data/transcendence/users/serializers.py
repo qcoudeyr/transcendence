@@ -6,7 +6,7 @@ from django.contrib.auth.password_validation import validate_password
 from users.models import Profile
 
 # Create your serializers here.
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.Serializer):
     username = serializers.CharField(
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())]
@@ -24,10 +24,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
         required=True,
         write_only=True
     )
-
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password', 'password_confirmation']
 
     def validate(self, data):
         if data['password'] != data['password_confirmation']:
@@ -47,10 +43,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     username = serializers.CharField(validators=[UniqueValidator(queryset=User.objects.all())])
     email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(
+        required=True,
+        write_only=True
+    )
     new_password = serializers.CharField(
         write_only=True,
-        required=False,
         validators=[validate_password]
     )
 
@@ -95,14 +93,16 @@ class UserDestroySerializer(serializers.ModelSerializer):
         fields = ['password']
 
     def validate_password(self, value):
-        # user = self.context['request'].user
         user = self.instance
         if not user.check_password(value):
             raise serializers.ValidationError("Incorrect password.")
         return value
 
+    def validate(self, attrs):
+        if 'password' not in attrs:
+            raise serializers.ValidationError("Password needed.")
+        return super().validate(attrs)
+
     def delete(self):
-        # user = self.context['request'].user
-        # user.delete()
         user = self.instance
         user.delete()

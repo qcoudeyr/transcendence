@@ -21,16 +21,16 @@ class UserMeAPIView(RetrieveUpdateDestroyAPIView):
             return UserRetrieveSerializer
         if self.request.method in ['PUT', 'PATCH']:
             return UserUpdateSerializer
-        # if self.request.method == 'PATCH':
-        #     return UserUpdateSerializer
         if self.request.method == 'DELETE':
             return UserDestroySerializer
         return super().get_serializer_class()
 
-    def get_serializer(self, *args, **kwargs):
-        if self.request.method == 'PATCH':
-            kwargs['partial'] = True
-        return super().get_serializer(*args, **kwargs)
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class UserRegisterAPIView(CreateAPIView):
     permission_classes = [AllowAny]
