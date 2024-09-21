@@ -12,7 +12,9 @@ class UserMeAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user
+        user = self.request.user
+        self.check_object_permissions(self.request, user)
+        return user
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -24,10 +26,11 @@ class UserMeAPIView(RetrieveUpdateDestroyAPIView):
         return super().get_serializer_class()
 
     def destroy(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, context={'request': request})
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.delete()
-        return Response({"message": "User deleted."}, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class UserRegisterAPIView(CreateAPIView):
     permission_classes = [AllowAny]
