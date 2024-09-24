@@ -3,7 +3,7 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
-from users.models import Profile
+from profiles.models import Profile
 
 # Create your serializers here.
 class UserCreateSerializer(serializers.Serializer):

@@ -1,9 +1,8 @@
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
-from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.models import User
+from rest_framework.decorators import api_view, permission_classes
 
 from users.serializers import UserCreateSerializer, UserUpdateSerializer, UserRetrieveSerializer, UserDestroySerializer
 
@@ -35,3 +34,9 @@ class UserMeAPIView(RetrieveUpdateDestroyAPIView):
 class UserRegisterAPIView(CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = UserCreateSerializer
+
+@api_view(['GET'])
+def MediaAuthAPIView(request):
+    if request.user.is_authenticated:
+        return Response({"authenticated": True}, status=200)
+    return Response(status=401)
