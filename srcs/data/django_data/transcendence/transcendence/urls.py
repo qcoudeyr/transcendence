@@ -18,12 +18,15 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from users.views import UserMeAPIView, UserRegisterAPIView
+from users.views import UserMeAPIView, UserRegisterAPIView, MediaAuthAPIView
+from profiles.views import ProfileMeAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/user/me/', UserMeAPIView.as_view(), name='user-me'),
-    path('api/user/register/', UserRegisterAPIView.as_view(), name='user-register'),
-    path('api/user/login/', TokenObtainPairView.as_view(), name='user-login'),
+    path('api/media/auth/', MediaAuthAPIView, name='media-auth'),
     path('api/tokenRefresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    path('api/user/login/', TokenObtainPairView.as_view(), name='user-login'),
+    path('api/user/register/', UserRegisterAPIView.as_view(), name='user-register'),
+    path('api/user/me/', UserMeAPIView.as_view(), name='user-me'),
+    path('api/profile/me/', ProfileMeAPIView.as_view(), name='profile-me'),
 ]

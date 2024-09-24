@@ -95,6 +95,7 @@ services:
     volumes:
       - ./requirements/nginx/nginx.conf:/etc/nginx/transcendence.conf
       - ./requirements/nginx/default.conf:/etc/nginx/conf.d/transcendence.conf
+      - ./requirements/nginx/proxy_params:/etc/nginx/proxy_params
       - ./data/website_data/:/app/static/
       - ./data/media_data/:/app/media/
     networks:

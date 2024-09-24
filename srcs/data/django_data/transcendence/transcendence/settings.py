@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import environ
+import sys
 
 env = environ.Env(
     DEBUG=(bool, False)
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'users',
+    'profiles',
 ]
 
 MIDDLEWARE = [
@@ -151,11 +153,36 @@ MEDIA_URL = '/media/'
 
 # Default profile values
 DEFAULT_NAME = 'Recruit'
-DEFAULT_AVATAR = 'avatars/sen.png'
+DEFAULT_AVATAR = 'default/avatar/sen.png'
 DEFAULT_BIOGRAPHY = 'A l\'huile !'
 
 # Simple JWT settings
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1)
+}
+
+# Logs
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django.log',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }
