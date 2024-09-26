@@ -41,8 +41,11 @@ create-data-dirs:
 
 build-and-up:
 	@cd ./srcs && docker compose up -d
+	docker exec nginx_modsecurity_crs rm /etc/nginx/conf.d/modsecurity.conf || true
 
 fclean:
+	@echo "Removing migrations..."
+	docker exec django remove_migrations.sh || true
 	@echo "Stopping and removing all Docker containers..."
 	@cd ./srcs && docker-compose down || true
 	docker stop $$(docker ps -q) || true
