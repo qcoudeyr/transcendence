@@ -25,11 +25,11 @@ jobs:
           --health-retries=5
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4.1.7
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5.2.0
       with:
-        python-version: 3.9
+        python-version: 3.12
     - name: Set environment variables
       run: |
         echo "POSTGRES_DB=test_db" >> $GITHUB_ENV
@@ -67,6 +67,7 @@ jobs:
        mkdir -p /home/runner/work/transcendence/transcendence/srcs/data/postgres_data
        mkdir -p /home/runner/work/transcendence/transcendence/srcs/data/es_data
        mkdir -p /home/runner/work/transcendence/transcendence/srcs/data/portainer_data
+       mkdir -p /home/runner/work/transcendence/transcendence/srcs/data/redis_data
     - name: Install Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/download/$(curl --silent https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -79,7 +80,7 @@ jobs:
       run: docker-compose -f srcs/docker-compose.yml up -d
     - name: Run Django tests
       run: |
-        cd srcs/data/django_data
+        cd srcs/data/django_data/transcendence
         python manage.py test
     - name: Run Selenium tests
       run: |

@@ -33,11 +33,10 @@ services:
     container_name: django
     build:
       context: ./requirements/django
-    command: uvicorn transcendence.asgi:application --host 0.0.0.0 --port 8000
     restart: always
     volumes:
       - ./data/django_data:/app
-      - ./data/website_data:/app/transcendence/static
+      - ./data/media_data:/app/media
     ports:
       - "8000:8000"
       - "8001:8001"
@@ -47,17 +46,42 @@ services:
       transcendence:
         ipv4_address: 10.0.10.10
     environment:
-      - DJANGO_SETTINGS_MODULE=transcendence.settings
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_USER=${DATABASE_USER}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
+      - DJANGO_SUPERUSER_NAME=${DJANGO_SUPERUSER_NAME}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
     logging:
       driver: "json-file"
       options:
         max-size: "200k"
         max-file: "10"
+
+######################
+########NODEJS########
+######################
+  nodejs:
+    build:
+      context: ./requirements/nodejs
+    container_name: nodejs
+    volumes:
+      - ./data/website_data:/app/static
+    ports:
+      - "3000:3000"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.60
+    depends_on:
+      - django
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
 
 #####################
 ########NGINX########
@@ -71,7 +95,9 @@ services:
     volumes:
       - ./requirements/nginx/nginx.conf:/etc/nginx/transcendence.conf
       - ./requirements/nginx/default.conf:/etc/nginx/conf.d/transcendence.conf
+      - ./requirements/nginx/proxy_params:/etc/nginx/proxy_params
       - ./data/website_data/:/app/static/
+      - ./data/media_data/:/app/media/
     networks:
       transcendence:
         ipv4_address: 10.0.10.2
@@ -83,6 +109,27 @@ services:
         max-size: "200k"
         max-file: "10"
 
+#####################
+########REDIS########
+#####################
+  redis:
+    image: redis:7.4.0-alpine3.20
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.70
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+
+
 #############################
 ########ELASTICSEARCH########
 #############################
@@ -91,7 +138,7 @@ services:
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
       - xpack.security.enabled=false
       - ELASTIC_USERNAME=${ELASTIC_USERNAME}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
@@ -116,6 +163,7 @@ services:
     image: docker.elastic.co/logstash/logstash:7.10.1
     container_name: logstash
     environment:
+      - "LS_JAVA_OPTS=-Xms128m -Xmx128m"
       - ELASTIC_USERNAME=${ELASTIC_USERNAME}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     volumes:
@@ -143,8 +191,8 @@ services:
     container_name: filebeat
     volumes:
       - ./requirements/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:rshared,ro
+      - /var/run/docker.sock:/var/run/docker.sock:rshared,ro
     networks:
       transcendence:
         ipv4_address: 10.0.10.50
@@ -299,6 +347,18 @@ volumes:
       type: "none"
       o: "bind"
       device: "./data/portainer_data/"
+  redis_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/redis_data/"
+  media_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/media_data/"
 
 ########################
 ########NETWORKS########

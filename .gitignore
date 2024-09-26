@@ -17,3 +17,4 @@ srcs/data/django_data/my_env/*
 **/__pycache__/
 **/.env.local
 db.sqlite3
+srcs/data/redis_data/*
