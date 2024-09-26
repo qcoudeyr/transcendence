@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function() {
     const sections = document.querySelectorAll('section');
     const links = document.querySelectorAll('nav a');
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set the volume to a lower level
     clickSound.volume = 0.2; // Adjust this value to your desired volume (0.2 is 20% of full volume)
 
+	
     function navigateToSection(sectionId) {
         sections.forEach(section => {
             if (section.id === sectionId) {
@@ -95,20 +97,30 @@ document.addEventListener('DOMContentLoaded', function() {
     playButton.addEventListener('click', function() {
         changePages('playing');
         clickSound.play(); // Play the click sound
+		location.reload(true);
     });
 
 
 			/// get to see how geoffrey wants it to work but its work also make a Logout Button							TODO
 		const connexionLink = document.querySelector('a[data-section="connexion"]');
 		const profileLink = document.querySelector('a[data-section="profile"]');
-	  
+	  	const playlink = document.querySelector('a[data-section="play"]');
+		const tournamentlink = document.querySelector('a[data-section="tournaments"]');
+		const statslink = document.querySelector('a[data-section="statistics"]');
+
 		function updateNavbar() {
 		  if (localStorage.getItem('accessToken')) {
 			connexionLink.style.display = 'none';
 			profileLink.style.display = 'inline-block';
+			playlink.style.display = 'inline-block';
+			tournamentlink.style.display = 'inline-block';
+			statslink.style.display = 'inline-block';
 		  } else {
 			connexionLink.style.display = 'inline-block';
 			profileLink.style.display = 'none';
+			playlink.style.display = 'none';
+			tournamentlink.style.display = 'none';
+			statslink.style.display = 'none';
 		  }
 		}
 	  

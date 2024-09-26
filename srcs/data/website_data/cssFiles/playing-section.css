@@ -1,145 +1,196 @@
 #splineContainer {
-  position: absolute; /* Can be removed if using flexbox centering */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
-
-.playing-section {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-
-#resizeButton {
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  background: #e230b8;
-  box-shadow: 0 0 5px #e230b8, 0 0 8px #e230b8;
-  line-height: 42px;
-  padding: 0;
-  border: none;
-  z-index: 2;
-  -webkit-transition: all 0.3s linear;
-  transition: all 0.3s linear;
-  color: #ff00a0;
-}
-
-#resizeButton:hover {
-  background-color: transparent;
-  color: #e230b8;
-  box-shadow: 0 5px 3px -3px #e230b8, 0 -5px 3px -3px #e230b8,
-      0 5px 3px -3px #e230b8, 0 -5px 3px -3px #e230b8;
-}
-
-#resizeButton:before,
-#resizeButton:after {
-  position: absolute;
-  content: "";
-  left: 0;
-  width: 100%;
-  height: 50%;
-  right: 0;
-  z-index: -1;
-  background: #e230b8;
-  box-shadow: 0 0 5px #e230b8;
-  transition: all 0.3s ease;
-}
-
-#resizeButton:before {
-  top: 0;
-}
-
-#resizeButton:after {
-  bottom: 0;
-}
-
-#resizeButton:hover:before,
-#resizeButton:hover:after {
-  height: 0;
-  background-color: #e230b8a4;
-}
-
-/* Scoreboard styling */
-
-.scoreboard {
-  position: absolute;
-  top: 25%;
-  left: 90%;
-  transform: translateX(-50%);
-  background-color: #111;
-  color: #fff;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 0 20px rgba(31, 29, 29, 0.7);
-  text-align: center;
-  border: 2px solid #ff00ff;
-  z-index: 1; /* Ensure scoreboard is visible above other elements */
-}
-
-h1 {
-  margin-bottom: 30px;
-  font-size: 2.5rem;
-  color: #ff00ff;
-  text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
-}
-
-.scores {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 30px;
-}
-
-.player {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-h2 {
-  font-size: 1.5rem;
-  color: #ff4c4c;
-  text-shadow: 0 0 5px #ff4c4c, 0 0 10px #ff4c4c;
-}
-
-.score {
-  font-size: 3.5rem;
-  margin: 10px 0;
-  width: 100px;
-  text-align: center;
-  background-color: #222;
-  border-radius: 10px;
-  padding: 15px;
-  color: #ff4c4c;
-  text-shadow: 0 0 10px #ff4c4c, 0 0 20px #ff4c4c, 0 0 30px #ff4c4c;
-  border: 2px solid #ff4c4c;
-}
-
-button {
-  background-color: #ff4c4c;
-  color: #fff;
-  border: none;
-  padding: 15px 25px;
-  border-radius: 10px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  text-shadow: 0 0 5px #fff, 0 0 10px #fff;
-  box-shadow: 0 0 5px #ff4c4c, 0 0 10px #ff4c4c, 0 0 15px #ff4c4c;
-}
-
-button:hover {
-  background-color: #ff6666;
-  transform: scale(1.05);
-  box-shadow: 0 0 10px #ff6666, 0 0 20px #ff6666, 0 0 30px #ff6666;
-}
-
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+  }
+  
+  .playing-section {
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  }
+  
+  #resizeButton {
+	position: fixed;
+	bottom: 10px;
+	left: 10px;
+	background: #e230b8;
+	box-shadow: 0 0 5px #e230b8, 0 0 8px #e230b8;
+	line-height: 42px;
+	padding: 0;
+	border: none;
+	z-index: 2;
+	-webkit-transition: all 0.3s linear;
+	transition: all 0.3s linear;
+	color: #ff00a0;
+  }
+  
+  #resizeButton:hover {
+	background-color: transparent;
+	color: #e230b8;
+	box-shadow: 0 5px 3px -3px #e230b8, 0 -5px 3px -3px #e230b8,
+		0 5px 3px -3px #e230b8, 0 -5px 3px -3px #e230b8;
+  }
+  
+  #resizeButton:before,
+  #resizeButton:after {
+	position: absolute;
+	content: "";
+	left: 0;
+	width: 100%;
+	height: 50%;
+	right: 0;
+	z-index: -1;
+	background: #e230b8;
+	box-shadow: 0 0 5px #e230b8;
+	transition: all 0.3s ease;
+  }
+  
+  #resizeButton:before {
+	top: 0;
+  }
+  
+  #resizeButton:after {
+	bottom: 0;
+  }
+  
+  #resizeButton:hover:before,
+  #resizeButton:hover:after {
+	height: 0;
+	background-color: #e230b8a4;
+  }
+  
+  /* Scoreboard styling */
+  
+  .scoreboard {
+	position: absolute;
+	top: 25%;
+	left: 90%;
+	transform: translateX(-50%);
+	background-color: #111;
+	color: #fff;
+	padding: 30px;
+	border-radius: 15px;
+	box-shadow: 0 0 20px rgba(31, 29, 29, 0.7);
+	text-align: center;
+	border: 2px solid #ff00ff;
+	z-index: 1;
+  }
+  
+  h1 {
+	margin-bottom: 30px;
+	font-size: 2.5rem;
+	color: #ff00ff;
+	text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+  }
+  
+  .scores {
+	display: flex;
+	justify-content: space-around;
+	margin-bottom: 30px;
+  }
+  
+  .player {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+  }
+  
+  h2 {
+	font-size: 1.5rem;
+	color: #ff4c4c;
+	text-shadow: 0 0 5px #ff4c4c, 0 0 10px #ff4c4c;
+  }
+  
+  .score {
+	font-size: 3.5rem;
+	margin: 10px 0;
+	width: 100px;
+	text-align: center;
+	background-color: #222;
+	border-radius: 10px;
+	padding: 15px;
+	color: #ff4c4c;
+	text-shadow: 0 0 10px #ff4c4c, 0 0 20px #ff4c4c, 0 0 30px #ff4c4c;
+	border: 2px solid #ff4c4c;
+  }
+  
+  button {
+	background-color: #ff4c4c;
+	color: #fff;
+	border: none;
+	padding: 15px 25px;
+	border-radius: 10px;
+	font-size: 1rem;
+	cursor: pointer;
+	transition: background-color 0.3s, transform 0.2s;
+	text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+	box-shadow: 0 0 5px #ff4c4c, 0 0 10px #ff4c4c, 0 0 15px #ff4c4c;
+  }
+  
+  button:hover {
+	background-color: #ff6666;
+	transform: scale(1.05);
+	box-shadow: 0 0 10px #ff6666, 0 0 20px #ff6666, 0 0 30px #ff6666;
+  }
+  
+  #unloadButton {
+	position: fixed;
+	top: 10px;
+	right: 10px;
+	background: #e230b8;
+	box-shadow: 0 0 5px #e230b8, 0 0 8px #e230b8;
+	line-height: 42px;
+	padding: 0 20px;
+	border: none;
+	z-index: 1000;
+	transition: all 0.3s linear;
+	color: #fff;
+	font-size: 1rem;
+	cursor: pointer;
+	border-radius: 10px;
+	text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+  }
+  
+  #unloadButton:hover {
+	background-color: transparent;
+	color: #e230b8;
+	box-shadow: 0 5px 3px -3px #e230b8, 0 -5px 3px -3px #e230b8,
+		0 5px 3px -3px #e230b8, 0 -5px 3px -3px #e230b8;
+  }
+  
+  #unloadButton:before,
+  #unloadButton:after {
+	position: absolute;
+	content: "";
+	left: 0;
+	width: 100%;
+	height: 50%;
+	right: 0;
+	z-index: -1;
+	background: #e230b8;
+	box-shadow: 0 0 5px #e230b8;
+	transition: all 0.3s ease;
+  }
+  
+  #unloadButton:before {
+	top: 0;
+  }
+  
+  #unloadButton:after {
+	bottom: 0;
+  }
+  
+  #unloadButton:hover:before,
+  #unloadButton:hover:after {
+	height: 0;
+	background-color: #e230b8a4;
+  }
