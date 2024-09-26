@@ -1,12 +1,8 @@
 #!/bin/bash
 
-apps=(
-    users
-    profiles
-)
-for i in "${apps[@]}"; do
-    rm -rf "$i"/migrations
-done
+remove_migrations.sh
+
+IFS=', ' read -r -a apps <<< "$APPS"
 for i in "${apps[@]}"; do
     python manage.py makemigrations "$i"
 done
