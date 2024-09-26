@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	<link rel="icon" type="image/png" href="/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transcendance</title>
@@ -13,25 +14,26 @@
 	<link rel="stylesheet" type="text/css" href="cssFiles/playerProfile.css">
 	<link rel="stylesheet" type="text/css" href="cssFiles/cyber-buttons.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P|VT323|Nova+Square&display=swap">
+	<script type="importmap">
+		{
+		  "imports": {
+			"three": "https://unpkg.com/three@0.149.0/build/three.module.js",
+			"three/examples/jsm/controls/OrbitControls.js": "https://unpkg.com/three@0.149.0/examples/jsm/controls/OrbitControls.js",
+			"three/examples/jsm/loaders/GLTFLoader.js": "https://unpkg.com/three@0.149.0/examples/jsm/loaders/GLTFLoader.js"
+		  }
+		}
+		</script>
 	<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
 </head>
 <body>
     <div id="preloader">
         <div id="loader"></div>
     </div>
-	<script type="importmap">
-		{
-		  "imports": {
-			"three": "https://unpkg.com/three@0.149.0/build/three.module.js",
-			"three/": "https://unpkg.com/three@0.149.0/"
-		  }
-		}
-	  </script>
     <nav>
         <a href="#home" data-section="home" class="neonText">Home</a>
         <a href="#play" data-section="play" class="neonText">QuickPlay</a>
         <a href="#tournaments" data-section="tournaments" class="neonText">Tournaments</a>
-        <a href="#statistiques" data-section="statistiques" class="neonText">Statistiques</a>
+        <a href="#statistiques" data-section="statistics" class="neonText">Statistics</a>
         <a href="#connexion" data-section="connexion" class="neonText">Connexion</a>
 		<a href="#profile" data-section="profile" class="neonText">Profile</a>
     </nav>
@@ -58,7 +60,7 @@
                 <source src="sounds/switch-sound.mp3" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
-            <div class="switch-container">
+            <!-- <div class="switch-container">
                 <div class="checkbox-wrapper-63">
                     <label class="switch">
                         <input type="checkbox" id="switch1" checked onclick="toggleSwitch(1)">
@@ -71,22 +73,23 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-            </div>
+            </div> -->
             <button id="playButton" class="button-82-pushable" role="button">
                 <span class="button-82-shadow"></span>
                 <span class="button-82-edge"></span>
                 <span class="button-82-front text neonText">PLAY</span>
             </button>
-
+<!-- 
             <audio id="clickSound">
                 <source src="sounds/arcade-click-sound.wav" type="audio/mpeg">
                 Your browser does not support the audio element.
-            </audio>
+            </audio> -->
         </div>
     </section>
 
     <section id="playing" class="playing-section">
         <button id="resizeButton">Big Screen</button>
+		<button id="unloadButton">Leave</button>
         <div class="scoreboard">
                 <h1>Scoreboard</h1>
                 <div class="scores">
@@ -131,7 +134,7 @@
         </div>
 		<img src="../images/trophy.png" class="trophy_image">
     </section>
-    <section id="statistiques" class="statistiques-section">
+    <section id="statistics" class="statistiques-section">
         <div class="stats_container">
             <input type="radio" name="slider" id="item-1" checked>
             <input type="radio" name="slider" id="item-2">
@@ -177,10 +180,10 @@
         <div class="container">
             <div class="login-form fade-in">
                 <h2 class="darkerNeonText">Login</h2>
-                <form>
-                    <input type="text" placeholder="Username" required>
-                    <input type="password" placeholder="Password" required>
-                    <button type="submit">Login</button>
+                <form id="LoginForm">
+                    <input id="LoginFormUsername" type="text" placeholder="Username" required>
+                    <input id="LoginFormPassword" type="password" placeholder="Password" required>
+                    <button type="submit" id="LoginButton">Login</button>
                     <div class="social-buttons">
                         <button class="google-btn">
                             <img src="images/7123025_logo_google_g_icon.png" alt="Google Logo" class="btn-logo">
@@ -189,6 +192,7 @@
                             <img src="images/42icon.png" alt="42 Logo" class="btn-logo">
                         </button>
                     </div>
+					<div id="error-message" style="color: red; display: none;"></div>
                 </form>
                 <p class="darkerNeonText">Don't have an account? <a href="#" onclick="switchForm(event)">Register</a></p>
             </div>
@@ -215,7 +219,7 @@
     </section>
 	<section id="profile" class="profile-section">
 		<div class="profile-container">
-				<h1 class="darkerNeonText">User Profile</h1>
+			<h1 class="darkerNeonText">User Profile</h1>
 			<div class="profile-content">
 				<div class="profile-picture">
 					<img id="profileImage" src="./images/42icon.png" alt="Profile Image">
@@ -239,20 +243,23 @@
 						<span id="userEmail">_EMAIL_</span>
 					</div>
 				</div>
+				<div class="button-group">
 					<button class="cybr-btn">
 						Delete Account<span aria-hidden>_</span>
 						<span aria-hidden class="cybr-btn__glitch">Delete</span>
 						<span aria-hidden class="cybr-btn__tag">Not reversible</span>
-					  </button>
+					</button>
+					<button id="LogoutButton">Logout</button>
+				</div>
 			</div>
 		</div>
-		</section>
+	</section>
     <script src="JsFiles/script.js"></script>
     <script src="JsFiles/single_page.js"></script>
 	<script src="JsFiles/login.js"></script>
     <script type="module" src="JsFiles/3d.js"></script>
 	<script type="module" src="JsFiles/3d_remote.js"></script>
-	<!-- <script type="module" src="JsFiles/3d_robot.js"></script> -->
+	<script type="module" src="JsFiles/3d_robot.js"></script>
 	<!-- <script type="module" src="JsFiles/test.js"></script> -->
 </body>
 </html>

@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 // Get the remote container element
 const remoteContainer = document.getElementById('remoteContainer');
@@ -9,7 +8,7 @@ const containerHeight = remoteContainer.clientHeight;
 
 // Orthographic camera for remote control
 const aspectRatio = containerWidth / containerHeight;
-const cameraSize = 50; // Adjust this value based on how zoomed in or out you want the view to be
+const cameraSize = 50;
 
 const remoteCamera = new THREE.OrthographicCamera(
   (-cameraSize * aspectRatio) / 2,
@@ -25,10 +24,13 @@ remoteCamera.lookAt(new THREE.Vector3(0, 0, 0));
 // Scene for remote control
 const remoteScene = new THREE.Scene();
 
-// Store initial rotation state
-const initialRotation = { x: 0, y: 0 };
+// Raycaster and mouse vector for hover detection
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
+const initialRotation = { x: 0, y: 0 };
 let remoteController; // Declare the remoteController variable
+let isHovered = false; // Variable to track hover state
 
 // Load the GLTF model
 const gltfLoader = new GLTFLoader();
@@ -49,48 +51,34 @@ gltfLoader.load(
 );
 
 // Set up the lighting
-// Ambient light for general illumination
-const ambientLight = new THREE.AmbientLight(0x404040, 8); // Soft white light with some intensity
+const ambientLight = new THREE.AmbientLight(0x404040, 8);
 remoteScene.add(ambientLight);
 
-// Directional light to simulate a main light source
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(10, 20, 10); // Position the light above and in front of the remote
-directionalLight.castShadow = true; // Enable shadows
-directionalLight.shadow.mapSize.width = 1024; // Shadow map resolution
-directionalLight.shadow.mapSize.height = 1024;
-directionalLight.shadow.camera.near = 0.5;
-directionalLight.shadow.camera.far = 500;
+directionalLight.position.set(10, 20, 10);
+directionalLight.castShadow = true;
 remoteScene.add(directionalLight);
 
-// Optionally, add a point light to add a nice highlight
 const pointLight = new THREE.PointLight(0xffffff, 0.6);
-pointLight.position.set(0, 20, 20); // Position the point light to shine directly on the remote
+pointLight.position.set(0, 20, 20);
 remoteScene.add(pointLight);
 
 // Set up the renderer for the remote control
 const remoteRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-remoteRenderer.setClearColor(0xFFFFFF, 0); // Transparent background
+remoteRenderer.setClearColor(0xFFFFFF, 0);
 
-// Attach the renderer to the remote container
 if (remoteContainer) {
   remoteRenderer.setSize(containerWidth, containerHeight);
   remoteContainer.appendChild(remoteRenderer.domElement);
 }
 
-// Scene settings for transparency
 remoteRenderer.shadowMap.enabled = true;
 remoteRenderer.shadowMap.type = THREE.PCFShadowMap;
 
-// Variable to track if cursor is inside the container
-let isCursorInside = false;
-
-// Function to handle window resize
 function onWindowResizeRemote() {
   const newWidth = remoteContainer.clientWidth;
   const newHeight = remoteContainer.clientHeight;
 
-  // Update camera to maintain correct aspect ratio
   const newAspectRatio = newWidth / newHeight;
   remoteCamera.left = (-cameraSize * newAspectRatio) / 2;
   remoteCamera.right = (cameraSize * newAspectRatio) / 2;
@@ -98,8 +86,38 @@ function onWindowResizeRemote() {
   remoteCamera.bottom = -cameraSize / 2;
   remoteCamera.updateProjectionMatrix();
 
-  // Update renderer size
   remoteRenderer.setSize(newWidth, newHeight);
+}
+
+// Function to handle mouse movement for hover effect and rotation
+function onMouseMove(event) {
+  const rect = remoteContainer.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+  // Update the raycaster with the mouse coordinates
+  raycaster.setFromCamera(mouse, remoteCamera);
+
+  // Check if the ray intersects with the remoteController
+  if (remoteController) {
+    const intersects = raycaster.intersectObject(remoteController, true);
+
+    if (intersects.length > 0) {
+      // Hovered, update rotation and scale
+      updateRemoteControllerRotation(event);
+      if (!isHovered) {
+        isHovered = true;
+        animateScaleRemoteController(1.2); // Increase size
+      }
+    } else {
+      // Not hovered, reset rotation and scale
+      animateRotationToInitial();
+      if (isHovered) {
+        isHovered = false;
+        animateScaleRemoteController(1.0); // Return to original size
+      }
+    }
+  }
 }
 
 // Function to update the rotation of the remote controller based on mouse movement
@@ -122,6 +140,32 @@ function updateRemoteControllerRotation(event) {
   remoteController.rotation.x += (targetRotationX - remoteController.rotation.x) * smoothingFactor;
 }
 
+// Function to animate the scaling of the remote controller
+function animateScaleRemoteController(targetScale) {
+  if (!remoteController) return;
+
+  // Animate scaling using requestAnimationFrame
+  const animationDuration = 300; // Duration in milliseconds
+  const startScale = remoteController.scale.x;
+  const targetScaleValue = 10 * targetScale;
+  const startTime = performance.now();
+
+  function animateScale(time) {
+    const elapsedTime = time - startTime;
+    const progress = Math.min(elapsedTime / animationDuration, 1);
+
+    // Interpolate the scale
+    const currentScale = THREE.MathUtils.lerp(startScale, targetScaleValue, progress);
+    remoteController.scale.set(currentScale, currentScale, currentScale);
+
+    if (progress < 1) {
+      requestAnimationFrame(animateScale);
+    }
+  }
+
+  requestAnimationFrame(animateScale);
+}
+
 // Function to smoothly animate rotation back to the initial state
 function animateRotationToInitial() {
   if (!remoteController) return;
@@ -138,19 +182,7 @@ function animateRotationToInitial() {
 }
 
 // Event listener for mouse movement
-window.addEventListener('mousemove', updateRemoteControllerRotation);
-
-// Event listeners for mouse enter and leave
-remoteContainer.addEventListener('mouseenter', () => {
-  isCursorInside = true;
-});
-
-remoteContainer.addEventListener('mouseleave', () => {
-  isCursorInside = false;
-
-  // Start the smooth rotation animation when the cursor leaves
-  requestAnimationFrame(animateRotationToInitial);
-});
+window.addEventListener('mousemove', onMouseMove);
 
 // Event listener for window resize
 window.addEventListener('resize', onWindowResizeRemote);

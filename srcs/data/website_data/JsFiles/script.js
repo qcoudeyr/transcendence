@@ -5,10 +5,10 @@ var playButton = document.getElementById("playButton");
 var clickSound = document.getElementById("clickSound");
 
 // Add click event listener to the button
-playButton.addEventListener("click", function() {
-    // Play the click sound
-    clickSound.play();
-});
+// playButton.addEventListener("click", function() {
+//     // Play the click sound
+//     clickSound.play();
+// });
 
 function toggleSwitch(activeSwitch) {
 	var switch1 = document.getElementById("switch1");
