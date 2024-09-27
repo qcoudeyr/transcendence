@@ -185,7 +185,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		.then(data => {
 			if (data) { // Only proceed if there's data (successful response)
 				console.log("Register Succesful");
-			localStorage.setItem('Username')
 				location.reload(true);
 				changePages('home');
 			}
