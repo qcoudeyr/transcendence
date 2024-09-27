@@ -142,6 +142,78 @@ document.addEventListener('DOMContentLoaded', function() {
 			localStorage.removeItem('accessToken');
 			location.reload(true);
 		});
+
+
+
+	//register section with API
+
+	RegisterForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		const RegisterUsername = document.getElementById('RegisterUsername').value;
+		const RegisterEmail = document.getElementById('RegisterEmail').value;
+		const RegisterPassword = document.getElementById('RegisterPassword').value;
+		const RegisterConfirmPassword = document.getElementById('RegisterConfirmPassword').value;
+
+		const apiUrl = '/api/user/register/';
+
+		const postData = {
+			username: RegisterUsername,
+			email: RegisterEmail,
+			password: RegisterPassword,
+			password_confirmation: RegisterConfirmPassword
+		};
+
+
+		fetch(apiUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(postData)
+		})
+		.then(response => {
+			if (response.ok) {
+				return response.json();
+			} else if (response.status === 400) {
+				displayErrorRegister('Invalid credentials.');
+				return;
+			} else {
+				throw new Error('Unexpected error occurred');
+			}
+		})
+		.then(data => {
+			if (data) { // Only proceed if there's data (successful response)
+				console.log("Register Succesful");
+			localStorage.setItem('Username')
+				location.reload(true);
+				changePages('home');
+			}
+		})
+		.catch(error => {
+			// Log unexpected errors only
+			if (error.message !== '400 Error: Unauthorized') {
+				console.error('Error during the request:', error);
+			}
+		});
+
+	});
+
+	function displayErrorRegister(message) {
+		const errorMessageDiv = document.getElementById('error-message-register');
+		errorMessageDiv.textContent = message;
+		errorMessageDiv.style.display = 'block';
+	}
+
+
+
+
+
+
+
+
+
+
 	//LOGIN SECTION WITH API
 
 	LoginForm.addEventListener('submit', (event) => {
@@ -179,14 +251,35 @@ document.addEventListener('DOMContentLoaded', function() {
 		})
 		.then(data => {
 			if (data) { // Only proceed if there's data (successful response)
-				console.log('Response:', data);
 				// Store tokens in localStorage
 				localStorage.setItem('accessToken', data.access);
 				localStorage.setItem('refreshToken', data.refresh);
-				console.log("Tokens logged in localStorage: ", localStorage.getItem('accessToken'))
 				location.reload(true);
-
 				changePages('home');
+
+				// GET USERNAME AND EMAIL
+						fetch('/api/user/me/', {
+							method: 'GET',
+							headers: {
+								'Content-Type': 'application/json',
+								'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+								// Any headers you want to include in the request
+							}
+							
+						})
+						.then(response => {
+							// Check if the response is okay (status in the range 200-299)
+							if (!response.ok) {
+								throw new Error('Network response was not ok ' + response.statusText);
+							}
+							return response.json(); // Parse the JSON from the response
+						})
+						.then(data => {
+							document.getElementById('_name_test_').textContent = data.username;
+						})
+						.catch(error => {
+							console.error('There was a problem with the fetch operation:', error);
+						});
 				// Redirect or perform other actions
 			}
 		})

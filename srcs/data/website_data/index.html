@@ -35,7 +35,7 @@
         <a href="#tournaments" data-section="tournaments" class="neonText">Tournaments</a>
         <a href="#statistiques" data-section="statistics" class="neonText">Statistics</a>
         <a href="#connexion" data-section="connexion" class="neonText">Connexion</a>
-		<a href="#profile" data-section="profile" class="neonText">Profile</a>
+		<a href="#profile" data-section="profile" class="neonText">Account</a>
     </nav>
     <audio id="navsound" src="sounds/interface-1-126517.mp3" volume="0.1"></audio>
 
@@ -198,12 +198,12 @@
             </div>
             <div class="register-form fade-out">
                 <h2 class="darkerNeonText">Register</h2>
-                <form>
-                    <input type="text" placeholder="Username" required>
-                    <input type="email" placeholder="Email" required>
-                    <input type="password" placeholder="Password" required>
-                    <input type="password" placeholder="Confirm Password" required>
-                    <button type="submit">Register</button>
+                <form id="RegisterForm">
+                    <input id="RegisterUsername" type="text" placeholder="Username" required>
+                    <input id="RegisterEmail" type="email" placeholder="Email" required>
+                    <input id="RegisterPassword" type="password" placeholder="Password" required>
+                    <input id="RegisterConfirmPassword" type="password" placeholder="Confirm Password" required>
+                    <button type="submit" id="RegisterButton">Register</button>
                     <div class="social-buttons">
                         <button class="google-btn">
                             <img src="images/7123025_logo_google_g_icon.png" alt="Google Logo" class="btn-logo">
@@ -212,19 +212,21 @@
                             <img src="images/42icon.png" alt="42 Logo" class="btn-logo">
                         </button>
                     </div>
+					<div id="error-message-register" style="color: red; display: none;"></div>
                 </form>
                 <p class="darkerNeonText">Already have a account? <a href="#" onclick="switchForm(event)">Login</a></p>
             </div>
         </div>
     </section>
 	<section id="profile" class="profile-section">
+		<!-- display form -->
 		<div class="profile-container">
 			<div class="profile-form fade-in">
 				<h2 class="darkerNeonText">Profile</h2>
 				<div class="profile-picture">
 					<img id="profileImage" src="./images/42icon.png" alt="Profile Image">
 				</div>
-				<h2>_NAME_</h2>
+				<h2 id="_name_test_">_NAME_</h2>
                 <h3>About:</h3>
                 <p>If you don't know who you truly are, you'll never know what you really want.</p>
 				<button onclick="switchFormProfile(event)" class="cybr-btn pink">
@@ -234,26 +236,45 @@
 				</button>
 				<button id="LogoutButton">Logout</button>
 			</div>
+
+			<!-- edit form -->
 			<div class="edit-form fade-out">
-				<h2 class="darkerNeonText">Edit Profile</h2>
+				<div class="form-container">
+				<!-- PROFIL EDIT FORM -->
+					<div class="edit-profile-form-text fade-out">
+						<h2 class="neonTextButton" onclick="switchFormProfileEdit(event)">Edit User</h2>
 				<div class="upload-area" id="uploadArea">
 					<p>Drag & Drop an Image Here or Click to Upload</p>
 					<input type="file" id="fileInput" accept="image/*" hidden />
 				</div>
 				<form>
 					<input type="text" placeholder="Name" required>
-					<input type="tel" placeholder="Phone Number" required>
 					<input type="email" placeholder="Email" required>
-					<textarea placeholder="About" required></textarea> <!-- New About input -->
+					<textarea placeholder="About" required></textarea>
 					<button type="submit">Save Changes</button>
 				</form>
-				<button class="cybr-btn">
-					Delete Account<span aria-hidden>_</span>
-					<span aria-hidden class="cybr-btn__glitch">Delete</span>
-					<span aria-hidden class="cybr-btn__tag">Not reversible</span>
-				</button>
 				<p class="darkerNeonText">Finished? <a href="#" onclick="switchFormProfile(event)">Return to profile</a></p>
+					</div>
+
+					<!-- USER EDIT FORM -->
+					<div class="edit-user-form-text fade-in">
+						<h2 class="neonTextButton" onclick="switchFormProfileEdit(event)">Edit Profile</h2>
+						<form>
+							<input type="text" placeholder="Username" required>
+							<input type="email" placeholder="Email" required>
+							<input type="password" placeholder="Password" required>
+							<button type="submit">Save Changes</button>
+						</form>
+						<button class="cybr-btn">
+							Delete Account<span aria-hidden>_</span>
+							<span aria-hidden class="cybr-btn__glitch">Delete</span>
+							<span aria-hidden class="cybr-btn__tag">Not reversible</span>
+						</button>
+						<p class="darkerNeonText">Finished? <a href="#" onclick="switchFormProfile(event)">Return to profile</a></p>
+					</div>
+					</div>
 			</div>
+
 		</div>
 	</section>
 	<script src="JsFiles/drag&drop.js"></script>
