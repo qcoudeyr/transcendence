@@ -41,7 +41,7 @@ create-data-dirs:
 
 build-and-up:
 	@cd ./srcs && docker compose up -d
-	docker exec nginx_modsecurity_crs rm /etc/nginx/conf.d/modsecurity.conf || true
+	sleep 2 && docker exec nginx_modsecurity_crs rm /etc/nginx/conf.d/modsecurity.conf && docker exec nginx_modsecurity_crs nginx -s reload || true
 
 fclean:
 	@echo "Removing migrations..."
