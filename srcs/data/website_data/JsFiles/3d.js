@@ -175,14 +175,8 @@ window.addEventListener('hashchange', checkHash);
 
 
 // Function to navigate to the home section
-function navigateToHome() {
-    // Hide all sections
-    document.querySelectorAll('.section').forEach(section => {
-        section.style.display = 'none';
-    });
-
-    // Show the home section
-    document.getElementById('home').style.display = 'block';
+function goHome() {
+    window.location.hash = 'home'; // Redirects to the home section
 }
 
 
@@ -221,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isSceneLoaded()) {
         unloadScene();
 		enableNavBar();
-		navigateToHome();
+		goHome();
 		console.log('scene unloaded and tried to nav');
 		
       } else {
