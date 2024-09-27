@@ -18,35 +18,10 @@ function initScene() {
   const teste = new THREE.AmbientLight(0x404040); // soft white light
   scene.add(teste);
 
-  const light = new THREE.RectAreaLight(0xff0000, 1, 100, 100);
-  light.position.set(680, 220, -200);
-  light.rotation.x = THREE.MathUtils.degToRad(0);
-  scene.add(light);
-
-  const light3 = new THREE.RectAreaLight(0xff00c8, 1, 100, 100);
-  light3.position.set(530, 220, -200);
-  light3.rotation.x = THREE.MathUtils.degToRad(0);
-  scene.add(light3);
-
-  const light4 = new THREE.RectAreaLight(0x0300be, 15, 100, 100);
-  light4.position.set(-200, 240, 200);
-  light4.rotation.x = THREE.MathUtils.degToRad(180);
-  scene.add(light4);
-
-  const light5 = new THREE.RectAreaLight(0xb300be, 10, 100, 100);
-  light5.position.set(0, 240, 200);
-  light5.rotation.x = THREE.MathUtils.degToRad(180);
-  scene.add(light5);
-
-  const WHITETEST = new THREE.RectAreaLight(0xFFFFFF, 10, 100, 100);
-  WHITETEST.position.set(200, 240, 200);
-  WHITETEST.rotation.x = THREE.MathUtils.degToRad(-90);
-  scene.add(WHITETEST);
-
-  const WHITETEST2 = new THREE.RectAreaLight(0xFFFFFF, 10, 100, 100);
-  WHITETEST2.position.set(-100, 240, 0);
-  WHITETEST2.rotation.x = THREE.MathUtils.degToRad(360);
-  scene.add(WHITETEST2);
+//   const light = new THREE.RectAreaLight(0xff0000, 1, 100, 100);
+//   light.position.set(680, 220, -200);
+//   light.rotation.x = THREE.MathUtils.degToRad(0);
+//   scene.add(light);
 
   const cubed = new THREE.BoxGeometry(50, 50, 50);
   const basic = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
@@ -199,6 +174,12 @@ window.addEventListener('load', checkHash);
 window.addEventListener('hashchange', checkHash);
 
 
+// Function to navigate to the home section
+function goHome() {
+    window.location.hash = 'home'; // Redirects to the home section
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM fully loaded and parsed');
   const button = document.getElementById('resizeButton');
@@ -228,15 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  
-  
   const unloadButton = document.getElementById('unloadButton');
   if (unloadButton) {
     unloadButton.addEventListener('click', () => {
       if (isSceneLoaded()) {
         unloadScene();
 		enableNavBar();
-		changePages('home');
+		goHome();
+		console.log('scene unloaded and tried to nav');
 		
       } else {
         console.log('Scene is not loaded');

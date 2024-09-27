@@ -4,7 +4,7 @@
     justify-content: center;
     align-items: center;
     height: 100vh; /* Full viewport height */
-    padding: 20px; /* Add padding for better spacing on small screens */
+    padding: 200px; /* Add padding for better spacing on small screens */
     position: relative; /* Ensure positioning context for forms */
 }
 
