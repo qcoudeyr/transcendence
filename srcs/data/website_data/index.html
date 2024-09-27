@@ -219,44 +219,48 @@
     </section>
 	<section id="profile" class="profile-section">
 		<div class="profile-container">
-			<h1 class="darkerNeonText">User Profile</h1>
-			<div class="profile-content">
+			<div class="profile-form fade-in">
+				<h2 class="darkerNeonText">Profile</h2>
 				<div class="profile-picture">
 					<img id="profileImage" src="./images/42icon.png" alt="Profile Image">
-					<button class="cybr-btn pink">
-						Edit Profile<span aria-hidden>_</span>
-						<span aria-hidden class="cybr-btn__glitch">Edit Profile</span>
-						<span aria-hidden class="cybr-btn__tag">R25</span>
-					</button>
 				</div>
-				<div class="profile-details">
-					<div class="detail">
-						<strong class="neon-text">Name:</strong>
-						<span id="userName">_NAME_</span>
-					</div>
-					<div class="detail">
-						<strong class="neon-text">Phone:</strong>
-						<span id="userPhone">_PHONENUMBER_</span>
-					</div>
-					<div class="detail">
-						<strong class="neon-text">Email:</strong>
-						<span id="userEmail">_EMAIL_</span>
-					</div>
+				<h2>_NAME_</h2>
+                <h3>About:</h3>
+                <p>If you don't know who you truly are, you'll never know what you really want.</p>
+				<button onclick="switchFormProfile(event)" class="cybr-btn pink">
+					Edit Profile<span aria-hidden>_</span>
+					<span aria-hidden class="cybr-btn__glitch">Edit Profile</span>
+					<span aria-hidden class="cybr-btn__tag">R25</span>
+				</button>
+				<button id="LogoutButton">Logout</button>
+			</div>
+			<div class="edit-form fade-out">
+				<h2 class="darkerNeonText">Edit Profile</h2>
+				<div class="upload-area" id="uploadArea">
+					<p>Drag & Drop an Image Here or Click to Upload</p>
+					<input type="file" id="fileInput" accept="image/*" hidden />
 				</div>
-				<div class="button-group">
-					<button class="cybr-btn">
-						Delete Account<span aria-hidden>_</span>
-						<span aria-hidden class="cybr-btn__glitch">Delete</span>
-						<span aria-hidden class="cybr-btn__tag">Not reversible</span>
-					</button>
-					<button id="LogoutButton">Logout</button>
-				</div>
+				<form>
+					<input type="text" placeholder="Name" required>
+					<input type="tel" placeholder="Phone Number" required>
+					<input type="email" placeholder="Email" required>
+					<textarea placeholder="About" required></textarea> <!-- New About input -->
+					<button type="submit">Save Changes</button>
+				</form>
+				<button class="cybr-btn">
+					Delete Account<span aria-hidden>_</span>
+					<span aria-hidden class="cybr-btn__glitch">Delete</span>
+					<span aria-hidden class="cybr-btn__tag">Not reversible</span>
+				</button>
+				<p class="darkerNeonText">Finished? <a href="#" onclick="switchFormProfile(event)">Return to profile</a></p>
 			</div>
 		</div>
 	</section>
+	<script src="JsFiles/drag&drop.js"></script>
     <script src="JsFiles/script.js"></script>
     <script src="JsFiles/single_page.js"></script>
 	<script src="JsFiles/login.js"></script>
+	<script src="JsFiles/profile.js"></script>
     <script type="module" src="JsFiles/3d.js"></script>
 	<script type="module" src="JsFiles/3d_remote.js"></script>
 	<script type="module" src="JsFiles/3d_robot.js"></script>

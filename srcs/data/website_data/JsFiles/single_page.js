@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		const LoginUsername = document.getElementById('LoginFormUsername').value;
 		const LoginPassword = document.getElementById('LoginFormPassword').value;
 		
-		const apiUrl = '/api/login/';
+		const apiUrl = '/api/user/login/';
 	
 		const postData = {
 			username: LoginUsername,

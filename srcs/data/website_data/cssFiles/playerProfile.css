@@ -1,61 +1,167 @@
-.profile-section {	
+.profile-container {
+	scale: 0.8;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh; /* Full viewport height */
-    padding: 20px; /* Add padding for better spacing on small screens */
-	background: #00ffff00;
-	margin-top: 5%;
+    padding: 2000px; /* Add padding for better spacing on small screens */
+    position: relative; /* Ensure positioning context for forms */
 }
 
-.profile-container {
-	scale: 0.8;
-	bottom: 50px;
-	position: relative;
+/* Form container styling */
+.profile-form, .edit-form {
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
-    background: #00ffff00;
-    width: 80%;
-    max-width: 800px; /* Ensure a maximum width for better visibility */
+    background: linear-gradient(135deg, #ff00ff00, #00ffff00);
+    transition: opacity 0.8s ease-in-out;
+    width: 100%;
+    max-width: 400px;
     text-align: center;
     display: flex;
-	justify-content: center;
-    align-items: center;
-	flex-direction: column;
-}
-
-.profile-content {
-    display: auto;
     flex-direction: column;
     align-items: center;
+    opacity: 0;
+    /* Removed absolute positioning */
+    position: absolute; /* Keep relative to stack forms */
+    margin: auto; /* Center within the container */
 }
 
-.profile-picture {
-    margin-bottom: 20px;
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="tel"],
+button {
+    width: 100%;
+    max-width: 280px;
+    padding: 12px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #00ffff00;
+    box-shadow: 0 0 15px rgba(255, 236, 255, 0.6);
+    color: rgb(0, 255, 255);
+    font-family: 'Press Start 2P', sans-serif;
+    transition: background 0.3s ease-in-out;
 }
+
+/* Responsive for mobile */
+@media (max-width: 600px) {
+    .profile-form, .edit-form {
+        padding: 20px;
+        max-width: 95%; /* Increased from 90% to 95% */
+    }
+
+    input[type="text"], input[type="password"], button {
+        max-width: 100%;
+    }
+}
+
+/* Specific styles for visibility */
+.fade-in {
+    opacity: 1;
+    z-index: 2;
+}
+
+.fade-out {
+    opacity: 0;
+    z-index: 1;
+}
+
+/* Rest of your CSS remains the same */
 
 .profile-picture img {
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     border: 3px solid #ff00a0;
     box-shadow: 0 0 15px #ff00a0;
-}
-
-.profile-details {
-    width: 100%;
     margin-bottom: 20px;
 }
 
-.detail {
-    margin-bottom: 10px;
+h2{
+    color: #ff77ff;
 }
 
-.detail strong {
-    color: #ff00a0;
+h3 {
+    color: #00ffff;
+	font-family: Arial, Helvetica, sans-serif;
 }
 
-.detail span {
-    color: #ffffff;
+p {
+    color: #00ffff;
+	font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+a {
+    color: #00ffff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #ff77ff;
+}
+
+
+.upload-area {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    border: 2px dashed rgba(255, 0, 255, 0.6);
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ff77ff;
+    text-align: center;
+    margin: 20px 0;
+    transition: background 0.3s ease-in-out, border 0.3s ease-in-out;
+}
+
+.upload-area:hover {
+    background: rgba(255, 0, 255, 0.1);
+    border: 2px solid #ff00ff;
+    cursor: pointer;
+}
+
+.upload-area p {
+    margin: 0;
+}
+
+.upload-area img {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    margin-top: 10px;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.6);
+}
+
+.uploaded-image {
+    max-width: 100px; /* Set maximum width */
+    max-height: 100px; /* Set maximum height */
+    width: auto; /* Allow the width to adjust automatically */
+    height: auto; /* Allow the height to adjust automatically */
+    border-radius: 10px; /* Optional: add some styling to the image */
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.5); /* Optional: add some shadow for effect */
+}
+
+textarea {
+    width: 100%;
+    max-width: 350px; /* Match max-width of other inputs */
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 10px;
+    background: #00ffff00; /* Same background as other inputs */
+    box-shadow: 0 0 15px rgba(255, 236, 255, 0.6); /* Same shadow effect */
+    color: rgb(0, 255, 255);
+    font-family: 'Press Start 2P', sans-serif;
+    transition: background 0.3s ease-in-out;
+    resize: none; /* Prevent resizing of the textarea */
+    min-height: 80px; /* Set a minimum height for the textarea */
+}
+
+/* Focus effect for textarea */
+textarea:focus {
+    outline: none;
+    background: rgba(255, 0, 255, 0.1);
 }
