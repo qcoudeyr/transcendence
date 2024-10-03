@@ -44,7 +44,6 @@ export function setupLogin() {
 			console.log('we are here idk why it reloads');
 			localStorage.setItem("accessToken", data.access);
 			localStorage.setItem("refreshToken", data.refresh);
-			getMailAndUsername();
 		  	location.reload(true);
 			window.location.hash = "#home";
 		})

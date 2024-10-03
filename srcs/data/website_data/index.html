@@ -265,11 +265,20 @@
 							<input type="password" placeholder="Password" required>
 							<button type="submit">Save Changes</button>
 						</form>
-						<button class="cybr-btn">
+						<button id="deleteAccountBtn" class="cybr-btn">
 							Delete Account<span aria-hidden>_</span>
 							<span aria-hidden class="cybr-btn__glitch">Delete</span>
 							<span aria-hidden class="cybr-btn__tag">Not reversible</span>
 						</button>
+						<div id="deleteAccountModal" class="modal" style="display: none;">
+							<div class="modal-content">
+								<span id="closeModal" class="close">&times;</span>
+								<h3>Delete Account</h3>
+								<p>Enter your password to confirm:</p>
+								<input type="password" id="passwordInput" placeholder="Enter password">
+								<button id="confirmDelete" onclick="deleteAccount()">Confirm Delete</button>
+							</div>
+						</div>
 						<p class="darkerNeonText">Finished? <a href="#" onclick="switchFormProfile(event)">Return to profile</a></p>
 					</div>
 					</div>
@@ -278,6 +287,7 @@
 		</div>
 	</section>
 	<script type="module" src="JsFiles/single_page.js"></script>
+	<script src="JsFiles/Modules/API/deleteAccount.js"> </script>
 	<script src="JsFiles/Pages/drag&drop.js"></script>
 	<script src="JsFiles/Pages/login.js"></script>
 	<script src="JsFiles/Pages/profile.js"></script>
