@@ -1,3 +1,6 @@
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     // Get all nav links and sections
     const navLinks = document.querySelectorAll('.profile_nav-link');
