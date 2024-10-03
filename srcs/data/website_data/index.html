@@ -79,7 +79,7 @@
                 <span class="button-82-edge"></span>
                 <span class="button-82-front text neonText">PLAY</span>
             </button>
-<!-- 
+<!--
             <audio id="clickSound">
                 <source src="sounds/arcade-click-sound.wav" type="audio/mpeg">
                 Your browser does not support the audio element.
@@ -226,7 +226,7 @@
 				<div class="profile-picture">
 					<img id="profileImage" src="./images/42icon.png" alt="Profile Image">
 				</div>
-				<h2 id="_name_test_">_NAME_</h2>
+				<h2 id="profileName">Profile Name Undefined</h2>
                 <h3>About:</h3>
                 <p>If you don't know who you truly are, you'll never know what you really want.</p>
 				<button onclick="switchFormProfile(event)" class="cybr-btn pink">
@@ -234,7 +234,7 @@
 					<span aria-hidden class="cybr-btn__glitch">Edit Profile</span>
 					<span aria-hidden class="cybr-btn__tag">R25</span>
 				</button>
-				<button id="LogoutButton">Logout</button>
+				<button id="LogoutButton" onclick="LogoutButton(event)">Logout</button>
 			</div>
 
 			<!-- edit form -->
@@ -277,14 +277,12 @@
 
 		</div>
 	</section>
-	<script src="JsFiles/drag&drop.js"></script>
-    <script src="JsFiles/script.js"></script>
-    <script src="JsFiles/single_page.js"></script>
-	<script src="JsFiles/login.js"></script>
-	<script src="JsFiles/profile.js"></script>
-    <script type="module" src="JsFiles/3d.js"></script>
-	<script type="module" src="JsFiles/3d_remote.js"></script>
-	<script type="module" src="JsFiles/3d_robot.js"></script>
-	<!-- <script type="module" src="JsFiles/test.js"></script> -->
+	<script type="module" src="JsFiles/single_page.js"></script>
+	<script src="JsFiles/Pages/drag&drop.js"></script>
+	<script src="JsFiles/Pages/login.js"></script>
+	<script src="JsFiles/Pages/profile.js"></script>
+    <script type="module" src="JsFiles/3d/3d.js"></script>
+	<script type="module" src="JsFiles/3d/3d_remote.js"></script>
+	<script type="module" src="JsFiles/3d/3d_robot.js"></script>
 </body>
 </html>
