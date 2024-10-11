@@ -1,0 +1,32 @@
+.goodbye-section {
+	text-align: center;
+	margin-top: 50px;
+	color: #f700ff; /* Neon pink text color */
+	padding: 40px;
+	border: 3px solid #0ef3f3; /* Neon cyan border */
+	border-radius: 10px;
+	max-width: 600px;
+	margin: auto;
+	box-shadow: 0 0 15px rgba(239, 0, 255, 0.7), 0 0 25px rgba(14, 243, 243, 0.8);
+	background: rgba(255, 255, 255, 0.1); /* Transparent background */
+	backdrop-filter: blur(5px);
+  }
+  
+  h1 {
+	font-size: 2.5em;
+	color: #0ef3f3; /* Neon cyan */
+	text-shadow: 0 0 10px rgba(14, 243, 243, 0.8);
+	margin-bottom: 20px;
+  }
+  
+  .goodbye-poem {
+	font-size: 1.2em;
+	line-height: 1.6em;
+	color: #f700ff; /* Neon pink */
+	text-shadow: 0 0 5px rgba(239, 0, 255, 0.7);
+	margin-top: 20px;
+  }
+  
+  .goodbye-poem br {
+	margin-bottom: 10px;
+  }
