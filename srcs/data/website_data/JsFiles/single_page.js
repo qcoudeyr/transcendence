@@ -1,4 +1,4 @@
-import { navigateToSection, changePages, switchProfileSection, updateNavbar, handleLogout, playButtonSetup, hidePreloaderAfterLoad } from './Modules/navigation.js';
+import { navigateToSection, changePages, switchProfileSection, updateNavbar, playButtonSetup, hidePreloaderAfterLoad } from './Modules/navigation.js';
 import { setupLogin, setupRegister } from './Modules/API/auth.js';
 import { getMailAndUsername, getNameBioAndAvatar } from './Modules/API/getProfileInfo.js';
 
@@ -26,7 +26,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	setupLogin();
 	setupRegister();
 
-	handleLogout(LogoutButton, sections, links, clickSound);
 	// all info in profile goes in this
 	if (localStorage.getItem('accessToken') && localStorage.getItem('refreshToken')){
 		window.onload = function() {

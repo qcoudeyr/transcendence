@@ -221,27 +221,45 @@
 		<!-- display form -->
 		<div class="profile-container">
 			<div class="profile-form fade-in">
-				<h2 class="darkerNeonText">Profile</h2>
+				<div class="header-container-profile">
+					<h2 class="neonTextButton" onclick="switchDisplayForm(event)">User</h2>
+					<h2 class="blueNeonHeader" style="scale: 1.5">Profile</h2>
+					
+				  </div>
 				<div class="profile-picture">
 					<img id="profileImage" src="./images/42icon.png" alt="Profile Image">
 				</div>
 				<h2 id="profileName">Profile Name Undefined</h2>
                 <h3>About:</h3>
                 <p id="userBiography">If you don't know who you truly are, you'll never know what you really want.</p>
-				<button onclick="switchFormProfile(event)" class="cybr-btn pink">
+				<button onclick="switchEditProfileForm(event)" class="cybr-btn pink">
 					Edit Profile<span aria-hidden>_</span>
 					<span aria-hidden class="cybr-btn__glitch">Edit Profile</span>
 					<span aria-hidden class="cybr-btn__tag">R25</span>
 				</button>
-				<button id="LogoutButton" onclick="LogoutButton(event)">Logout</button>
+				<button onclick="logout()">Logout</button>
+			</div>
+
+			<!-- USER INFO FORM -->
+			<div class="user-form fade-out">
+				<div class="header-container-profile">
+					<h2 class="blueNeonHeader" style="scale: 1.5">User</h2>
+					<h2 class="neonTextButton" onclick="switchDisplayForm(event)">Profile</h2>
+				  </div>
+				<h2 id="usernameDisplay"></h2>
+                <h3 id="emailDisplay"></h3>
+				<button onclick="switchEditUserForm(event)" class="cybr-btn pink">
+					Edit User<span aria-hidden>_</span>
+					<span aria-hidden class="cybr-btn__glitch">Edit User</span>
+					<span aria-hidden class="cybr-btn__tag">R25</span>
+				</button>
+				<button onclick="logout()">Logout</button>
 			</div>
 
 			<!-- edit form -->
-			<div class="edit-form fade-out">
-				<div class="form-container">
 				<!-- PROFIL EDIT FORM -->
 					<div class="edit-profile-form-text fade-out">
-						<h2 class="neonTextButton" onclick="switchFormProfileEdit(event)">Edit User</h2>
+						<h2 class="blueNeonHeader">Edit Profile</h2>
 						<div class="upload-area" id="uploadArea">
 							<p>Drag & Drop an Image Here or Click to Upload</p>
 							<input type="file" id="fileInput" accept="image/*" hidden />
@@ -251,12 +269,12 @@
 							<textarea id="bioInput" placeholder="About" required></textarea>
 							<button id="profile-edit-submit-btn" type="submit">Save Changes</button>
 						</form>
-				<p class="darkerNeonText">Finished? <a href="#" onclick="switchFormProfile(event)">Return to profile</a></p>
+				<p class="darkerNeonText">Finished? <a href="#" onclick="switchEditProfileForm(event)">Return to profile</a></p>
 					</div>
 
 					<!-- USER EDIT FORM -->
-					<div class="edit-user-form-text fade-in">
-						<h2 class="neonTextButton" onclick="switchFormProfileEdit(event)">Edit Profile</h2>
+					<div class="edit-user-form-text fade-out">
+						<h2 class="blueNeonHeader">Edit User</h2>
 						<form>
 							<input type="text" id="usernameInput" placeholder="Username" required>
 							<input type="email" id="emailInput" placeholder="Email" required>
@@ -288,11 +306,8 @@
 								<button id="confirmDelete" onclick="deleteAccount()">Confirm Delete</button>
 							</div>
 						</div>
-						<p class="darkerNeonText">Finished? <a href="#" onclick="switchFormProfile(event)">Return to profile</a></p>
+						<p class="darkerNeonText">Finished? <a href="#" onclick="switchEditUserForm(event)">Return to user</a></p>
 					</div>
-					</div>
-			</div>
-
 		</div>
 	</section>
 	<section id="goodbye">
@@ -325,6 +340,7 @@
 
 	<script type="module" src="JsFiles/single_page.js"></script>
 	<script src="JsFiles/Modules/API/deleteAccount.js"> </script>
+	<script src="JsFiles/Modules/API/logout.js"></script>
 	<script type="module" src="/JsFiles/Modules/API/patchProfile.js"> </script>
 	<script type="module" src="/JsFiles/Modules/API/patchUser.js"></script>
 	<!-- <script src="JsFiles/Pages/drag&drop.js"></script> -->
