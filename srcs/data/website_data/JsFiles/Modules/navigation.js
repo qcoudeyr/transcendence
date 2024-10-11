@@ -51,6 +51,8 @@ export function navigateToSection(sections, links) {
 	const playlink = document.querySelector('a[data-section="play"]');
 	const tournamentlink = document.querySelector('a[data-section="tournaments"]');
 	const statslink = document.querySelector('a[data-section="statistics"]');
+	const chatContainer = document.querySelector('.chat-container');
+	const chatInput = document.querySelector('.chat-input');
   
 	function update() {
 	  if (localStorage.getItem("accessToken")) {
@@ -59,12 +61,17 @@ export function navigateToSection(sections, links) {
 		playlink.style.display = "inline-block";
 		tournamentlink.style.display = "inline-block";
 		statslink.style.display = "inline-block";
+		chatContainer.style.display = "fixed";
+		chatInput.style.display = "fixed";
 	  } else {
+		
 		connexionLink.style.display = "inline-block";
 		profileLink.style.display = "none";
 		playlink.style.display = "none";
 		tournamentlink.style.display = "none";
 		statslink.style.display = "none";
+		chatContainer.style.display = "none";
+		chatInput.style.display = "none";
 	  }
 	}
   

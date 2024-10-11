@@ -12,7 +12,7 @@
     overflow-y: scroll;
 	-ms-overflow-style: none;  /* Internet Explorer 10+ */
     scrollbar-width: none;
-    z-index: 9999;
+    z-index: 200;
     pointer-events: auto;
 }
 
@@ -39,7 +39,7 @@ background: rgba(0, 0, 0, 0.42);
 box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 backdrop-filter: blur(7.7px);
 -webkit-backdrop-filter: blur(7.7px);
-	z-index: 23867576245;
+	z-index: 200;
 	border: 0px;
 	color:#fcfcfc;
 	padding-left: 5px;
