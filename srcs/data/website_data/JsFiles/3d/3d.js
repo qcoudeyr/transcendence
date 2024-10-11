@@ -158,12 +158,16 @@ function enableNavBar() {
 }
 
 function checkHash() {
+	if (window.location.hash === '#goodbye') {
+		disableNavBar();
+	}
     if (window.location.hash === '#playing') {
         if (!isSceneLoaded()) {
             initScene();
 			disableNavBar();
         }
-    } else {
+    } 
+	else {
         if (isSceneLoaded()) {
             unloadScene();
         }

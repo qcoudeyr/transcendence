@@ -17,7 +17,7 @@ function deleteAccount(){
 				if (response.ok) {
 					alert('Account deleted successfully.');
 					// Redirect or take further action after deletion
-					window.location.href = '#home'; // MAYBE A GOODBYE PAGE
+					window.location.href = '#goodbye'; // MAYBE A GOODBYE PAGE
 					localStorage.clear();
 					location.reload();
 				} else {
