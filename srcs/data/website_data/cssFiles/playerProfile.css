@@ -237,6 +237,71 @@ textarea:focus {
     display: flex; /* Flexbox for centering the modal */
 }
 
+.edit-modal {
+    display: none; /* Hide the modal by default */
+    position: fixed;
+    z-index: 9999; /* High z-index to make sure it is above everything else */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    justify-content: center; /* Center the modal horizontally */
+    align-items: center; /* Center the modal vertically */
+    display: flex; /* Flexbox for centering the modal */
+}
+
+/* Modal content */
+.edit-modal-content {
+    background: rgba(212, 55, 198, 0.5);
+		border-radius: 16px;
+		box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(10.6px);
+		-webkit-backdrop-filter: blur(10.6px);
+		border: 1px solid rgba(212, 55, 198, 1);
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+    z-index: 10000; /* Ensure the content is on top */
+    position: relative; /* Required for proper positioning of the close button */
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3); /* Add a shadow for better visibility */
+}
+
+/* Close button */
+.edit-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Input field styling */
+.edit-modal-content input {
+    margin-top: 15px;
+    padding: 8px;
+    width: 80%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Button styling */
+.edit-modal-content button {
+    margin-top: 15px;
+    padding: 8px 16px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.edit-modal-content button:hover {
+    background-color: darkred;
+}
+
+
 /* Modal content */
 .modal-content {
 	/* From https://css.glass */
@@ -281,4 +346,8 @@ textarea:focus {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+}
+
+.error-message {
+	font-family: Arial, Helvetica, sans-serif;
 }

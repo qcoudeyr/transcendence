@@ -42,3 +42,24 @@ window.addEventListener('click', function(event) {
 	}
 });
 
+
+// Reference the Edit Account modal and related elements
+const editModal = document.getElementById('EditAccountModal');
+const closeEditModal = document.getElementById('closeEditModal');
+const saveChangesBtn = document.getElementById('saveChangesBtn'); 
+
+// Open modal when the Save Changes button is clicked
+saveChangesBtn.addEventListener('click', function() {
+    editModal.style.display = 'flex'; // Show the Edit Account modal
+});
+
+// Close the modal when the user clicks the close button or outside the modal
+closeEditModal.addEventListener('click', function() {
+    editModal.style.display = 'none'; // Hide the Edit Account modal
+});
+
+window.addEventListener('click', function(event) {
+    if (event.target === editModal) {
+        editModal.style.display = 'none'; // Hide modal if clicked outside of the modal content
+    }
+});

@@ -86,7 +86,6 @@
             </audio> -->
         </div>
     </section>
-
     <section id="playing" class="playing-section">
         <button id="resizeButton">Big Screen</button>
 		<button id="unloadButton">Leave</button>
@@ -106,7 +105,6 @@
         <div id="splineContainer">
         </div>
     </section>
-
     <section id="tournaments" class="tournaments-section">
 		<h3 class="tournament_desc">Compete in the very first game ever with enhanced graphics and maybe win the Tournament !!</h3>
         <div class="bracket">
@@ -228,7 +226,7 @@
 				</div>
 				<h2 id="profileName">Profile Name Undefined</h2>
                 <h3>About:</h3>
-                <p>If you don't know who you truly are, you'll never know what you really want.</p>
+                <p id="userBiography">If you don't know who you truly are, you'll never know what you really want.</p>
 				<button onclick="switchFormProfile(event)" class="cybr-btn pink">
 					Edit Profile<span aria-hidden>_</span>
 					<span aria-hidden class="cybr-btn__glitch">Edit Profile</span>
@@ -243,16 +241,15 @@
 				<!-- PROFIL EDIT FORM -->
 					<div class="edit-profile-form-text fade-out">
 						<h2 class="neonTextButton" onclick="switchFormProfileEdit(event)">Edit User</h2>
-				<div class="upload-area" id="uploadArea">
-					<p>Drag & Drop an Image Here or Click to Upload</p>
-					<input type="file" id="fileInput" accept="image/*" hidden />
-				</div>
-				<form>
-					<input type="text" placeholder="Name" required>
-					<input type="email" placeholder="Email" required>
-					<textarea placeholder="About" required></textarea>
-					<button type="submit">Save Changes</button>
-				</form>
+						<div class="upload-area" id="uploadArea">
+							<p>Drag & Drop an Image Here or Click to Upload</p>
+							<input type="file" id="fileInput" accept="image/*" hidden />
+						</div>
+						<form id="profileForm">
+							<input type="text" id="nameInput" placeholder="Name" required>
+							<textarea id="bioInput" placeholder="About" required></textarea>
+							<button id="profile-edit-submit-btn" type="submit">Save Changes</button>
+						</form>
 				<p class="darkerNeonText">Finished? <a href="#" onclick="switchFormProfile(event)">Return to profile</a></p>
 					</div>
 
@@ -260,11 +257,22 @@
 					<div class="edit-user-form-text fade-in">
 						<h2 class="neonTextButton" onclick="switchFormProfileEdit(event)">Edit Profile</h2>
 						<form>
-							<input type="text" placeholder="Username" required>
-							<input type="email" placeholder="Email" required>
-							<input type="password" placeholder="Password" required>
-							<button type="submit">Save Changes</button>
+							<input type="text" id="usernameInput" placeholder="Username" required>
+							<input type="email" id="emailInput" placeholder="Email" required>
+							<input type="password" id="passwordUserInput" placeholder="Password" required>
+							
 						</form>
+						<button id="saveChangesBtn">Save Changes</button>
+						<!-- Edit Account Modal -->
+						<div id="EditAccountModal" class="editModal" style="display: none;">
+							<div class="edit-modal-content">
+								<span id="closeEditModal" class="edit-close">&times;</span> <!-- Updated ID -->
+								<h3>Edit Account</h3>
+								<p>Enter your password to confirm:</p>
+								<input type="password" id="passwordEditInput" placeholder="Enter password">
+								<button id="confirmEdit">Confirm Edit</button>
+							</div>
+						</div>
 						<button id="deleteAccountBtn" class="cybr-btn">
 							Delete Account<span aria-hidden>_</span>
 							<span aria-hidden class="cybr-btn__glitch">Delete</span>
@@ -288,7 +296,9 @@
 	</section>
 	<script type="module" src="JsFiles/single_page.js"></script>
 	<script src="JsFiles/Modules/API/deleteAccount.js"> </script>
-	<script src="JsFiles/Pages/drag&drop.js"></script>
+	<script type="module" src="/JsFiles/Modules/API/patchProfile.js"> </script>
+	<script type="module" src="/JsFiles/Modules/API/patchUser.js"></script>
+	<!-- <script src="JsFiles/Pages/drag&drop.js"></script> -->
 	<script src="JsFiles/Pages/login.js"></script>
 	<script src="JsFiles/Pages/profile.js"></script>
     <script type="module" src="JsFiles/3d/3d.js"></script>
