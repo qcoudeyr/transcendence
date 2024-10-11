@@ -1,3 +1,4 @@
+
 function deleteAccount(){
 	confirmDeleteBtn.addEventListener('click', function() {
 		const password = document.getElementById('passwordInput').value;
@@ -25,7 +26,6 @@ function deleteAccount(){
 			})
 			.catch(error => {
 				console.error('Error:', error);
-				alert('Account deletion failed. Please try again.');
 			});
 	
 			// Close the modal

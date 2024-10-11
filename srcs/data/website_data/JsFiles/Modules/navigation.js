@@ -91,8 +91,7 @@ export function navigateToSection(sections, links) {
   
   function logout() {
 	// Remove tokens to log the user out
-	localStorage.removeItem("accessToken");
-	localStorage.removeItem("refreshToken");
+	localStorage.clear();
   
 	// Navigate to the home section and refresh the page
 	window.location.hash = "#home";
