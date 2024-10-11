@@ -81,24 +81,7 @@ export function navigateToSection(sections, links) {
 	  	location.reload();
 	});
   }
-
-
-  export function handleLogout(LogoutButton, sections, links, clickSound) {
-	LogoutButton.addEventListener("click", function () {
-	  logout();
-	});
-  }
   
-  function logout() {
-	// Remove tokens to log the user out
-	localStorage.clear();
-  
-	// Navigate to the home section and refresh the page
-	window.location.hash = "#home";
-	location.reload(true);  // Reload the page to update the UI
-  }
-
-
   export function hidePreloaderAfterLoad() {
     document.addEventListener("DOMContentLoaded", function() {
         const preloader = document.getElementById('preloader');

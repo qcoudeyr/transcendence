@@ -17,10 +17,16 @@ export function getMailAndUsername() {
 	.then(data => {
 		localStorage.setItem("username", data.username);
 		localStorage.setItem("email", data.email);
+		setEmailUsername();
 	})
 	.catch(error => {
 		console.error('There was a problem with the fetch operation:', error);
 	});
+}
+
+function setEmailUsername() {
+	document.getElementById('usernameDisplay').textContent = localStorage.getItem('username');
+	document.getElementById('emailDisplay').textContent = localStorage.getItem('email');
 }
 
 function setAvatar() {

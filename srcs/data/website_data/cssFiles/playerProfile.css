@@ -45,7 +45,7 @@
 }
 
 /* Form container styling */
-.profile-form, .edit-form {
+.profile-form, .edit-form, .user-form {
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
@@ -216,6 +216,7 @@ textarea:focus {
 .neonTextButton:hover {
     color: #ff77ff; /* Change to pink on hover */
     font-size: 1.7rem; /* Slightly increase the size */
+	cursor: pointer;
 }
 
 
@@ -350,4 +351,22 @@ textarea:focus {
 
 .error-message {
 	font-family: Arial, Helvetica, sans-serif;
+}
+
+.header-container-profile {
+	display: flex;
+  align-items: center; /* Aligns items vertically centered */
+  gap: 50px;
+}
+
+.blueNeonHeader {
+	color: #0ef3f3; /* Neon cyan */
+	text-shadow: 0 0 10px rgba(14, 243, 243, 0.8);
+	text-shadow:
+        /* White glow */
+        0 0 0px #fff,
+        0 0 10px rgba(14, 243, 243, 0.8),
+        0 0 21px rgba(14, 243, 243, 0.8);
+	margin-bottom: 20px;
+	margin-left: 20px;
 }
