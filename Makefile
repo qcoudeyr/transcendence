@@ -57,6 +57,8 @@ fclean:
 	docker volume rm $$(docker volume ls -q) || true
 	@echo "Removing all Docker networks..."
 	docker network rm $$(docker network ls -q) || true
+	@echo "Removing database..."
+	sudo rm -rf srcs/data/postgres_data
 	@echo "Cleanup complete."
 
 stop:

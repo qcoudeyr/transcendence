@@ -37,6 +37,7 @@ services:
     volumes:
       - ./data/django_data:/app
       - ./data/media_data:/app/media
+      # - profile_share:/app/transcendence/profiles:rw
     expose:
       - 8000
     ports:
@@ -71,6 +72,8 @@ services:
     restart: always
     volumes:
       - ./data/channels_data:/app
+      - ./data/django_data/transcendence/profiles:/app/transcendence/profiles
+      # - profile_share:/app/transcendence/profiles:ro
     expose:
       - 8002
     ports:
@@ -80,6 +83,8 @@ services:
         ipv4_address: 10.0.10.11
     depends_on:
       - redis
+      - postgresql
+      - django
     environment:
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_USER=${DATABASE_USER}
@@ -349,18 +354,19 @@ services:
 ########VOLUMES########
 #######################
 volumes:
+  profile_share:
   postgres_data:
     driver: local
     driver_opts:
       type: "none"
       o: "bind"
       device: "./data/postgres_data/"
-  django_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/django_data/"
+  # django_data:
+  #   driver: local
+  #   driver_opts:
+  #     type: "none"
+  #     o: "bind"
+  #     device: "./data/django_data/"
   es_data:
     driver: local
     driver_opts:
