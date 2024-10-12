@@ -36,7 +36,7 @@ class UserCreateSerializer(serializers.Serializer):
             email=validated_data['email'],
             password=validated_data['password']
         )
-        Profile.objects.create(user=user)
+        Profile.objects.create(user=user, name='Recruit_' + str(user.pk))
         return user
 
 

@@ -2,7 +2,6 @@ import json
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from .models import Profile
 
 class EventConsumer(AsyncWebsocketConsumer):
 
@@ -40,8 +39,8 @@ class EventConsumer(AsyncWebsocketConsumer):
     # Events functions here
     async def chat_message(self, content):
         if 'message' in content:
-            # name = await get_profile_name(self.user)
-            name = user.username
+            name = await get_profile_name(self.user)
+            # name = user.username
             await self.channel_layer.group_send(
                 self.chat_group,
                 {
@@ -52,7 +51,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             )
 
     async def send_chat_message(self, event):
-        message = f"[{self.user.username}]: {event['message']}"
+        message = f"[{event['name']}]: {event['message']}"
 
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
@@ -62,5 +61,4 @@ class EventConsumer(AsyncWebsocketConsumer):
 
 @database_sync_to_async
 def get_profile_name(user):
-    user.refresh_from_db()
-    return Profile.objects.get(user=user)
+    return user.profile.name
