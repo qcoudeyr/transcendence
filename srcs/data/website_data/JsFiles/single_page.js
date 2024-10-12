@@ -1,6 +1,7 @@
 import { navigateToSection, changePages, switchProfileSection, updateNavbar, playButtonSetup, hidePreloaderAfterLoad } from './Modules/navigation.js';
 import { setupLogin, setupRegister } from './Modules/API/auth.js';
 import { getMailAndUsername, getNameBioAndAvatar } from './Modules/API/getProfileInfo.js';
+import { websocketConnect } from './WebSocket/websocket-open.js';
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -31,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		window.onload = function() {
 		getMailAndUsername(); // Call the function here
 		getNameBioAndAvatar();
+		websocketConnect();
 		};
 	}
 });
