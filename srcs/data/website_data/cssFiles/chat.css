@@ -2,8 +2,9 @@
     position: fixed;
     bottom: 30px;
     left: 0px;
-    width: 300px;
-    max-height: 250px;
+    width: 25%;
+    max-height: 27.5%;
+	min-height: 27.5%;
 	background: rgba(255, 255, 255, 0.088);
 	border-radius: 4px;
 	box-shadow: 0 4px 30px rgba(255, 255, 255, 0.1);
@@ -49,4 +50,6 @@ backdrop-filter: blur(7.7px);
 
 .send-chat-button {
 	display: none;
+	position: fixed;
+	z-index: 200;
 }

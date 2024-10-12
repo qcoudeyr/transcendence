@@ -26,40 +26,16 @@
 		}
 		</script>
 	<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+	
+
 </head>
 <body>
     <div id="preloader">
         <div id="loader"></div>
     </div>
-	<div class="chat-container">
-		<div class="chat-messages">
-			<div class="message">Luke: Geoffrey la pute.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
-			<div class="message">Geoffrey: Oui c'est moi.</div>
+	<div id="messagesDivContainer" class="chat-container">
+		<div id="messages" class="chat-messages">
 		</div>
-			<button id="send-chat-button-id" class="send-chat-button"></button>
 		
 	</div>
 	<input id="chat-input" class="chat-input" placeholder="Type here..">
@@ -377,6 +353,8 @@
 	<script src="JsFiles/Modules/API/logout.js"></script>
 	<script type="module" src="/JsFiles/Modules/API/patchProfile.js"> </script>
 	<script type="module" src="/JsFiles/Modules/API/patchUser.js"></script>
+	<script type="module" src="/JsFiles/WebSocket/chatSend.js"></script>
+	<script type="module" src="/JsFiles/WebSocket/websocket-open.js"></script>
 	<!-- <script src="JsFiles/Pages/drag&drop.js"></script> -->
 	<script src="JsFiles/Pages/login.js"></script>
 	<script src="JsFiles/Pages/profile.js"></script>
