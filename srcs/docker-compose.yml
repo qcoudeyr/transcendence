@@ -37,9 +37,10 @@ services:
     volumes:
       - ./data/django_data:/app
       - ./data/media_data:/app/media
+    expose:
+      - 8000
     ports:
       - "8000:8000"
-      - "8001:8001"
     depends_on:
       - postgresql
     networks:
@@ -54,11 +55,38 @@ services:
       - DJANGO_SUPERUSER_NAME=${DJANGO_SUPERUSER_NAME}
       - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
       - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
     logging:
       driver: "json-file"
       options:
         max-size: "200k"
         max-file: "10"
+
+######################
+#######CHANNELS#######
+######################
+  channels:
+    container_name: channels
+    build: ./requirements/channels
+    restart: always
+    volumes:
+      - ./data/channels_data:/app
+    expose:
+      - 8002
+    ports:
+      - "8002:8002"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.11
+    depends_on:
+      - redis
+    environment:
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
 
 ######################
 ########NODEJS########
@@ -113,12 +141,10 @@ services:
 ########REDIS########
 #####################
   redis:
-    image: redis:7.4.0-alpine3.20
+    image: redis:7
     container_name: redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+    expose:
+      - 6379
     networks:
       transcendence:
         ipv4_address: 10.0.10.70
@@ -347,12 +373,6 @@ volumes:
       type: "none"
       o: "bind"
       device: "./data/portainer_data/"
-  redis_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/redis_data/"
   media_data:
     driver: local
     driver_opts:

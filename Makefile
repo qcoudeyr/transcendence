@@ -46,6 +46,7 @@ build-and-up:
 fclean:
 	@echo "Removing migrations..."
 	docker exec django remove_migrations.sh || true
+	docker exec channels remove_migrations.sh || true
 	@echo "Stopping and removing all Docker containers..."
 	@cd ./srcs && docker-compose down || true
 	docker stop $$(docker ps -q) || true

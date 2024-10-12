@@ -1,7 +1,7 @@
 FROM python:3.10
 
 # Set environment variables
-ENV APPS "users profiles"
+ENV APPS "events"
 
 # Set work directory
 WORKDIR /app/transcendence
@@ -17,5 +17,5 @@ RUN chmod +x /usr/local/bin/remove_migrations.sh
 COPY tools/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
-# Run uvicorn
+# Run daphne
 CMD ["start.sh"]
