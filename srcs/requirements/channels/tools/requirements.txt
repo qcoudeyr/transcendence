@@ -1,0 +1,10 @@
+Django>=5.0.6
+channels[daphne]
+channels_redis
+django-environ>=0.4.5
+psycopg2>=2.9.1
+environ>=1.0.0
+djangorestframework>=3.15.2
+djangorestframework-simplejwt>=5.3.1
+django-channels-jwt
+pillow
