@@ -53,6 +53,7 @@ export function navigateToSection(sections, links) {
 	const statslink = document.querySelector('a[data-section="statistics"]');
 	const chatContainer = document.querySelector('.chat-container');
 	const chatInput = document.querySelector('.chat-input');
+	const sidebar = document.querySelector('.sidebar');
   
 	function update() {
 	  if (localStorage.getItem("accessToken")) {
@@ -63,6 +64,7 @@ export function navigateToSection(sections, links) {
 		statslink.style.display = "inline-block";
 		chatContainer.style.display = "fixed";
 		chatInput.style.display = "fixed";
+		sidebar.style.display = "fixed"
 	  } else {
 		
 		connexionLink.style.display = "inline-block";
@@ -72,6 +74,7 @@ export function navigateToSection(sections, links) {
 		statslink.style.display = "none";
 		chatContainer.style.display = "none";
 		chatInput.style.display = "none";
+		sidebar.style.display = "none"
 	  }
 	}
   

@@ -1,0 +1,211 @@
+.sidebar {
+    position: fixed;
+    right: 0px;
+    bottom: 10%; /* Adjust this to align both elements */
+    display: flex;
+    flex-direction: column;
+    gap: 5%; /* Space between the two elements */
+	z-index: 300;
+	width: 5%;
+	text-align: center;
+	max-height: 70%;
+	overflow-y: scroll;
+}
+
+.friend-container {
+    max-height: 70%;
+    min-height: 70%;
+    background: rgba(255, 255, 255, 0.088);
+    border-radius: 4px;
+    box-shadow: 0 4px 30px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    overflow-y: scroll;
+    z-index: 200;
+    pointer-events: auto;
+    transition: width 0.3s ease;
+}
+
+.search-user {
+    height: 4%;
+    min-width: 50px;
+    background: rgba(0, 0, 0, 0.42);
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(7.7px);
+	-webkit-backdrop-filter: blur(7.7px);
+	border-radius: 4px;
+    z-index: 200;
+    pointer-events: auto;
+    transition: width 0.3s ease;
+}
+
+.add-friend-tittle{
+	left: 0px;
+	color: #0ef3f3;
+	font-size: 15px;
+}
+
+
+.sidebar:hover {
+	width: 20%;
+	text-align: left;
+}
+
+.sidebar:hover .friend-name {
+    opacity: 1; /* Show all names when hovering over the container */
+}
+
+
+
+
+
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: smaller;
+	align-items: left;
+	padding-left: 10px;
+}
+
+.friend {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.friend:hover {
+	background-color: rgba(0, 0, 0, 0.209);
+	cursor: pointer;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.friend-name {
+    position: relative;
+    left: 15px; /* Adjust as needed to control distance from avatar */
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+	color: #0ef3f3; /* Neon cyan */
+	text-shadow: 0 0 10px rgba(14, 243, 243, 0.8);
+}
+
+.friend:hover .avatar {
+    transform: scale(1.5);
+}
+
+.actions {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    margin-top: 5px; /* Space between avatar/name and actions */
+	right: 0px;
+}
+
+.friend:hover .actions {
+    display: flex; /* Show actions on friend hover */
+}
+
+.group-list {
+	background-color: #00000020;
+	padding: 20%;
+	margin-bottom: 20px;
+	gap: 30px;
+}
+
+.search-input {
+	background: rgba(0, 0, 0, 0.42);
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(7.7px);
+	-webkit-backdrop-filter: blur(7.7px);
+	border: 0px;
+	color:#fcfcfc;
+	padding-left: 5px;
+	outline: none;
+}
+
+
+.invite-friend-button {
+    background-color: #ffffff0a;
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, .1) 0 2px 4px 0;
+    box-sizing: border-box;
+    color: #ffffff;
+    cursor: pointer;
+    outline: none;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+    padding: 2.5px 5px;
+    text-align: center;
+    margin-top: 5px; /* Space above the button */
+    transition: transform 150ms, box-shadow 150ms;
+	right: 0px;
+	margin-left: 50px;
+	margin-bottom: 5px; /* Space above the button */
+	text-shadow: none;
+}
+
+.invite-friend-button:hover {
+    box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
+    transform: translateY(-2px);
+	background: #ffffff0a;
+}
+
+.message-friend-button {
+    background-color: #ffffff0a;
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, .1) 0 2px 4px 0;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+    padding: 2.5px 5px;
+    text-align: center;
+    margin-top: 5px; /* Space above the button */
+    transition: transform 150ms, box-shadow 150ms;
+	right: 0px;
+	margin-left: 50px;
+	margin-bottom: 5px; /* Space above the button */
+	text-shadow: none;
+}
+
+.message-friend-button:hover {
+    box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
+    transform: translateY(-2px);
+	background: #ffffff0a;
+}
+
+.remove-friend-button {
+	background-color: #ffffff0a;
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, .1) 0 2px 4px 0;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+    padding: 2.5px 5px;
+    text-align: center;
+    margin-top: 5px; /* Space above the button */
+    transition: transform 150ms, box-shadow 150ms;
+	right: 0px;
+	margin-left: 50px;
+	margin-bottom: 5px; /* Space above the button */
+	text-shadow: none;
+}
+
+.remove-friend-button:hover {
+    box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
+    transform: translateY(-2px);
+	background: #ffffff0a;
+}

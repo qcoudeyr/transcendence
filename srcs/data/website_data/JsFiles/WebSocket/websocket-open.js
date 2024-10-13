@@ -29,6 +29,7 @@ export function websocketConnect()
 		console.log('Uuid :' + data.uuid);
 		localStorage.setItem("websocketUrl", 'ws://localhost/ws/events/?uuid=' + data.uuid);
 		console.log(localStorage.getItem('websocketUrl'));
+
 		openWebsocket();
 	})
 	.catch(error => {
@@ -37,6 +38,7 @@ export function websocketConnect()
 }
 
 function openWebsocket(){
+	console.log('[Websocket] Connecting...');
 	socket = new WebSocket(localStorage.getItem('websocketUrl'));
 	localStorage.setItem('WebSocket_', socket);
 	socket.onopen = function(e) {
