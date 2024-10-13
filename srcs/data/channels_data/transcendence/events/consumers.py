@@ -5,6 +5,7 @@ from channels.db import database_sync_to_async
 
 class EventConsumer(AsyncWebsocketConsumer):
 
+
     async def connect(self):
         # Events handled by the server
         self.events = {
@@ -13,6 +14,7 @@ class EventConsumer(AsyncWebsocketConsumer):
 
         # Request's user
         self.user = self.scope['user']
+        self.profile = await get_profile(self.user)
 
         # Connect to the general chat by default
         self.chat_group = "general_chat"
@@ -39,13 +41,11 @@ class EventConsumer(AsyncWebsocketConsumer):
     # Events functions here
     async def chat_message(self, content):
         if 'message' in content:
-            name = await get_profile_name(self.user)
-            # name = user.username
             await self.channel_layer.group_send(
                 self.chat_group,
                 {
                     "type": "send.chat.message",
-                    "name": name,
+                    "name": self.profile.name,
                     "message": content['message']
                 }
             )
@@ -60,5 +60,5 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
 @database_sync_to_async
-def get_profile_name(user):
-    return user.profile.name
+def get_profile(user):
+    return user.profile

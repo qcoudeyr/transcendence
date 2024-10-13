@@ -39,6 +39,19 @@ create-data-dirs:
 
 	@echo "Data directories created."
 
+reset_db:
+	@echo "Removing migrations..."
+	docker exec django remove_migrations.sh || true
+	docker exec channels remove_migrations.sh || true
+	@echo "Stopping db related services..."
+	docker stop channels django
+	docker stop postgresql
+	docker rm postgresql
+	@echo "Removing database..."
+	sudo rm -rf srcs/data/postgres_data
+	@echo "Starting db related services..."
+	make
+
 build-and-up:
 	@cd ./srcs && docker compose up -d
 	sleep 2 && docker exec nginx_modsecurity_crs rm /etc/nginx/conf.d/modsecurity.conf && docker exec nginx_modsecurity_crs nginx -s reload || true
