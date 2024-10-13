@@ -84,4 +84,5 @@ class Profile(models.Model):
         "Group",
         on_delete=models.PROTECT,
         related_name="members",
+        null=True
     )

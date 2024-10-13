@@ -147,8 +147,12 @@ CHANNEL_LAYERS = {
     },
 }
 
+# DRF Auth config
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+# Media config
+MEDIA_URL = '/media/'
