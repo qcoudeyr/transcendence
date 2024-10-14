@@ -13,7 +13,8 @@ class EventConsumer(AsyncWebsocketConsumer):
         self.events = {
             'chat_message': self.chat_message,
             'friend_list': self.friend_list,
-            'friend_add': self.friend_add,
+            'friend_request': self.friend_request,
+            'friend_request_list': self.friend_request_list,
         }
 
         # Request's user
@@ -71,7 +72,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                 })
             )
 
-    async def friend_add(self, content):
+    async def friend_request(self, content):
         if 'profile_id' in content:
             to_profile = await get_id_profile(content['profile_id'])
             if to_profile is not None and to_profile.pk != self.profile.pk:
@@ -84,6 +85,17 @@ class EventConsumer(AsyncWebsocketConsumer):
                             'request_id': request.pk,
                         }
                     )
+
+    async def friend_request_list(self, content):
+        requests = await get_friend_requests(self.profile)
+        for request in requests:
+            await self.channel_layer.group_send(
+                self.notifications_group,
+                {
+                    'type': 'send_friend_request',
+                    'request_id': request.pk,
+                }
+            )
 
     # group_send functions here
     async def send_chat_message(self, event):
@@ -130,3 +142,7 @@ def create_friend_request(from_profile, to_profile):
     if created:
         return request
     return None
+
+@database_sync_to_async
+def get_friend_requests(profile):
+    return list(profile.friend_requests_received.all())
