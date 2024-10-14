@@ -16,6 +16,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             'friend_request': self.friend_request,
             'friend_request_list': self.friend_request_list,
             'friend_request_answer': self.friend_request_answer,
+            'friend_remove': self.friend_remove,
         }
 
         # Request's user
@@ -81,9 +82,9 @@ class EventConsumer(AsyncWebsocketConsumer):
             )
 
     async def friend_request(self, content):
-        if 'profile_id' in content:
+        if 'profile_id' in content and type(content['profile_id']) is int:
             to_profile = await get_id_profile(content['profile_id'])
-            if to_profile is not None and to_profile.pk != self.profile.pk:
+            if to_profile is not None and to_profile.pk != self.profile.pk and not (await are_friends(to_profile, self.profile)):
                 request = await create_friend_request(from_profile=self.profile, to_profile=to_profile)
                 if request is not None:
                     await self.channel_layer.group_send(
@@ -116,6 +117,13 @@ class EventConsumer(AsyncWebsocketConsumer):
             request = await get_request_id_friend_request(content['request_id'])
             if request is not None:
                 answer = content['answer']
+                await self.channel_layer.group_send(
+                    self.notifications_group,
+                    {
+                        'type': 'remove.friend.request',
+                        'request_id': request.pk
+                    }
+                )
                 await answer_friend_request(request=request, answer=answer)
                 if answer:
                     new_friend = await get_friend_request_from_profile(request)
@@ -140,6 +148,27 @@ class EventConsumer(AsyncWebsocketConsumer):
                             'status': self.profile.status,
                         }
                     )
+
+    async def friend_remove(self, content):
+        if 'profile_id' in content and type(content['profile_id']) is int:
+            request_profile = await get_id_profile(content['profile_id'])
+            if (await are_friends(self.profile, request_profile)):
+                await remove_friendship(self.profile, request_profile)
+                await self.leave_friend_channel(friend_pk=request_profile.pk)
+                await self.channel_layer.group_send(
+                    self.notifications_group,
+                    {
+                        'type': 'remove.friend',
+                        'profile_id': request_profile.pk,
+                    }
+                )
+                await self.channel_layer.group_send(
+                    'notifications_' + str(request_profile.pk),
+                    {
+                        'type': 'remove.friend',
+                        'profile_id': self.profile.pk,
+                    }
+                )
 
     # group_send functions here
     async def send_chat_message(self, event):
@@ -170,6 +199,20 @@ class EventConsumer(AsyncWebsocketConsumer):
             })
         )
 
+    async def remove_friend_request(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'friend_request_remove',
+            'request_id': event['request_id'],
+            })
+        )
+
+    async def remove_friend(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'friend_remove',
+            'profile_id': event['profile_id'],
+            })
+        )
+
     # Usefull functions
     async def join_friend_channel(self, friend_pk):
         # Generate unique group name for both profiles
@@ -178,6 +221,9 @@ class EventConsumer(AsyncWebsocketConsumer):
 
         self.private_groups[friend_pk] = str(min_pk) + "_" + str(max_pk) + "_private_group"
         await self.channel_layer.group_add(self.private_groups[friend_pk], self.channel_name)
+
+    async def leave_friend_channel(self, friend_pk):
+        await self.channel_layer.group_discard(self.private_groups[friend_pk], self.channel_name)
 
 # Database access from consumers
 @database_sync_to_async
@@ -216,7 +262,11 @@ def get_friend_request_from_profile(request):
 
 @database_sync_to_async
 def get_request_id_friend_request(request_id):
-    return FriendRequest.objects.get(pk=request_id)
+    try:
+        request = FriendRequest.objects.get(pk=request_id)
+    except Exception:
+        request = None
+    return request
 
 @database_sync_to_async
 def answer_friend_request(request, answer):
@@ -231,3 +281,11 @@ def answer_friend_request(request, answer):
         pass
 
     request.delete()
+
+@database_sync_to_async
+def are_friends(profile1, profile2):
+    return profile1.friends.filter(pk=profile2.pk).exists()
+
+@database_sync_to_async
+def remove_friendship(profile1, profile2):
+    profile1.friends.remove(profile2)
