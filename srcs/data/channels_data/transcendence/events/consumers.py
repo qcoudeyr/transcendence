@@ -15,6 +15,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             'friend_list': self.friend_list,
             'friend_request': self.friend_request,
             'friend_request_list': self.friend_request_list,
+            # 'friend_request_answer', self.friend_request_answer,
         }
 
         # Request's user
@@ -48,52 +49,59 @@ class EventConsumer(AsyncWebsocketConsumer):
                 except Exception:
                     logging.error(traceback.format_exc())
 
-    # Events functions here
+    # Received events functions here
     async def chat_message(self, content):
         if 'message' in content:
             await self.channel_layer.group_send(
                 self.chat_group,
                 {
-                    "type": "send.chat.message",
-                    "name": self.profile.name,
-                    "message": content['message'],
+                    'type': 'send.chat.message',
+                    'name': self.profile.name,
+                    'message': content['message'],
                 }
             )
 
     async def friend_list(self, content):
         friends = await get_friends(self.profile)
         for friend in friends:
-            await self.send(text_data=json.dumps({
-                'type': 'friend',
-                'profile_id': friend.pk,
-                'name': friend.name,
-                'avatar': friend.avatar.url,
-                'status': friend.status,
-                })
+            await self.channel_layer.group_send(
+                self.notifications_group,
+                {
+                    'type': 'send.friend',
+                    'profile_id': friend.pk,
+                    'name': friend.name,
+                    'avatar': friend.avatar.url,
+                    'status': friend.status,
+                }
             )
 
     async def friend_request(self, content):
         if 'profile_id' in content:
             to_profile = await get_id_profile(content['profile_id'])
             if to_profile is not None and to_profile.pk != self.profile.pk:
-                request = await create_friend_request(self.profile, to_profile)
+                request = await create_friend_request(from_profile=self.profile, to_profile=to_profile)
                 if request is not None:
                     await self.channel_layer.group_send(
                         "notifications_" + str(to_profile.pk),
                         {
-                            'type': 'send_friend_request',
+                            'type': 'send.friend.request',
                             'request_id': request.pk,
+                            'name': self.profile.name,
+                            'avatar': self.profile.avatar.url,
                         }
                     )
 
     async def friend_request_list(self, content):
         requests = await get_friend_requests(self.profile)
         for request in requests:
+            from_profile = await get_request_from_profile(request)
             await self.channel_layer.group_send(
                 self.notifications_group,
                 {
-                    'type': 'send_friend_request',
+                    'type': 'send.friend.request',
                     'request_id': request.pk,
+                    'name': from_profile.name,
+                    'avatar': from_profile.avatar.url,
                 }
             )
 
@@ -107,12 +115,22 @@ class EventConsumer(AsyncWebsocketConsumer):
             })
         )
 
+    async def send_friend(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'friend',
+            'profile_id': event['friend_id'],
+            'name': event['name'],
+            'avatar': event['avatar'],
+            'status': event['status'],
+            })
+        )
+
     async def send_friend_request(self, event):
         await self.send(text_data=json.dumps({
             'type': 'friend_request',
             'request_id': event['request_id'],
-            'name': self.profile.name,
-            'avatar': self.profile.avatar.url,
+            'name': event['name'],
+            'avatar': event['avatar'],
             })
         )
 
@@ -146,3 +164,7 @@ def create_friend_request(from_profile, to_profile):
 @database_sync_to_async
 def get_friend_requests(profile):
     return list(profile.friend_requests_received.all())
+
+@database_sync_to_async
+def get_request_from_profile(request):
+    return request.from_profile
