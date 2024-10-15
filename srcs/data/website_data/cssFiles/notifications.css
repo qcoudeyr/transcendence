@@ -1,0 +1,51 @@
+.notification-container {
+	position: fixed;
+	right: 0px;
+	top: 2.5%;
+	display: flex;
+	z-index: 300;
+	width: 5%;
+	text-align: center;
+	max-height: 5%;
+	min-height: 5%;
+	background: rgba(0, 0, 0, 0.42);
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(7.7px);
+	-webkit-backdrop-filter: blur(7.7px);
+	align-items: center;
+	border-radius: 5px;
+	transition: width 0.6s ease;
+}
+
+.notification-container:hover {
+	width: 20%;
+	text-align: left;
+}
+
+.notification-container:hover .notification{
+	opacity: 1;
+}
+
+.bell-notifcation{
+	width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+	position: center;
+    transition: transform 0.3s ease;
+	margin-left: 10px;
+	/*box-shadow: 0 0 10px rgba(14, 243, 243, 0.8); FOR WHEN UR NOTIFIED */
+}
+
+.notification {
+	position: relative;
+    left: 15px; /* Adjust as needed to control distance from avatar */
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+	/* color: #0ef3f3; Neon cyan */
+	/* text-shadow: 0 0 10px rgba(14, 243, 243, 0.8); */
+	color: #ff00ff; /*purple cyan */
+	text-shadow: 0 0 10px rgba(205, 14, 243, 0.8);
+	font-family: Arial, Helvetica, sans-serif;
+}
