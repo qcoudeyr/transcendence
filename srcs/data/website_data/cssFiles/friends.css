@@ -40,12 +40,30 @@
     transition: width 0.3s ease;
 }
 
-.add-friend-tittle{
+.add-friend-title{
 	left: 0px;
 	color: #0ef3f3;
 	font-size: 15px;
+	padding: 0px;
+	font-family: Arial, Helvetica, sans-serif;
 }
 
+.profile_id{
+	font-size: 12px;
+	opacity: 0;
+	color:#ffffff;
+	text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+	font-family: Arial, Helvetica, sans-serif;
+	padding-left: 1px;
+}
+
+.profile_id:hover{
+	color:#ffffff;
+}
+
+.add-friend-div{
+	margin-bottom: -10px;
+}
 
 .sidebar:hover {
 	width: 20%;
@@ -53,6 +71,14 @@
 }
 
 .sidebar:hover .friend-name {
+    opacity: 1; /* Show all names when hovering over the container */
+}
+
+.sidebar:hover .friend-name-request {
+    opacity: 1; /* Show all names when hovering over the container */
+}
+
+.sidebar:hover .profile_id {
     opacity: 1; /* Show all names when hovering over the container */
 }
 
@@ -99,6 +125,17 @@
 	text-shadow: 0 0 10px rgba(14, 243, 243, 0.8);
 }
 
+
+.friend-name-request {
+    position: relative;
+    left: 15px; /* Adjust as needed to control distance from avatar */
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+	color: #ef0ef3; /* Neon cyan */
+	text-shadow: 0 0 10px #ff00ff;
+}
+
 .friend:hover .avatar {
     transform: scale(1.5);
 }
@@ -119,6 +156,19 @@
 	padding: 20%;
 	margin-bottom: 20px;
 	gap: 30px;
+}
+
+.friend-request-container {
+	display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: smaller;
+	align-items: left;
+	padding-left: 10px;
+	margin-top: 20px;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
 .search-input {
