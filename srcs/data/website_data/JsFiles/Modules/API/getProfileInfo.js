@@ -76,7 +76,6 @@ export function getNameBioAndAvatar() {
 		return response.json(); // Parse the JSON from the response
 	})
 	.then(data => {
-		console.log('Avatar = ' + data.avatar);
 		localStorage.setItem("name", data.name);
 		localStorage.setItem("biography", data.biography);
 		localStorage.setItem("avatar_url", data.avatar);

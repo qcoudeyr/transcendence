@@ -118,13 +118,25 @@
 					<span class="friend-name">Friend's Name</span>
 					<div id="friends-options" class="actions"></div>
 				</div>
+				
 			</div>
+				<div class="friend-request-container">
+					<div id="friend" class="friend">
+						<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
+						<span class="friend-name-request">Friend's Name</span>
+						<div id="friends-options" class="actions"></div>
+					</div>
+				</div>
 		</div>
 		<div class="search-user">
-			<div>
-				<h3 class="add-friend-tittle">Add Friend:</h3>
+			<div class="add-friend-div">
+				<a class="add-friend-title">Add Friend:</a>
 				</div>
-			<input class="search-input" placeholder="Friend ID">
+				<div>
+				<a class="profile_id"> My ID: 452 </a>
+				</div>
+			<input id="search-input" class="search-input" placeholder="Friend ID"> </input>
+			
 		</div>
 	</div>
 
@@ -449,6 +461,7 @@
 	<script type="module" src="/JsFiles/Modules/API/patchUser.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/chatSend.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/websocket-open.js"></script>
+	<script type="module" src="/JsFiles/WebSocket/friendRequests.js"></script>
 	<script src="/JsFiles/WebSocket/friendsButtons.js"></script>
 	<!-- <script src="JsFiles/Pages/drag&drop.js"></script> -->
 	<script src="JsFiles/Pages/login.js"></script>

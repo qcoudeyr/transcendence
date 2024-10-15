@@ -5,7 +5,6 @@ import { getWebsocket } from "./websocket-open.js";
 	{
 		if (e.key === 'Enter') {
 			chatSend();
-			console.log('sent chat');
 		}
 	}
 

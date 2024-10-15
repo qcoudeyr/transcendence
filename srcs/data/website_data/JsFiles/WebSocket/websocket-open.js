@@ -26,21 +26,17 @@ export function websocketConnect()
 		return response.json(); // Parse the JSON from the response
 	})
 	.then(data => {
-		console.log('Uuid :' + data.uuid);
-		localStorage.setItem("websocketUrl", 'ws://localhost/ws/events/?uuid=' + data.uuid);
-		console.log(localStorage.getItem('websocketUrl'));
-
-		openWebsocket();
+		let socketurl = "ws://localhost/ws/events/?uuid=" + data.uuid;
+		openWebsocket(socketurl);
 	})
 	.catch(error => {
 		console.error('There was a problem with the fetch operation:', error);
 	});
 }
 
-function openWebsocket(){
+function openWebsocket(socketurl){
 	console.log('[Websocket] Connecting...');
-	socket = new WebSocket(localStorage.getItem('websocketUrl'));
-	localStorage.setItem('WebSocket_', socket);
+	socket = new WebSocket(socketurl);
 	socket.onopen = function(e) {
 		console.log("[WebSocket] Connection established !");
 	};
@@ -54,6 +50,10 @@ function openWebsocket(){
 			if (content.type === 'chat_message')
 			{
 					displayChatMessage(content.message);
+			}
+			if (content.type === 'friend')
+			{
+					displayFriendList(content.list);
 			}
 		}
 	}
