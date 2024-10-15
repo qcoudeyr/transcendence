@@ -17,6 +17,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             'friend_request_list': self.friend_request_list,
             'friend_request_answer': self.friend_request_answer,
             'friend_remove': self.friend_remove,
+            'chat_private_message': self.chat_private_message,
         }
 
         # Request's user
@@ -127,7 +128,6 @@ class EventConsumer(AsyncWebsocketConsumer):
                 await answer_friend_request(request=request, answer=answer)
                 if answer:
                     new_friend = await get_friend_request_from_profile(request)
-                    await self.join_friend_channel(friend_pk=new_friend.pk)
                     await self.channel_layer.group_send(
                         self.notifications_group,
                         {
@@ -136,6 +136,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                             'name': new_friend.name,
                             'avatar': new_friend.avatar.url,
                             'status': new_friend.status,
+                            'new_friend': True
                         }
                     )
                     await self.channel_layer.group_send(
@@ -146,6 +147,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                             'name': self.profile.name,
                             'avatar': self.profile.avatar.url,
                             'status': self.profile.status,
+                            'new_friend': True
                         }
                     )
 
@@ -154,7 +156,6 @@ class EventConsumer(AsyncWebsocketConsumer):
             request_profile = await get_id_profile(content['profile_id'])
             if (await are_friends(self.profile, request_profile)):
                 await remove_friendship(self.profile, request_profile)
-                await self.leave_friend_channel(friend_pk=request_profile.pk)
                 await self.channel_layer.group_send(
                     self.notifications_group,
                     {
@@ -170,6 +171,21 @@ class EventConsumer(AsyncWebsocketConsumer):
                     }
                 )
 
+    async def chat_private_message(self, content):
+        if ('profile_id' in content and 'message' in content):
+            profile_id = content['profile_id']
+            to_profile = await get_id_profile(profile_id)
+            if to_profile is not None and await are_friends(self.profile, to_profile):
+                await self.channel_layer.group_send(
+                    self.private_groups[to_profile.pk],
+                    {
+                        'type': 'send.private.chat.message',
+                        'message': content['message'],
+                        'name': self.profile.name,
+                        'profile_id': self.profile.pk,
+                    }
+                )
+
     # group_send functions here
     async def send_chat_message(self, event):
         message = f"[{event['name']}]: {event['message']}"
@@ -180,7 +196,19 @@ class EventConsumer(AsyncWebsocketConsumer):
             })
         )
 
+    async def send_private_chat_message(self, event):
+        message = f"[{event['name']}]: {event['message']}"
+
+        await self.send(text_data=json.dumps({
+            'type': 'chat_private_message',
+            'message': message,
+            'profile_id': event['profile_id'],
+            })
+        )
+
     async def send_friend(self, event):
+        if 'new_friend' in event and event['new_friend']:
+            await self.join_friend_channel(friend_pk=event['profile_id'])
         await self.send(text_data=json.dumps({
             'type': 'friend',
             'profile_id': event['profile_id'],
@@ -207,6 +235,7 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def remove_friend(self, event):
+        await self.leave_friend_channel(friend_pk=event['profile_id'])
         await self.send(text_data=json.dumps({
             'type': 'friend_remove',
             'profile_id': event['profile_id'],
