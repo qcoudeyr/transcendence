@@ -16,6 +16,7 @@
 	<link rel="stylesheet" type="text/css" href="cssFiles/goodbye-section.css">
 	<link rel="stylesheet" type="text/css" href="cssFiles/chat.css">
 	<link rel="stylesheet" type="text/css" href="cssFiles/friends.css">
+	<link rel="stylesheet" type="text/css" href="cssFiles/notifications.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P|VT323|Nova+Square&display=swap">
 	<script type="importmap">
 		{
@@ -34,17 +35,19 @@
     <div id="preloader">
         <div id="loader"></div>
     </div>
+	<!-- NOTIFICATIONS -->
+	<div id="notification-bell" class="notification-container">
+		<img src="./images/bell.svg" alt="Bell notification" class="bell-notifcation">
+		<span class="notification">You don't have any notifications</span>
+		<!-- <span class="notification">Luke invited you to a group</span> -->
+	</div>
+
 	<!-- CHAT -->
 	<div id="messagesDivContainer" class="chat-container">
 		<div id="messages" class="chat-messages">
 		</div>
 	</div>
 	<input id="chat-input" class="chat-input" placeholder="Type here..">
-
-
-
-	
-
 
 	<!-- FRIENDS -->
 	<div class="sidebar">
@@ -54,7 +57,6 @@
 					<img src="./images/logo.png" alt="Friend Avatar" class="avatar">
 					<span class="friend-name">Luke</span>
 				</div>
-
 				<div class="friend">
 					<img src="./images/trophy.png" alt="Friend Avatar" class="avatar">
 					<span class="friend-name">Geoffrey</span>
