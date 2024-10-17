@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sleep 5
+
 remove_migrations.sh
 
 IFS=', ' read -r -a apps <<< "$APPS"

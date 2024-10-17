@@ -1,4 +1,6 @@
 import { displayChatMessage } from "./chatDisplay.js";
+import { friendRequestReceive, friendRequestRemoveDiv } from "./friendRequests.js"
+import { displayFriendList } from "./friendDisplay.js";
 
 let socket;
 
@@ -39,22 +41,36 @@ function openWebsocket(socketurl){
 	socket = new WebSocket(socketurl);
 	socket.onopen = function(e) {
 		console.log("[WebSocket] Connection established !");
+		socket.send(JSON.stringify({
+            'type': 'friend_list',
+        }));
+		socket.send(JSON.stringify({
+            'type': 'friend_request_list',
+        }));
 	};
-
 	socket.onmessage = function(event) {
-		// alert(`[message] Data received from server: ${event.data}`);
+		alert(`[message] Data received from server: ${event.data}`);
 		console.log(JSON.parse(event.data));
 		const content = JSON.parse(event.data);
 		if ('type' in content)
 		{
 			if (content.type === 'chat_message')
 			{
-					displayChatMessage(content.message);
+				displayChatMessage(content.message);
+			}
+			if (content.type === 'friend_request')
+			{
+				friendRequestReceive(content.request_id, content.name, content.avatar);
 			}
 			if (content.type === 'friend')
 			{
-					displayFriendList(content.list);
+				displayFriendList(content.name, content.profile_id, content.avatar, content.status);
+			}
+			if (content.type === 'friend_request_remove')
+			{
+				friendRequestRemoveDiv(content.request_id);
 			}
 		}
 	}
+	
 }

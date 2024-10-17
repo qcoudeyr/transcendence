@@ -62,70 +62,38 @@
 					<span class="friend-name">Geoffrey</span>
 				</div>
 			</div>
-			<div class="friends-list">
+			<div id="friends-list" class="friends-list">
 				<div id="friend" class="friend">
 					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
 					<span class="friend-name">Friend's Name</span>
 					<div id="friends-options" class="actions"></div>
+					<div class="actions"></div>
 				</div>
 				<div id="friend" class="friend">
 					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
 					<span class="friend-name">Friend's Name</span>
 					<div id="friends-options" class="actions"></div>
+					<div class="actions"></div>
 				</div>
 				<div id="friend" class="friend">
 					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
 					<span class="friend-name">Friend's Name</span>
 					<div id="friends-options" class="actions"></div>
+					<div class="actions"></div>
 				</div>
 				<div id="friend" class="friend">
 					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
 					<span class="friend-name">Friend's Name</span>
 					<div id="friends-options" class="actions"></div>
+					<div class="actions"></div>
 				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				
 			</div>
-				<div class="friend-request-container">
-					<div id="friend" class="friend">
-						<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
+				<div id="request_lists" class="friend-request-container">
+					<!-- <div id="friend_request" class="friend">
+						<img src="./images/42icon.png" alt="Friend Avatar" class="avatar"> 				example of friend request
 						<span class="friend-name-request">Friend's Name</span>
 						<div id="friends-options" class="actions"></div>
-					</div>
+					</div> -->
 				</div>
 		</div>
 		<div class="search-user">
@@ -133,7 +101,7 @@
 				<a class="add-friend-title">Add Friend:</a>
 				</div>
 				<div>
-				<a class="profile_id"> My ID: 452 </a>
+				<a id="profile-id" class="profile_id"></a>
 				</div>
 			<input id="search-input" class="search-input" placeholder="Friend ID"> </input>
 			
@@ -462,6 +430,7 @@
 	<script type="module" src="/JsFiles/WebSocket/chatSend.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/websocket-open.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/friendRequests.js"></script>
+	<script type="module" src="/JsFiles/WebSocket/friendDisplay.js"></script>
 	<script src="/JsFiles/WebSocket/friendsButtons.js"></script>
 	<!-- <script src="JsFiles/Pages/drag&drop.js"></script> -->
 	<script src="JsFiles/Pages/login.js"></script>

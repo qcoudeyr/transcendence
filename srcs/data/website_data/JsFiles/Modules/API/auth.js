@@ -13,11 +13,11 @@ export function setupLogin() {
 	  })
 		.then((response) => response.ok ? response.json() : Promise.reject(response))
 		.then((data) => {
-			console.log('we are here idk why it reloads');
 			localStorage.setItem("accessToken", data.access);
 			localStorage.setItem("refreshToken", data.refresh);
-		  	location.reload(true);
+		  	// location.reload(true);
 			window.location.hash = "#home";
+			console.log('data.access=' + data.access);
 		})
 		.catch((error) => {
 		  displayError("Wrong Credentials, please try again.");

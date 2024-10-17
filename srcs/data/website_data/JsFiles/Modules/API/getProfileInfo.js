@@ -57,6 +57,7 @@ export function setNameBioAvatar()
 {
 		document.getElementById('userBiography').textContent = localStorage.getItem('biography');
 		document.getElementById('profileName').textContent = localStorage.getItem('name');
+		document.getElementById('profile-id').textContent = 'My ID:' + localStorage.getItem('id');
 		setAvatar();
 }
 
@@ -79,7 +80,7 @@ export function getNameBioAndAvatar() {
 		localStorage.setItem("name", data.name);
 		localStorage.setItem("biography", data.biography);
 		localStorage.setItem("avatar_url", data.avatar);
-
+		localStorage.setItem("id",data.id);
 		setNameBioAvatar();
 	})
 	.catch(error => {
