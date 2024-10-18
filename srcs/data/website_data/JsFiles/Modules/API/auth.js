@@ -15,7 +15,7 @@ export function setupLogin() {
 		.then((data) => {
 			localStorage.setItem("accessToken", data.access);
 			localStorage.setItem("refreshToken", data.refresh);
-		  	// location.reload(true);
+		  	location.reload(true);
 			window.location.hash = "#home";
 			console.log('data.access=' + data.access);
 		})

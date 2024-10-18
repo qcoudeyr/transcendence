@@ -8,7 +8,9 @@
 	z-index: 300;
 	width: 5%;
 	text-align: center;
+	height: 70%;
 	max-height: 70%;
+	min-height: 70%;
 	overflow-y: scroll;
 	transition: width 0.3s ease;
 }
@@ -25,19 +27,23 @@
     z-index: 200;
     pointer-events: auto;
     transition: width 0.3s ease;
+	-ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;
+	overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
 .search-user {
     height: 4%;
     min-width: 50px;
-    background: rgba(0, 0, 0, 0.42);
-	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-	backdrop-filter: blur(7.7px);
-	-webkit-backdrop-filter: blur(7.7px);
 	border-radius: 4px;
     z-index: 200;
     pointer-events: auto;
     transition: width 0.3s ease;
+	opacity: 0;
+}
+
+.sidebar:hover .search-user {
+	opacity: 1;
 }
 
 .add-friend-title{
@@ -48,6 +54,14 @@
 	font-family: Arial, Helvetica, sans-serif;
 }
 
+.add-friend-title:hover{
+	color: #0ef3f3;
+}
+
+.profile-id-div {
+	background: #ef0ef3;
+}
+
 .profile_id{
 	font-size: 12px;
 	opacity: 0;
@@ -55,16 +69,28 @@
 	text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 	font-family: Arial, Helvetica, sans-serif;
 	padding-left: 1px;
+	opacity: 0;
 }
 
 .profile_id:hover{
 	color:#ffffff;
+	opacity: 1;
 }
 
 .add-friend-div{
+	opacity: 0;
 	margin-bottom: -10px;
 }
 
+.add-friend-div:hover{
+	opacity: 1;
+	margin-bottom: -10px;
+}
+
+
+.sidebar:hover .add-friend-div {
+	opacity: 1;
+}
 .sidebar:hover {
 	width: 20%;
 	text-align: left;
@@ -82,6 +108,9 @@
     opacity: 1; /* Show all names when hovering over the container */
 }
 
+.sidebar:hover .search-input {
+    opacity: 1; /* Show all names when hovering over the container */
+}
 
 
 
@@ -105,6 +134,7 @@
 .friend:hover {
 	background-color: rgba(0, 0, 0, 0.209);
 	cursor: pointer;
+	border-radius: 5px;
 }
 
 .avatar {
@@ -180,33 +210,7 @@
 	color:#fcfcfc;
 	padding-left: 5px;
 	outline: none;
-}
-
-
-.invite-friend-button {
-    background-color: #ffffff0a;
-    border-radius: 4px;
-    box-shadow: rgba(0, 0, 0, .1) 0 2px 4px 0;
-    box-sizing: border-box;
-    color: #ffffff;
-    cursor: pointer;
-    outline: none;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: small;
-    padding: 2.5px 5px;
-    text-align: center;
-    margin-top: 5px; /* Space above the button */
-    transition: transform 150ms, box-shadow 150ms;
-	right: 0px;
-	margin-left: 50px;
-	margin-bottom: 5px; /* Space above the button */
-	text-shadow: none;
-}
-
-.invite-friend-button:hover {
-    box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
-    transform: translateY(-2px);
-	background: #ffffff0a;
+	opacity: 0;
 }
 
 .message-friend-button {
@@ -221,7 +225,7 @@
 	font-size: small;
     padding: 2.5px 5px;
     text-align: center;
-    margin-top: 5px; /* Space above the button */
+    margin: 2.5px; /* Space above the button */
     transition: transform 150ms, box-shadow 150ms;
 	right: 0px;
 	margin-left: 50px;
@@ -230,32 +234,6 @@
 }
 
 .message-friend-button:hover {
-    box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
-    transform: translateY(-2px);
-	background: #ffffff0a;
-}
-
-.remove-friend-button {
-	background-color: #ffffff0a;
-    border-radius: 4px;
-    box-shadow: rgba(0, 0, 0, .1) 0 2px 4px 0;
-    box-sizing: border-box;
-    color: #fff;
-    cursor: pointer;
-    outline: none;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: small;
-    padding: 2.5px 5px;
-    text-align: center;
-    margin-top: 5px; /* Space above the button */
-    transition: transform 150ms, box-shadow 150ms;
-	right: 0px;
-	margin-left: 50px;
-	margin-bottom: 5px; /* Space above the button */
-	text-shadow: none;
-}
-
-.remove-friend-button:hover {
     box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
     transform: translateY(-2px);
 	background: #ffffff0a;

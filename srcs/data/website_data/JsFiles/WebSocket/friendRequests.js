@@ -29,7 +29,6 @@ function friendRequestSend() {
 export function getFriendsAvatar(avatarUrl) {
     return new Promise((resolve, reject) => {
         let completeAvatarUrl = 'http://localhost' + avatarUrl;
-        console.log(localStorage.getItem('accessToken'));
 
         fetch(completeAvatarUrl, {
             method: 'GET',

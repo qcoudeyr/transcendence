@@ -1,6 +1,7 @@
 import { displayChatMessage } from "./chatDisplay.js";
 import { friendRequestReceive, friendRequestRemoveDiv } from "./friendRequests.js"
-import { displayFriendList } from "./friendDisplay.js";
+import { displayFriendList, removeFriend } from "./friendDisplay.js";
+import { displayPrivateMessage } from "./chatSend.js";
 
 let socket;
 
@@ -49,14 +50,18 @@ function openWebsocket(socketurl){
         }));
 	};
 	socket.onmessage = function(event) {
-		alert(`[message] Data received from server: ${event.data}`);
-		console.log(JSON.parse(event.data));
+		// alert(`[message] Data received from server: ${event.data}`);
+		// console.log(JSON.parse(event.data));
 		const content = JSON.parse(event.data);
 		if ('type' in content)
 		{
 			if (content.type === 'chat_message')
 			{
 				displayChatMessage(content.message);
+			}
+			if (content.type === 'chat_private_message')
+			{
+				displayPrivateMessage(content.message, content.profile_id);
 			}
 			if (content.type === 'friend_request')
 			{
@@ -69,6 +74,10 @@ function openWebsocket(socketurl){
 			if (content.type === 'friend_request_remove')
 			{
 				friendRequestRemoveDiv(content.request_id);
+			}
+			if (content.type === 'friend_remove')
+			{
+				removeFriend(content.profile_id);
 			}
 		}
 	}

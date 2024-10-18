@@ -57,7 +57,7 @@ export function setNameBioAvatar()
 {
 		document.getElementById('userBiography').textContent = localStorage.getItem('biography');
 		document.getElementById('profileName').textContent = localStorage.getItem('name');
-		document.getElementById('profile-id').textContent = 'My ID:' + localStorage.getItem('id');
+		document.getElementById('profile-id').textContent = 'My ID: ' + localStorage.getItem('id');
 		setAvatar();
 }
 
