@@ -37,7 +37,7 @@
     </div>
 	<!-- NOTIFICATIONS -->
 	<div id="notification-bell" class="notification-container">
-		<img src="./images/bell.svg" alt="Bell notification" class="bell-notifcation">
+		<img src="./images/colored-bell.svg" alt="Bell notification" class="bell-notifcation">
 		<span class="notification">You don't have any notifications</span>
 		<!-- <span class="notification">Luke invited you to a group</span> -->
 	</div>
@@ -62,78 +62,28 @@
 					<span class="friend-name">Geoffrey</span>
 				</div>
 			</div>
-			<div class="friends-list">
-				<div id="friend" class="friend">
+			<div id="friends-list" class="friends-list">
+				<!-- <div id="friend" class="friend">
 					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
 					<span class="friend-name">Friend's Name</span>
 					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				<div id="friend" class="friend">
-					<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Friend's Name</span>
-					<div id="friends-options" class="actions"></div>
-				</div>
-				
+					<div class="actions"></div>
+				</div> -->
 			</div>
-				<div class="friend-request-container">
-					<div id="friend" class="friend">
-						<img src="./images/42icon.png" alt="Friend Avatar" class="avatar">
+				<div id="request_lists" class="friend-request-container">
+					<!-- <div id="friend_request" class="friend">
+						<img src="./images/42icon.png" alt="Friend Avatar" class="avatar"> 				example of friend request
 						<span class="friend-name-request">Friend's Name</span>
 						<div id="friends-options" class="actions"></div>
-					</div>
+					</div> -->
 				</div>
 		</div>
 		<div class="search-user">
 			<div class="add-friend-div">
 				<a class="add-friend-title">Add Friend:</a>
 				</div>
-				<div>
-				<a class="profile_id"> My ID: 452 </a>
+				<div class="profle-id-div">
+				<a id="profile-id" class="profile_id"></a>
 				</div>
 			<input id="search-input" class="search-input" placeholder="Friend ID"> </input>
 			
@@ -204,7 +154,6 @@
         </div>
     </section>
     <section id="playing" class="playing-section">
-        <button id="resizeButton">Big Screen</button>
 		<button id="unloadButton">Leave</button>
         <div class="scoreboard">
                 <h1>Scoreboard</h1>
@@ -391,7 +340,7 @@
 					<!-- USER EDIT FORM -->
 					<div class="edit-user-form-text fade-out">
 						<h2 class="blueNeonHeader">Edit User</h2>
-						<form>
+						<form class="profile-form">
 							<input type="text" id="usernameInput" placeholder="Username" required>
 							<input type="email" id="emailInput" placeholder="Email" required>
 							<input type="password" id="passwordUserInput" placeholder="Password" required>
@@ -462,6 +411,7 @@
 	<script type="module" src="/JsFiles/WebSocket/chatSend.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/websocket-open.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/friendRequests.js"></script>
+	<script type="module" src="/JsFiles/WebSocket/friendDisplay.js"></script>
 	<script src="/JsFiles/WebSocket/friendsButtons.js"></script>
 	<!-- <script src="JsFiles/Pages/drag&drop.js"></script> -->
 	<script src="JsFiles/Pages/login.js"></script>

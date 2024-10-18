@@ -1,12 +1,9 @@
 document.querySelectorAll('.friend').forEach((friendElement) => {
     let buttonsVisible = false; // Track button visibility for each friend
 
-    friendElement.onclick = function(e) {
+    friendElement.onmouseenter = function(e) {
         const actionButtons = friendElement.querySelector('.actions');
         if (!buttonsVisible) {
-            // Create and append buttons if not visible
-            console.log("Buttons appeared for this friend");
-
             const invite = document.createElement('button');
             invite.classList.add('invite-friend-button');
             invite.textContent = 'Invite';

@@ -29,17 +29,41 @@
 	padding-top: 10px;
 }
 
+.private-message {
+	display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+	color: #ce1599;
+	text-shadow: 0 0 3px rgba(238, 37, 231, 0.8);
+	cursor: pointer;
+}
+
+/* Optional: add a hover effect for better visual feedback */
+.private-message:hover {
+    background-color: #f0f0f0;  /* Light background on hover */
+    border-left: 2px solid pink; /* Optional border on hover */
+}
+
+.private-message-id {
+    display: block;  /* Makes sure the profile ID is on a new line */
+    font-size: 10px;  /* Really small text */
+    color: gray;  /* Subtle color */
+    margin-top: 0px;  /* Only 1px spacing from the message */
+    line-height: 0;  /* Tightens the vertical spacing */
+}
+
 .chat-input {
 	position: fixed;
 	height: 30px;
-	width: 300px;
+	width: 25%;
 	bottom: 0px;
 	left: 0px;
 	right: 0px;
-background: rgba(0, 0, 0, 0.42);
-box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-backdrop-filter: blur(7.7px);
--webkit-backdrop-filter: blur(7.7px);
+	background: rgba(0, 0, 0, 0.42);
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(7.7px);
+	-webkit-backdrop-filter: blur(7.7px);
 	z-index: 200;
 	border: 0px;
 	color:#fcfcfc;

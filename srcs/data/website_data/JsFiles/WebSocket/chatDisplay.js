@@ -9,3 +9,4 @@ export function displayChatMessage(messageContent)
 	messagesContainer.scrollTo({top: messagesContainer.scrollHeight, behavior: "smooth"});
 
 }
+

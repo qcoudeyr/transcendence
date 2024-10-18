@@ -186,33 +186,6 @@ function goHome() {
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM fully loaded and parsed');
-  const button = document.getElementById('resizeButton');
-  const splineContainer = document.getElementById('splineContainer');
-
-  if (button && splineContainer) {
-    button.addEventListener('click', () => {
-      if (splineContainer.classList.contains('small')) {
-        splineContainer.classList.remove('small');
-        splineContainer.classList.add('big');
-        button.textContent = 'Small Screen';
-        renderer.setSize(800, 600);
-        camera.aspect = 800 / 600;
-      } else if (splineContainer.classList.contains('big')) {
-        splineContainer.classList.remove('big');
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.aspect = window.innerWidth / window.innerHeight;
-        button.textContent = 'Big Screen';
-      } else {
-        splineContainer.classList.add('small');
-        renderer.setSize(640, 480);
-        camera.aspect = 640 / 480;
-        button.textContent = 'Full Screen';
-      }
-
-      camera.updateProjectionMatrix();
-    });
-  }
-
   const unloadButton = document.getElementById('unloadButton');
   if (unloadButton) {
     unloadButton.addEventListener('click', () => {

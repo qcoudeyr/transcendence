@@ -162,12 +162,12 @@ nav a {
 }
 
 .redNeonText {
-    color: #7a04eb;
-    text-shadow:
-        /* White glow */
-        0 0 5px #f36363,
-        0 0 5px #fa4141,
-        0 0 5px #ffffff;
+	font-family: 'EB Neon';
+    src: url('neonfonts.TTF') format('woff2'), 
+         url('neonfonts.TTF') format('woff');
+		 color: #ff00ff; /* Neon pink color */
+		 text-shadow: 0 0 5px #000000, 0 0 10px #ff00ff, 0 0 20px #ffffff; /* Neon glow effect */
+	font-size: 2px;
 }
 
 .pinkNeonText {
