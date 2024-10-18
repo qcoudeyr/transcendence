@@ -54,6 +54,7 @@ export function navigateToSection(sections, links) {
 	const chatContainer = document.querySelector('.chat-container');
 	const chatInput = document.querySelector('.chat-input');
 	const sidebar = document.querySelector('.sidebar');
+	const notification = document.querySelector('.notification-container');
   
 	function update() {
 	  if (localStorage.getItem("accessToken")) {
@@ -64,9 +65,9 @@ export function navigateToSection(sections, links) {
 		statslink.style.display = "inline-block";
 		chatContainer.style.display = "fixed";
 		chatInput.style.display = "fixed";
-		sidebar.style.display = "fixed"
+		sidebar.style.display = "fixed";
+		notification.style.opacity = "fixed";
 	  } else {
-		
 		connexionLink.style.display = "inline-block";
 		profileLink.style.display = "none";
 		playlink.style.display = "none";
@@ -74,12 +75,11 @@ export function navigateToSection(sections, links) {
 		statslink.style.display = "none";
 		chatContainer.style.display = "none";
 		chatInput.style.display = "none";
-		sidebar.style.display = "none"
+		sidebar.style.display = "none";
 	  }
 	}
   
 	update();
-  
 	window.addEventListener("storage", update);
   }
   
@@ -93,11 +93,9 @@ export function navigateToSection(sections, links) {
   }
   
   export function hidePreloaderAfterLoad() {
-    document.addEventListener("DOMContentLoaded", function() {
         const preloader = document.getElementById('preloader');
         // Simulate loading time
         setTimeout(() => {
             preloader.style.display = 'none';
         }, 3000); // Adjust the timeout as needed
-    });
 }

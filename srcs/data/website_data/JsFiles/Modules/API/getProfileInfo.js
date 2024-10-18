@@ -37,16 +37,19 @@ function setAvatar() {
         }
     })
     .then(response => {
-        // Check if the response is okay (status in the range 200-299)
         if (!response.ok) {
             throw new Error('Network response was not ok ' + response.statusText);
         }
-        return response.blob(); // Get the response as a Blob (for binary data like an image)
+        return response.blob();
     })
     .then(blob => {
-        const imageURL = URL.createObjectURL(blob); // Create a URL for the image
-        localStorage.setItem('avatar_img', imageURL); // Store the image URL in localStorage
-        document.getElementById('profileImage').src = imageURL; // Set the src of the image element
+        const reader = new FileReader();
+        reader.readAsDataURL(blob); // Convert Blob to Base64
+        reader.onloadend = function() {
+            const base64data = reader.result;
+            localStorage.setItem('avatar_img', base64data); // Store Base64 image in localStorage
+            document.getElementById('profileImage').src = base64data; // Set the src of the image element
+        };
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);

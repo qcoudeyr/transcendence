@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<link rel="icon" type="image/png" href="/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transcendance</title>
+	<link rel="icon" type="image/png" href="/images/logo.png">
     <link rel="stylesheet" type="text/css" href="cssFiles/styles.css">
     <link rel="stylesheet" type="text/css" href="cssFiles/loader.css">
     <link rel="stylesheet" type="text/css" href="cssFiles/login.css">
@@ -127,20 +127,6 @@
                 <source src="sounds/switch-sound.mp3" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
-            <!-- <div class="switch-container">
-                <div class="checkbox-wrapper-63">
-                    <label class="switch">
-                        <input type="checkbox" id="switch1" checked onclick="toggleSwitch(1)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="checkbox-wrapper-63">
-                    <label class="switch">
-                        <input type="checkbox" id="switch2" onclick="toggleSwitch(2)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div> -->
             <button id="playButton" class="button-82-pushable" role="button">
                 <span class="button-82-shadow"></span>
                 <span class="button-82-edge"></span>
@@ -217,24 +203,26 @@
             <div class="stats_player">
                 <div class="stats_upper-part">
                     <div class="stats_info-area" id="test">
-                        <label class="stats_song-info" id="stats_song-info-1">
-                            <div class="stats_title">GAMES LOST</div>
-                            <div class="stats_sub-line">
-                                <div class="stats_subtitle">45</div>
-                            </div>
-                        </label>
-                        <label class="stats_song-info" id="stats_song-info-2">
-                            <div class="stats_title">GAMES WON</div>
-                            <div class="stats_sub-line">
-                                <div class="stats_subtitle">67</div>
-                            </div>
-                        </label>
-                        <label class="stats_song-info" id="stats_song-info-3">
-                            <div class="stats_title">HOURS PLAYED</div>
-                            <div class="stats_sub-line">
-                                <div class="stats_subtitle">7</div>
-                            </div>
-                        </label>
+						<div class="stats_song-info" id="stats_song-info-1">
+							<div class="stats_title">GAMES LOST</div>
+							<div class="stats_sub-line">
+								<div class="stats_subtitle">45</div>
+							</div>
+						</div>
+					</div>
+					<div class="stats_song-info" id="stats_song-info-2">
+						<div class="stats_title">GAMES WON</div>
+						<div class="stats_sub-line">
+							<div class="stats_subtitle">67</div>
+						</div>
+					</div>
+					
+					<div class="stats_song-info" id="stats_song-info-3">
+						<div class="stats_title">HOURS PLAYED</div>
+						<div class="stats_sub-line">
+							<div class="stats_subtitle">7</div>
+						</div>
+					</div>
                     </div>
                 </div>
             </div>
@@ -413,7 +401,6 @@
 	<script type="module" src="/JsFiles/WebSocket/friendRequests.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/friendDisplay.js"></script>
 	<script src="/JsFiles/WebSocket/friendsButtons.js"></script>
-	<!-- <script src="JsFiles/Pages/drag&drop.js"></script> -->
 	<script src="JsFiles/Pages/login.js"></script>
 	<script src="JsFiles/Pages/profile.js"></script>
     <script type="module" src="JsFiles/3d/3d.js"></script>
