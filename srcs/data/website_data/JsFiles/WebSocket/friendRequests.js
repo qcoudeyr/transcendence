@@ -1,4 +1,6 @@
 import { getWebsocket } from "./websocket-open.js";
+import { notificationReset } from "./notifications-displays.js"
+
 
 	document.getElementById('search-input').focus();
 	document.getElementById('search-input').onkeyup = function(e)
@@ -116,6 +118,7 @@ export function friendRequestReceive(request_id, name, avatar) {
 
 function handleFriendRequestResponse(request_id, isAccepted) {
     const socket = getWebsocket();
+	notificationReset();
 
     socket.send(JSON.stringify({
         "type": "friend_request_answer",

@@ -76,6 +76,7 @@ export function navigateToSection(sections, links) {
 		chatContainer.style.display = "none";
 		chatInput.style.display = "none";
 		sidebar.style.display = "none";
+		notification.style.display = "none";
 	  }
 	}
   
