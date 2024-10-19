@@ -20,6 +20,9 @@ export function displayFriendList(name, profile_id, avatar, status) {
 	nameSpan.textContent = name;
 	nameSpan.classList.add('friend-name');
 
+	const actionsDiv = document.createElement('div');
+	actionsDiv.id = 'friends-options';
+	actionsDiv.classList.add('actions');
 
     const friendStatusInfo = document.createElement('a');
     friendStatusInfo.classList.add('friend-status');
@@ -29,20 +32,21 @@ export function displayFriendList(name, profile_id, avatar, status) {
 		friendStatusInfo.style.top = "6px";
 		nameSpan.style.color = "#ff00ff"
 		nameSpan.style.textShadow = '0 0 10px #ff00ff';
-    } else if (friendStatusInfo.textContent === "Online") {
+    } else if (friendStatusInfo.textContent === "Online" || friendStatusInfo.textContent === "In Game") {
         friendStatusInfo.style.color = "#0ef3f3";
 		nameSpan.style.color = "#0ef3f3"
 		nameSpan.style.textShadow = '0 0 10px rgba(14, 243, 243, 0.8)';
+		
 		const messageButton = document.createElement('button');
 		messageButton.textContent = 'Message';
 		messageButton.classList.add('message-friend-button');
 		messageButton.addEventListener('click', () => messageFriend(profile_id));
-
 		const inviteGroupeButton = document.createElement('button');
 		inviteGroupeButton.textContent = 'Invite';
 		inviteGroupeButton.classList.add('message-friend-button');
 		inviteGroupeButton.addEventListener('click', () => inviteToGroup(profile_id));
 		actionsDiv.appendChild(inviteGroupeButton);
+		actionsDiv.appendChild(messageButton);
     	
     }
 
@@ -50,9 +54,7 @@ export function displayFriendList(name, profile_id, avatar, status) {
 	
 
 
-    const actionsDiv = document.createElement('div');
-    actionsDiv.id = 'friends-options';
-    actionsDiv.classList.add('actions');
+    
 
     
 
