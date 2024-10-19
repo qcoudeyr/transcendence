@@ -16,7 +16,28 @@ export function displayFriendList(name, profile_id, avatar, status) {
     friend.id = 'friend_' + profile_id;
     friend.classList.add('friend');
 
+	const nameSpan = document.createElement('span');
+	nameSpan.textContent = name;
+	nameSpan.classList.add('friend-name');
+
+
+    const friendStatusInfo = document.createElement('a');
+    friendStatusInfo.classList.add('friend-status');
+    friendStatusInfo.textContent = status;
+    if (friendStatusInfo.textContent === "OF") {
+        friendStatusInfo.style.color = "#ff00ff";
+		nameSpan.style.color = "#ff00ff"
+		nameSpan.style.textShadow = '0 0 10px #ff00ff';
+    } else if (friendStatusInfo.textContent === "ON") {
+        friendStatusInfo.style.color = "#0ef3f3";
+		nameSpan.style.color = "#0ef3f3"
+		nameSpan.style.textShadow = '0 0 10px rgba(14, 243, 243, 0.8)';
+    }
+
     // Create actions div with buttons
+	
+
+
     const actionsDiv = document.createElement('div');
     actionsDiv.id = 'friends-options';
     actionsDiv.classList.add('actions');
@@ -57,17 +78,19 @@ export function displayFriendList(name, profile_id, avatar, status) {
             avatarImg.src = './default-avatar.png'; // Set a default avatar in case of error
         });
 
-    // Create the span for the friend's name
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = name;
-    nameSpan.classList.add('friend-name');
-
     // Append elements to the friend container
     friend.appendChild(nameSpan);
+    friend.appendChild(friendStatusInfo);
     friend.appendChild(actionsDiv);
 
-    // Append the friend container to the friend list
-    friend_list.appendChild(friend);    
+    // Append or prepend the friend container based on the status
+    if (status === "ON") {
+        // Prepend online friends to the top
+        friend_list.prepend(friend);
+    } else {
+        // Append offline friends to the end
+        friend_list.appendChild(friend);
+    }
 }
 
 
