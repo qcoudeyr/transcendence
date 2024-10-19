@@ -6,6 +6,7 @@ import { websocketConnect } from './WebSocket/websocket-open.js';
 
 document.addEventListener("DOMContentLoaded", function () {
 	hidePreloaderAfterLoad();
+	
 	// Navigation logic
 	const sections = document.querySelectorAll("section");
 	const links = document.querySelectorAll("nav a");
@@ -26,7 +27,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	// Set up auth forms
 	setupLogin();
 	setupRegister();
-
 	// all info in profile goes in this
 	if (localStorage.getItem('accessToken') && localStorage.getItem('refreshToken')){
 		window.onload = function() {

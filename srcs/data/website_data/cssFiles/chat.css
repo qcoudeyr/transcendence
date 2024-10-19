@@ -37,12 +37,12 @@
 	color: #ce1599;
 	text-shadow: 0 0 3px rgba(238, 37, 231, 0.8);
 	cursor: pointer;
+	border-radius: 4px;
 }
 
 /* Optional: add a hover effect for better visual feedback */
 .private-message:hover {
-    background-color: #f0f0f0;  /* Light background on hover */
-    border-left: 2px solid pink; /* Optional border on hover */
+    background-color: #f0f0f004;  /* Light background on hover */
 }
 
 .private-message-id {
@@ -50,7 +50,7 @@
     font-size: 10px;  /* Really small text */
     color: gray;  /* Subtle color */
     margin-top: 0px;  /* Only 1px spacing from the message */
-    line-height: 0;  /* Tightens the vertical spacing */
+    line-height: 1;  /* Tightens the vertical spacing */
 }
 
 .chat-input {

@@ -2,6 +2,7 @@ import { displayChatMessage } from "./chatDisplay.js";
 import { friendRequestReceive, friendRequestRemoveDiv } from "./friendRequests.js"
 import { displayFriendList, removeFriend } from "./friendDisplay.js";
 import { displayPrivateMessage } from "./chatSend.js";
+import { friendRequestNotification } from "./notifications-displays.js";
 
 let socket;
 
@@ -66,6 +67,7 @@ function openWebsocket(socketurl){
 			if (content.type === 'friend_request')
 			{
 				friendRequestReceive(content.request_id, content.name, content.avatar);
+				friendRequestNotification(content.name);
 			}
 			if (content.type === 'friend')
 			{

@@ -34,7 +34,7 @@
 	position: center;
     transition: transform 0.3s ease;
 	margin-left: 10px;
-	box-shadow: 0 0 10px rgba(14, 243, 243, 0.8); /*FOR WHEN UR NOTIFIED*/
+	/* box-shadow: 0 0 10px rgba(14, 243, 243, 0.8); FOR WHEN UR NOTIFIED */
 }
 
 .notification {
@@ -43,9 +43,12 @@
     opacity: 0;
     white-space: nowrap;
     transition: opacity 0.3s ease;
-	color: #0ef3f3; /*Neon cyan*/
-	text-shadow: 0 0 10px rgba(14, 243, 243, 0.8);
-	/* color: #ff00ff; /*purple cyan */
-	/* /* text-shadow: 0 0 10px rgba(205, 14, 243, 0.8);  */
+	/* color: #0ef3f3;
+	text-shadow: 0 0 10px rgba(14, 243, 243, 0.8); */
+	color: #ff00ff; /*purple cyan */
+	text-shadow: 0 0 10px rgba(205, 14, 243, 0.8); 
 	font-family: Arial, Helvetica, sans-serif;
+	font-size: smaller;
+	margin-right: 5px;
+	padding-right: 5px;
 }
