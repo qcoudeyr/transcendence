@@ -86,6 +86,8 @@ export function friendRequestReceive(request_id, name, avatar) {
     const nameSpan = document.createElement('span');
     nameSpan.textContent = name; // Set friend's name from the parameter
     nameSpan.classList.add('friend-name-request');
+	nameSpan.style.color = "white";
+	nameSpan.style.textShadow = '0 0 10px #ffffff';
 
     // Create the actions div (used for buttons like accept/reject)
     const actionsDiv = document.createElement('div');
