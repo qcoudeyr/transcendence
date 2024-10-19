@@ -24,12 +24,12 @@ export function displayFriendList(name, profile_id, avatar, status) {
     const friendStatusInfo = document.createElement('a');
     friendStatusInfo.classList.add('friend-status');
     friendStatusInfo.textContent = status;
-    if (friendStatusInfo.textContent === "OF") {
+    if (friendStatusInfo.textContent === "Offline") {
         friendStatusInfo.style.color = "#ff00ff";
 		friendStatusInfo.style.top = "6px";
 		nameSpan.style.color = "#ff00ff"
 		nameSpan.style.textShadow = '0 0 10px #ff00ff';
-    } else if (friendStatusInfo.textContent === "ON") {
+    } else if (friendStatusInfo.textContent === "Online") {
         friendStatusInfo.style.color = "#0ef3f3";
 		nameSpan.style.color = "#0ef3f3"
 		nameSpan.style.textShadow = '0 0 10px rgba(14, 243, 243, 0.8)';
