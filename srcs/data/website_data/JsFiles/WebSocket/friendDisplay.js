@@ -26,12 +26,24 @@ export function displayFriendList(name, profile_id, avatar, status) {
     friendStatusInfo.textContent = status;
     if (friendStatusInfo.textContent === "OF") {
         friendStatusInfo.style.color = "#ff00ff";
+		friendStatusInfo.style.top = "6px";
 		nameSpan.style.color = "#ff00ff"
 		nameSpan.style.textShadow = '0 0 10px #ff00ff';
     } else if (friendStatusInfo.textContent === "ON") {
         friendStatusInfo.style.color = "#0ef3f3";
 		nameSpan.style.color = "#0ef3f3"
 		nameSpan.style.textShadow = '0 0 10px rgba(14, 243, 243, 0.8)';
+		const messageButton = document.createElement('button');
+		messageButton.textContent = 'Message';
+		messageButton.classList.add('message-friend-button');
+		messageButton.addEventListener('click', () => messageFriend(profile_id));
+
+		const inviteGroupeButton = document.createElement('button');
+		inviteGroupeButton.textContent = 'Invite';
+		inviteGroupeButton.classList.add('message-friend-button');
+		inviteGroupeButton.addEventListener('click', () => inviteToGroup(profile_id));
+		actionsDiv.appendChild(inviteGroupeButton);
+    	
     }
 
     // Create actions div with buttons
@@ -42,15 +54,7 @@ export function displayFriendList(name, profile_id, avatar, status) {
     actionsDiv.id = 'friends-options';
     actionsDiv.classList.add('actions');
 
-    const messageButton = document.createElement('button');
-    messageButton.textContent = 'Message';
-    messageButton.classList.add('message-friend-button');
-    messageButton.addEventListener('click', () => messageFriend(profile_id));
-
-    const inviteGroupeButton = document.createElement('button');
-    inviteGroupeButton.textContent = 'Invite';
-    inviteGroupeButton.classList.add('message-friend-button');
-    inviteGroupeButton.addEventListener('click', () => inviteToGroup(profile_id));
+    
 
     const removeFriendButton = document.createElement('button');
     removeFriendButton.textContent = 'Remove';
@@ -58,8 +62,7 @@ export function displayFriendList(name, profile_id, avatar, status) {
     removeFriendButton.addEventListener('click', () => removeFriend(profile_id));
 
     // Append buttons to actions div
-    actionsDiv.appendChild(inviteGroupeButton);
-    actionsDiv.appendChild(messageButton);
+    
     actionsDiv.appendChild(removeFriendButton);
 
     // Create the avatar image element
