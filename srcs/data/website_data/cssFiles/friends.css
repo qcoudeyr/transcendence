@@ -112,9 +112,6 @@
     opacity: 1; /* Show all names when hovering over the container */
 }
 
-
-
-
 .friends-list {
     display: flex;
     flex-direction: column;
@@ -168,6 +165,10 @@
 
 .friend:hover .avatar {
     transform: scale(1.5);
+}
+
+.friend:hover .friend-status {
+    opacity: 1;
 }
 
 .actions {
@@ -237,4 +238,14 @@
     box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
     transform: translateY(-2px);
 	background: #ffffff0a;
+}
+
+.friend-status {
+    position: absolute; /* Absolute positioning relative to .friend */
+    top: 30px; /* Position it just below the avatar */
+    left: 55px; /* Align it to the left */
+    font-size: 8.5px;  /* Small text size */
+    color: #ff00ff;
+	opacity: 0;
+    transition: transform 0.3s ease; /* Smoothly adjust position on hover */
 }
