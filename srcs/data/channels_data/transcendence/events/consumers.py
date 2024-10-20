@@ -19,6 +19,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             'friend_remove': self.friend_remove,
             'chat_private_message': self.chat_private_message,
             'group_request': self.group_request,
+            'group_list': self.group_list,
         }
 
         # Request's user
@@ -72,7 +73,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-        # Clean group requests
+        # Clear group requests
         await delete_profile_group_requests_received(self.profile)
         await delete_profile_group_requests_sent(self.profile)
 
@@ -237,6 +238,21 @@ class EventConsumer(AsyncWebsocketConsumer):
                     }
                 )
 
+    async def group_list(self, content):
+        group_members = await get_profile_group_members(self.profile)
+        for group_member in group_members:
+            await self.channel_layer.group_send(
+                self.notifications_group,
+                {
+                    'type': 'send.group.member',
+                    'profile_id': group_member.pk,
+                    'name': group_member.name,
+                    'avatar': group_member.avatar.url,
+                    'status': group_member.status,
+                    'is_chief': await is_group_chief(group_member),
+                }
+            )
+
     # group_send functions here
     async def send_chat_message(self, event):
         message = event['message'].strip()
@@ -316,6 +332,17 @@ class EventConsumer(AsyncWebsocketConsumer):
             'request_id': group_request.pk,
             'name': event['name'],
             'avatar': event['avatar'],
+            })
+        )
+
+    async def send_group_member(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'group_member',
+            'profile_id': event['profile_id'],
+            'name': event['name'],
+            'avatar': event['avatar'],
+            'status': event['status'],
+            'is_chief': event['is_chief'],
             })
         )
 
@@ -445,3 +472,16 @@ def are_grouped(profile_1, profile_2):
     if profile_1.group == profile_2.group:
         return True
     return False
+
+@database_sync_to_async
+def is_group_chief(profile):
+    if profile.group is not None:
+        if profile.group.chief == profile:
+            return True
+    return False
+
+@database_sync_to_async
+def get_profile_group_members(profile):
+    if profile.group == None:
+        return []
+    return list(profile.group.members.all())
