@@ -15,8 +15,8 @@ function initScene() {
   // Create the scene
   scene = new THREE.Scene();
 
-  const teste = new THREE.AmbientLight(0x404040); // soft white light
-  scene.add(teste);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Bright white light, intensity 1.5
+	scene.add(ambientLight);
 
 //   const light = new THREE.RectAreaLight(0xff0000, 1, 100, 100);
 //   light.position.set(680, 220, -200);
