@@ -5,6 +5,7 @@ import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import async_to_sync
+from django.db import transaction
 
 from profiles.models import Profile, FriendRequest, GroupRequest, Group
 
@@ -460,10 +461,12 @@ class EventConsumer(AsyncWebsocketConsumer):
 
 # Database access from consumers
 @database_sync_to_async
+@transaction.atomic
 def get_user_profile(user):
     return user.profile
 
 @database_sync_to_async
+@transaction.atomic
 def get_id_profile(id):
     try:
         profile = Profile.objects.get(pk=id)
@@ -472,10 +475,12 @@ def get_id_profile(id):
     return profile
 
 @database_sync_to_async
+@transaction.atomic
 def get_profile_friends(profile):
     return list(profile.friends.all())
 
 @database_sync_to_async
+@transaction.atomic
 def create_friend_request(from_profile, to_profile):
     request, created = FriendRequest.objects.get_or_create(
         from_profile=from_profile,
@@ -486,19 +491,23 @@ def create_friend_request(from_profile, to_profile):
     return None
 
 @database_sync_to_async
+@transaction.atomic
 def create_group_request(from_profile, to_profile, to_group):
     group = GroupRequest.objects.create(from_profile=from_profile, to_profile=to_profile, to_group=to_group)
     return group
 
 @database_sync_to_async
+@transaction.atomic
 def get_profile_friend_requests(profile):
     return list(profile.friend_requests_received.all())
 
 @database_sync_to_async
+@transaction.atomic
 def get_friend_request_from_profile(request):
     return request.from_profile
 
 @database_sync_to_async
+@transaction.atomic
 def get_request_id_friend_request(request_id):
     try:
         request = FriendRequest.objects.get(pk=request_id)
@@ -507,6 +516,7 @@ def get_request_id_friend_request(request_id):
     return request
 
 @database_sync_to_async
+@transaction.atomic
 def answer_friend_request(request, answer):
     if answer:
         request.to_profile.friends.add(request.from_profile)
@@ -521,28 +531,34 @@ def answer_friend_request(request, answer):
     request.delete()
 
 @database_sync_to_async
+@transaction.atomic
 def are_friends(profile1, profile2):
     return profile1.friends.filter(pk=profile2.pk).exists()
 
 @database_sync_to_async
+@transaction.atomic
 def remove_friendship(profile1, profile2):
     profile1.friends.remove(profile2)
 
 @database_sync_to_async
+@transaction.atomic
 def update_profile_status(profile, status):
     profile.status = status
     profile.save()
 
 @database_sync_to_async
+@transaction.atomic
 def get_profile_group(profile):
     return profile.group
 
 @database_sync_to_async
+@transaction.atomic
 def join_default_group(profile):
     profile.group, created = Group.objects.get_or_create(chief=profile)
     profile.save()
 
 @database_sync_to_async
+@transaction.atomic
 def leave_profile_group(profile):
     group = profile.group
     if group:
@@ -557,6 +573,7 @@ def leave_profile_group(profile):
                 group.delete()
 
 @database_sync_to_async
+@transaction.atomic
 def delete_profile_group_request_received(profile):
     try:
         group_request = GroupRequest.objects.get(pk=profile.group_request_received.pk)
@@ -565,18 +582,21 @@ def delete_profile_group_request_received(profile):
         pass
 
 @database_sync_to_async
+@transaction.atomic
 def delete_profile_group_requests_sent(profile):
     group_requests = list(profile.group_requests_sent.all())
     for group_request in group_requests:
         group_request.delete()
 
 @database_sync_to_async
+@transaction.atomic
 def are_grouped(profile_1, profile_2):
     if profile_1.group == profile_2.group:
         return True
     return False
 
 @database_sync_to_async
+@transaction.atomic
 def is_group_chief(profile):
     profile.refresh_from_db()
     if profile.group is not None:
@@ -585,17 +605,20 @@ def is_group_chief(profile):
     return False
 
 @database_sync_to_async
+@transaction.atomic
 def get_profile_group_members(profile):
     if profile.group == None:
         return []
     return list(profile.group.members.all())
 
 @database_sync_to_async
+@transaction.atomic
 def get_profile_group_request(profile):
     if hasattr(profile, "group_request_received"):
         return profile.group_request_received
 
 @database_sync_to_async
+@transaction.atomic
 def get_group_request_group(group_request):
     try:
         group = Group.objects.get(pk=group_request.to_group.pk)
@@ -604,11 +627,13 @@ def get_group_request_group(group_request):
     return group
 
 @database_sync_to_async
+@transaction.atomic
 def update_profile_group(profile, new_group):
     async_to_sync(leave_profile_group)(profile)
     profile.group = new_group
     profile.save()
 
 @database_sync_to_async
+@transaction.atomic
 def get_group_members(group):
     return list(group.members.all())
