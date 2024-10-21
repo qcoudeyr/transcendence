@@ -15,6 +15,8 @@ from datetime import timedelta
 import environ
 import sys
 import os
+import logging
+import elasticapm
 
 env = environ.Env(
     DEBUG=(bool, False)
@@ -48,10 +50,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'users',
+    'elasticapm.contrib.django',
     'profiles',
 ]
 
 MIDDLEWARE = [
+	'elasticapm.contrib.django.middleware.TracingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -157,4 +161,49 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer', ),
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1)
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+    },
+    'handlers': {
+        'elasticapm': {
+            'level': 'WARNING',
+            'class': 'elasticapm.contrib.django.handlers.LoggingHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'mysite': {
+            'level': 'WARNING',
+            'handlers': ['elasticapm'],
+            'propagate': False,
+        },
+        # Log errors from the Elastic APM module to the console (recommended)
+        'elasticapm.errors': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    },
+}
+
+ELASTIC_APM = {
+	'SERVICE_NAME': 'django',
+	'SECRET_TOKEN': '',
+	'SERVER_URL': 'http://apm-server:8200'
 }

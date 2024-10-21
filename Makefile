@@ -35,43 +35,46 @@ detect-and-install-docker:
 create-data-dirs:
 	@echo "Creating data directories if they do not exist..."
 
-	@mkdir -p ./srcs/data/django_data ./srcs/data/es_data ./srcs/data/portainer_data ./srcs/data/postgres_data ./srcs/data/vault_data ./srcs/data/website_data ./srcs/data/redis_data
+	@mkdir -p ./srcs/data/django_data ./srcs/data/portainer_data ./srcs/data/postgres_data ./srcs/data/vault_data ./srcs/data/website_data ./srcs/data/redis_data ./srcs/data/elasticsearch_data ./srcs/data/apm_server_data ./srcs/data/fleet_server_data
 
 	@echo "Data directories created."
 
 reset_db:
 	@echo "Removing migrations..."
-	docker exec django remove_migrations.sh || true
-	docker exec channels remove_migrations.sh || true
+	@docker exec django remove_migrations.sh || true
+	@docker exec channels remove_migrations.sh || true
 	@echo "Stopping db related services..."
-	docker stop channels django
-	docker stop postgresql
-	docker rm postgresql
+	@docker stop channels django
+	@docker stop postgresql
+	@docker rm postgresql
 	@echo "Removing database..."
-	sudo rm -rf srcs/data/postgres_data
+	@sudo rm -rf srcs/data/postgres_data
 	@echo "Starting db related services..."
-	make
+	@make
 
 build-and-up:
-	@cd ./srcs && docker compose up -d
-	sleep 2 && docker exec nginx_modsecurity_crs rm /etc/nginx/conf.d/modsecurity.conf && docker exec nginx_modsecurity_crs nginx -s reload || true
-
+	@cd ./srcs && docker compose up setup && docker compose up -d
+	@sleep 5 && docker exec tr_nginx_modsecurity_crs rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx_modsecurity_crs nginx -s reload || true
+	@echo "Build Complete !"
 fclean:
 	@echo "Removing migrations..."
-	docker exec django remove_migrations.sh || true
-	docker exec channels remove_migrations.sh || true
+	@docker exec django remove_migrations.sh || true
+	@docker exec channels remove_migrations.sh || true
 	@echo "Stopping and removing all Docker containers..."
-	@cd ./srcs && docker-compose down || true
-	docker stop $$(docker ps -q) || true
-	docker rm $$(docker ps -a -q) || true
+	@cd ./srcs &&  docker-compose down --volumes --remove-orphans || true
+	@docker stop $$(docker ps -q) || true
+	@docker rm $$(docker ps -a -q) || true
 	@echo "Removing all Docker images..."
-	docker rmi $$(docker images -q) || true
+	@docker rmi $$(docker images -q) || true
 	@echo "Removing all Docker volumes..."
-	docker volume rm $$(docker volume ls -q) || true
+	@docker volume rm $$(docker volume ls -q) || true
 	@echo "Removing all Docker networks..."
-	docker network rm $$(docker network ls -q) || true
+	@docker network rm $$(docker network ls -q) || true
 	@echo "Removing database..."
-	sudo rm -rf srcs/data/postgres_data
+	@sudo rm -rf srcs/data/postgres_data
+	@sudo rm -rf srcs/data/elasticsearch_data
+	@sudo rm -rf ./srcs/data/apm_server_data
+	@sudo rm -rf ./srcs/data/fleet_server_data
 	@echo "Cleanup complete."
 
 stop:

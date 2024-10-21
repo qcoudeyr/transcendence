@@ -1,11 +1,38 @@
 services:
+  setup:
+    profiles:
+      - setup
+    build:
+      context: ./requirements/elastic/setup/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_setup
+    init: true
+    volumes:
+      - ./requirements/elastic/setup/entrypoint.sh:/entrypoint.sh
+      - ./requirements/elastic/setup/lib.sh:/lib.sh
+      - ./requirements/elastic/setup/roles:/roles
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+      METRICBEAT_INTERNAL_PASSWORD: ${METRICBEAT_INTERNAL_PASSWORD:-}
+      FILEBEAT_INTERNAL_PASSWORD: ${FILEBEAT_INTERNAL_PASSWORD:-}
+      HEARTBEAT_INTERNAL_PASSWORD: ${HEARTBEAT_INTERNAL_PASSWORD:-}
+      MONITORING_INTERNAL_PASSWORD: ${MONITORING_INTERNAL_PASSWORD:-}
+      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
+    networks:
+      - transcendence
+    depends_on:
+      - elasticsearch
+
 ##########################
 ########POSTGRESQL########
 ##########################
   postgresql:
     build:
       context: ./requirements/postgresql
-    container_name: postgresql
+    container_name: tr_postgresql
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
@@ -30,7 +57,7 @@ services:
 ########DJANGO########
 ######################
   django:
-    container_name: django
+    container_name: tr_django
     build:
       context: ./requirements/django
     restart: always
@@ -67,7 +94,7 @@ services:
 #######CHANNELS#######
 ######################
   channels:
-    container_name: channels
+    container_name: tr_channels
     build: ./requirements/channels
     restart: always
     volumes:
@@ -94,11 +121,394 @@ services:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
 
 #####################
+########REDIS########
+#####################
+  redis:
+    image: redis:7
+    container_name: tr_redis
+    expose:
+      - 6379
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.70
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+
+###########################
+###### ELASTICSEARCH ######
+###########################
+  elasticsearch:
+    build:
+      context: ./requirements/elasticsearch/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_elasticsearch
+    volumes:
+      - ./requirements/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
+      - elasticsearch_data:/usr/share/elasticsearch/data:Z
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      node.name: elasticsearch
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      # Bootstrap password.
+      # Used to initialize the keystore during the initial startup of
+      # Elasticsearch. Ignored on subsequent runs.
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: single-node
+    hostname: elasticsearch
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.13
+    restart: unless-stopped
+
+
+######################
+###### LOGSTASH ######
+######################
+  logstash:
+    build:
+      context: ./requirements/logstash/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_logstash
+    volumes:
+      - ./requirements/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+    ports:
+      - 5044:5044
+      - 50000:50000/tcp
+      - 50000:50000/udp
+      - 9600:9600
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.14
+    hostname: logstash
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+
+####################
+###### KIBANA ######
+####################
+  kibana:
+    build:
+      context: ./requirements/kibana/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_kibana
+    volumes:
+      - ./requirements/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+    ports:
+      - 5601:5601
+    environment:
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.15
+    hostname: kibana
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+######################
+###### FILEBEAT ######
+######################
+  filebeat:
+    build:
+      context: ./requirements/filebeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    # Run as 'root' instead of 'filebeat' (uid 1000) to allow reading
+    # 'docker.sock' and the host's filesystem.
+    container_name: tr_filebeat
+    user: root
+    command:
+      # Log to stderr.
+      - -e
+      # Disable config file permissions checks. Allows mounting
+      # 'config/filebeat.yml' even if it's not owned by root.
+      # see: https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
+      - --strict.perms=false
+    volumes:
+      - ./requirements/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    hostname: filebeat
+    environment:
+      FILEBEAT_INTERNAL_PASSWORD: ${FILEBEAT_INTERNAL_PASSWORD:-}
+      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.22
+#####################
+###### CURATOR ######
+#####################
+  curator:
+    build:
+      context: ./requirements/curator/
+    init: true
+    container_name: tr_curator
+    volumes:
+      - ./requirements/curator/config/curator.yml:/.curator/curator.yml:ro,Z
+      - ./requirements/curator/config/delete_log_files_curator.yml:/.curator/delete_log_files_curator.yml:ro,Z
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+    hostname: curator
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.16
+    depends_on:
+      - elasticsearch
+
+##########################
+###### FLEET-SERVER ######
+##########################
+
+  fleet-server:
+    build:
+      context: ./requirements/fleet/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    # Run as 'root' instead of 'elastic-agent' (uid 1000) to allow reading
+    # 'docker.sock' and the host's filesystem.
+    container_name: tr_fleet_server
+    user: root
+    volumes:
+      - fleet_server_data:/usr/share/elastic-agent/state:Z
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    environment:
+      FLEET_SERVER_ENABLE: '1'
+      FLEET_SERVER_INSECURE_HTTP: '1'
+      FLEET_SERVER_HOST: 0.0.0.0
+      FLEET_SERVER_POLICY_ID: fleet-server-policy
+      # Fleet plugin in Kibana
+      KIBANA_FLEET_SETUP: '1'
+      # Enrollment.
+      # (a) Auto-enroll using basic authentication
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-}
+      # (b) Enroll using a pre-generated service token
+      #FLEET_SERVER_SERVICE_TOKEN: <service_token>
+    ports:
+      - 8220:8220
+    hostname: fleet-server
+    # Elastic Agent does not retry failed connections to Kibana upon the initial enrollment phase.
+    restart: on-failure
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.18
+    depends_on:
+      - elasticsearch
+      - kibana
+
+########################
+###### APM-SERVER ######
+########################
+  apm-server:
+    build:
+      context: ./requirements/fleet/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_apm_server
+    volumes:
+      - apm_server_data:/usr/share/elastic-agent/state:Z
+    environment:
+      FLEET_ENROLL: '1'
+      FLEET_TOKEN_POLICY_NAME: Agent Policy APM Server
+      FLEET_INSECURE: '1'
+      FLEET_URL: http://fleet-server:8220
+      # Enrollment.
+      # (a) Auto-enroll using basic authentication
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-}
+      # (b) Enroll using a pre-generated enrollment token
+      #FLEET_ENROLLMENT_TOKEN: <enrollment_token>
+    ports:
+      - 8200:8200
+    hostname: apm-server
+    # Elastic Agent does not retry failed connections to Kibana upon the initial enrollment phase.
+    restart: on-failure
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.19
+    depends_on:
+      - elasticsearch
+      - kibana
+      - fleet-server
+
+#######################
+###### HEARTBEAT ######
+#######################
+
+  heartbeat:
+    build:
+      context: ./requirements/heartbeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_heartbeat
+    command:
+      # Log to stderr.
+      - -e
+      # Disable config file permissions checks. Allows mounting
+      # 'config/heartbeat.yml' even if it's not owned by root.
+      # see: https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
+      - --strict.perms=false
+    volumes:
+      - ./requirements/heartbeat/config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro,Z
+    environment:
+      HEARTBEAT_INTERNAL_PASSWORD: ${HEARTBEAT_INTERNAL_PASSWORD:-}
+      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.20
+    depends_on:
+      - elasticsearch
+
+########################
+###### METRICBEAT ######
+########################
+
+  metricbeat:
+    build:
+      context: ./requirements/metricbeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_metricbeat
+    # Run as 'root' instead of 'metricbeat' (uid 1000) to allow reading
+    # 'docker.sock' and the host's filesystem.
+    user: root
+    command:
+      # Log to stderr.
+      - -e
+      # Disable config file permissions checks. Allows mounting
+      # 'config/metricbeat.yml' even if it's not owned by root.
+      # see: https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
+      - --strict.perms=false
+      # Mount point of the host’s filesystem. Required to monitor the host
+      # from within a container.
+      - --system.hostfs=/hostfs
+    volumes:
+      - ./requirements/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro,Z
+      - type: bind
+        source: /
+        target: /hostfs
+        read_only: true
+      - type: bind
+        source: /sys/fs/cgroup
+        target: /hostfs/sys/fs/cgroup
+        read_only: true
+      - type: bind
+        source: /proc
+        target: /hostfs/proc
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    environment:
+      METRICBEAT_INTERNAL_PASSWORD: ${METRICBEAT_INTERNAL_PASSWORD:-}
+      MONITORING_INTERNAL_PASSWORD: ${MONITORING_INTERNAL_PASSWORD:-}
+      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.21
+    depends_on:
+      - elasticsearch
+
+##########################
+########PROMETHEUS########
+##########################
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tr_prometheus
+    volumes:
+      - ./requirements/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9091:9090"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+
+#######################
+########GRAFANA########
+#######################
+  grafana:
+    image: grafana/grafana:latest
+    container_name: tr_grafana
+    ports:
+      - "3001:3000"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.31
+    depends_on:
+      - prometheus
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+
+#########################
+########PORTAINER########
+#########################
+  portainer:
+    image: portainer/portainer-ce:2.20.3
+    container_name: tr_portainer
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "${PORTAINER_PORT}:${PORTAINER_PORT}"
+    environment:
+      - PORTAINER_USER=${PORTAINER_USER}
+      - PORTAINER_PASSWORD=${PORTAINER_PASSWORD}
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.40
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+
+#####################
 ########NGINX########
 #####################
   nginx_modsecurity_crs:
-    image: owasp/modsecurity-crs:4.3.0-nginx-202406090906
-    container_name: nginx_modsecurity_crs
+    image: owasp/modsecurity-crs:4.7.0-nginx-202410090410
+    container_name: tr_nginx_modsecurity_crs
     ports:
       - "80:80"
       - "443:443"
@@ -119,201 +529,17 @@ services:
         max-size: "200k"
         max-file: "10"
 
-#####################
-########REDIS########
-#####################
-  redis:
-    image: redis:7
-    container_name: redis
-    expose:
-      - 6379
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.70
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-
-#############################
-########ELASTICSEARCH########
-#############################
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
-      - xpack.security.enabled=false
-      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.20
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-########################
-########LOGSTASH########
-########################
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.10.1
-    container_name: logstash
-    environment:
-      - "LS_JAVA_OPTS=-Xms128m -Xmx128m"
-      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    volumes:
-      - ./requirements/logstash/config:/usr/share/logstash/config
-      - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline
-    ports:
-      - "5044:5044"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.21
-    depends_on:
-      - elasticsearch
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-########################
-########FILEBEAT########
-########################
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:7.13.4
-    container_name: filebeat
-    volumes:
-      - ./requirements/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - /var/lib/docker/containers:/var/lib/docker/containers:rshared,ro
-      - /var/run/docker.sock:/var/run/docker.sock:rshared,ro
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.50
-    environment:
-      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    depends_on:
-      - logstash
-    restart: always
-
-######################
-########KIBANA########
-######################
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.10.1
-    container_name: kibana
-    ports:
-      - "5601:5601"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.22
-    volumes:
-      - ./requirements/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
-    depends_on:
-      - elasticsearch
-    environment:
-      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - XPACK_SECURITY_ENCRYPTIONKEY=${XPACK_SECURITY_ENCRYPTIONKEY}
-      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY}
-      - XPACK_REPORTING_ENCRYPTIONKEY=${XPACK_REPORTING_ENCRYPTIONKEY}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-##########################
-########PROMETHEUS########
-##########################
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    volumes:
-      - ./requirements/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9091:9090"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.30
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-#######################
-########GRAFANA########
-#######################
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3001:3000"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.31
-    depends_on:
-      - prometheus
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-#########################
-########PORTAINER########
-#########################
-  portainer:
-    image: portainer/portainer-ce:2.20.3
-    container_name: portainer
-    command: -H unix:///var/run/docker.sock
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-    ports:
-      - "${PORTAINER_PORT}:${PORTAINER_PORT}"
-    environment:
-      - PORTAINER_USER=${PORTAINER_USER}
-      - PORTAINER_PASSWORD=${PORTAINER_PASSWORD}
-      - PORTAINER_HOST=${PORTAINER_HOST}
-      - PORTAINER_PORT=${PORTAINER_PORT}
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.40
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
 
 #####################
 ########VAULT########
 #####################
   vault:
     image: hashicorp/vault:latest
-    container_name: vault
+    container_name: tr_vault
     ports:
-      - "8200:8200"
+      - "30000:30000"
     environment:
-      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_ADDR=http://0.0.0.0:30000
       - VAULT_DEV_ROOT_TOKEN_ID=myroot
     cap_add:
       - IPC_LOCK
@@ -332,36 +558,55 @@ services:
 #######################
 volumes:
   profile_share:
+
   postgres_data:
     driver: local
     driver_opts:
       type: "none"
       o: "bind"
       device: "./data/postgres_data/"
+
+  elasticsearch_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/elasticsearch_data/"
+
   # django_data:
   #   driver: local
   #   driver_opts:
   #     type: "none"
   #     o: "bind"
   #     device: "./data/django_data/"
-  es_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/es_data/"
+
   portainer_data:
     driver: local
     driver_opts:
       type: "none"
       o: "bind"
       device: "./data/portainer_data/"
+
   media_data:
     driver: local
     driver_opts:
       type: "none"
       o: "bind"
       device: "./data/media_data/"
+
+  apm_server_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/apm_server_data/"
+
+  fleet_server_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/fleet_server_data/"
 
 ########################
 ########NETWORKS########
