@@ -54,6 +54,7 @@ jobs:
         echo "PORTAINER_PORT=9000" >> $GITHUB_ENV
         echo "VAULT_URL=http://10.0.10.69:8201" >> $GITHUB_ENV
         echo "VAULT_TOKEN=vault_token" >> $GITHUB_ENV
+        echo "DJANGO_SECRET_KEY=JQjEX(gjjA!m(-0gOd2W:T}eDjBRY!gYOl1x561LlB7W-" >> $GITHUB_ENV
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
