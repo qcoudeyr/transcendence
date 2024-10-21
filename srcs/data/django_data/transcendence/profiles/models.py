@@ -35,7 +35,12 @@ class GroupRequest(models.Model):
     to_group = models.ForeignKey(
         "Group",
         on_delete=models.CASCADE,
-        related_name="group_requests_received",
+        related_name="requests",
+    )
+    to_profile = models.OneToOneField(
+        "Profile",
+        on_delete=models.CASCADE,
+        related_name="group_request_received",
     )
     from_profile = models.ForeignKey(
         "Profile",

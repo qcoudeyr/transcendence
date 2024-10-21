@@ -4,8 +4,9 @@ import logging
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from asgiref.sync import async_to_sync
 
-from profiles.models import Profile, FriendRequest
+from profiles.models import Profile, FriendRequest, GroupRequest, Group
 
 class EventConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -18,11 +19,17 @@ class EventConsumer(AsyncWebsocketConsumer):
             'friend_request_answer': self.friend_request_answer,
             'friend_remove': self.friend_remove,
             'chat_private_message': self.chat_private_message,
+            'group_request': self.group_request,
+            'group_list': self.group_list,
+            'group_request_answer': self.group_request_answer,
+            'group_leave': self.group_leave,
         }
 
         # Request's user
         self.user = self.scope['user']
         self.profile = await get_user_profile(self.user)
+        await update_profile_status(self.profile, 'ON')
+        await join_default_group(self.profile)
 
         # Add groups here
         self.chat_group = "general_chat"
@@ -35,11 +42,61 @@ class EventConsumer(AsyncWebsocketConsumer):
             logging.error('[' + str(friend.pk) + ']')
             await self.join_friend_channel(friend_pk=friend.pk)
 
+        # Notify friends when Online
+        for friend in friends:
+            await self.channel_layer.group_send(
+                "notifications_" + str(friend.pk),
+                {
+                    'type': 'send.friend',
+                    'profile_id': self.profile.pk,
+                    'name': self.profile.name,
+                    'avatar': self.profile.avatar.url,
+                    'status': self.profile.get_status_display(),
+                }
+            )
+
         # Connexion always accepted, bad connexions are handled by the middleware
         await self.accept()
 
     async def disconnect(self, close_code):
-        pass
+        await update_profile_status(self.profile, 'OF')
+        group = await get_profile_group(self.profile)
+        await leave_profile_group(self.profile)
+
+        # Notify group when leaving
+        group_members = await get_group_members(group)
+        for group_member in group_members:
+            await self.channel_layer.group_send(
+                "notifications_" + str(group_member.pk),
+                {
+                    'type': 'remove.group.member',
+                    'profile_id': self.profile.pk,
+                }
+            )
+            await self.channel_layer.group_send(
+                "notifications_" + str(group_member.pk),
+                {
+                    'type': 'group.list',
+                }
+            )
+
+        # Notify friends when Offline
+        friends = await get_profile_friends(self.profile)
+        for friend in friends:
+            await self.channel_layer.group_send(
+                "notifications_" + str(friend.pk),
+                {
+                    'type': 'send.friend',
+                    'profile_id': self.profile.pk,
+                    'name': self.profile.name,
+                    'avatar': self.profile.avatar.url,
+                    'status': self.profile.get_status_display(),
+                }
+            )
+
+        # Clear group requests
+        await delete_profile_group_request_received(self.profile)
+        await delete_profile_group_requests_sent(self.profile)
 
     async def receive(self, text_data):
         try:
@@ -78,7 +135,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                     'profile_id': friend.pk,
                     'name': friend.name,
                     'avatar': friend.avatar.url,
-                    'status': friend.status,
+                    'status': friend.get_status_display(),
                 }
             )
 
@@ -122,7 +179,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                     self.notifications_group,
                     {
                         'type': 'remove.friend.request',
-                        'request_id': request.pk
+                        'request_id': request.pk,
                     }
                 )
                 await answer_friend_request(request=request, answer=answer)
@@ -135,7 +192,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                             'profile_id': new_friend.pk,
                             'name': new_friend.name,
                             'avatar': new_friend.avatar.url,
-                            'status': new_friend.status,
+                            'status': new_friend.get_status_display(),
                             'new_friend': True
                         }
                     )
@@ -146,7 +203,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                             'profile_id': self.profile.pk,
                             'name': self.profile.name,
                             'avatar': self.profile.avatar.url,
-                            'status': self.profile.status,
+                            'status': self.profile.get_status_display(),
                             'new_friend': True
                         }
                     )
@@ -186,9 +243,110 @@ class EventConsumer(AsyncWebsocketConsumer):
                     }
                 )
 
+    async def group_request(self, content):
+        if 'profile_id' in content:
+            profile_id = content['profile_id']
+            to_profile = await get_id_profile(profile_id)
+            if (to_profile is not None and await are_friends(self.profile, to_profile)
+                and not await are_grouped(self.profile, to_profile)):
+                await self.channel_layer.group_send(
+                    'notifications_' + str(to_profile.pk),
+                    {
+                        'type': 'send.group.request',
+                        'from_profile_id': self.profile.pk,
+                        'name': self.profile.name,
+                        'avatar': self.profile.avatar.url,
+                    }
+                )
+
+    async def group_list(self, content):
+        group_members = await get_profile_group_members(self.profile)
+        for group_member in group_members:
+            await self.channel_layer.group_send(
+                self.notifications_group,
+                {
+                    'type': 'send.group.member',
+                    'profile_id': group_member.pk,
+                    'name': group_member.name,
+                    'avatar': group_member.avatar.url,
+                    'status': group_member.get_status_display(),
+                    'is_chief': await is_group_chief(group_member),
+                }
+            )
+
+    async def group_request_answer(self, content):
+        if 'answer' in content and type(content['answer']) is bool:
+            await self.channel_layer.group_send(
+                self.notifications_group,
+                {
+                    'type': 'remove.group.request',
+                }
+            )
+            group_request = await get_profile_group_request(self.profile)
+            if group_request is None:
+                return
+            group = await get_group_request_group(group_request)
+            await delete_profile_group_request_received(self.profile)
+            if group is None or not content['answer']:
+                return
+            await update_profile_group(profile=self.profile, new_group=group)
+            await self.group_list({})
+            group_members = await get_profile_group_members(self.profile)
+            for group_member in group_members:
+                await self.channel_layer.group_send(
+                    "notifications_" + str(group_member.pk),
+                    {
+                        'type': 'send.group.member',
+                        'profile_id': self.profile.pk,
+                        'name': self.profile.name,
+                        'avatar': self.profile.avatar.url,
+                        'status': self.profile.get_status_display(),
+                        'is_chief': await is_group_chief(self.profile),
+                    }
+                )
+
+    async def group_leave(self, content):
+        group = await get_profile_group(self.profile)
+        await leave_profile_group(self.profile)
+        await join_default_group(self.profile)
+        group_members = await get_group_members(group)
+        # For others
+        for group_member in group_members:
+            await self.channel_layer.group_send(
+                "notifications_" + str(group_member.pk),
+                {
+                    'type': 'remove.group.member',
+                    'profile_id': self.profile.pk,
+                }
+            )
+            await self.channel_layer.group_send(
+                "notifications_" + str(group_member.pk),
+                {
+                    'type': 'group.list',
+                }
+            )
+        # For me
+        for group_member in group_members:
+            await self.channel_layer.group_send(
+                self.notifications_group,
+                {
+                    'type': 'remove.group.member',
+                    'profile_id': group_member.pk,
+                }
+            )
+        await self.channel_layer.group_send(
+            self.notifications_group,
+            {
+                'type': 'group.list',
+            }
+        )
+
     # group_send functions here
     async def send_chat_message(self, event):
-        message = f"[{event['name']}]: {event['message']}"
+        message = event['message'].strip()
+        if len(message) <= 0:
+            return
+        message = f"[{event['name']}]: {message}"
 
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
@@ -197,7 +355,10 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def send_private_chat_message(self, event):
-        message = f"[{event['name']}]: {event['message']}"
+        message = event['message'].strip()
+        if len(message) <= 0:
+            return
+        message = f"[{event['name']}]: {message}"
 
         await self.send(text_data=json.dumps({
             'type': 'chat_private_message',
@@ -242,6 +403,49 @@ class EventConsumer(AsyncWebsocketConsumer):
             })
         )
 
+    async def send_group_request(self, event):
+        from_profile = await get_id_profile(event['from_profile_id'])
+        to_group = await get_profile_group(from_profile)
+
+        # Remove old group requests received
+        await delete_profile_group_request_received(self.profile)
+        await self.send(text_data=json.dumps({
+            'type': 'group_request_remove',
+            })
+        )
+
+        group_request = await create_group_request(from_profile=from_profile, to_profile=self.profile, to_group=to_group)
+        await self.send(text_data=json.dumps({
+            'type': 'group_request',
+            'name': event['name'],
+            'avatar': event['avatar'],
+            })
+        )
+
+    async def send_group_member(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'group_member',
+            'profile_id': event['profile_id'],
+            'name': event['name'],
+            'avatar': event['avatar'],
+            'status': event['status'],
+            'is_chief': event['is_chief'],
+            })
+        )
+
+    async def remove_group_member(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'group_member_remove',
+            'profile_id': event['profile_id'],
+            })
+        )
+
+    async def remove_group_request(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'group_request_remove',
+            })
+        )
+
     # Usefull functions
     async def join_friend_channel(self, friend_pk):
         # Generate unique group name for both profiles
@@ -263,7 +467,7 @@ def get_user_profile(user):
 def get_id_profile(id):
     try:
         profile = Profile.objects.get(pk=id)
-    except Exception:
+    except Profile.DoesNotExist:
         profile = None
     return profile
 
@@ -282,6 +486,11 @@ def create_friend_request(from_profile, to_profile):
     return None
 
 @database_sync_to_async
+def create_group_request(from_profile, to_profile, to_group):
+    group = GroupRequest.objects.create(from_profile=from_profile, to_profile=to_profile, to_group=to_group)
+    return group
+
+@database_sync_to_async
 def get_profile_friend_requests(profile):
     return list(profile.friend_requests_received.all())
 
@@ -293,7 +502,7 @@ def get_friend_request_from_profile(request):
 def get_request_id_friend_request(request_id):
     try:
         request = FriendRequest.objects.get(pk=request_id)
-    except Exception:
+    except FriendRequest.DoesNotExist:
         request = None
     return request
 
@@ -318,3 +527,88 @@ def are_friends(profile1, profile2):
 @database_sync_to_async
 def remove_friendship(profile1, profile2):
     profile1.friends.remove(profile2)
+
+@database_sync_to_async
+def update_profile_status(profile, status):
+    profile.status = status
+    profile.save()
+
+@database_sync_to_async
+def get_profile_group(profile):
+    return profile.group
+
+@database_sync_to_async
+def join_default_group(profile):
+    profile.group, created = Group.objects.get_or_create(chief=profile)
+    profile.save()
+
+@database_sync_to_async
+def leave_profile_group(profile):
+    group = profile.group
+    if group:
+        profile.group = None
+        profile.save()
+        if group.chief == profile:
+            group.refresh_from_db()
+            if group.members.count() > 0:
+                group.chief = group.members.first()
+                group.save()
+            else:
+                group.delete()
+
+@database_sync_to_async
+def delete_profile_group_request_received(profile):
+    try:
+        group_request = GroupRequest.objects.get(pk=profile.group_request_received.pk)
+        group_request.delete()
+    except GroupRequest.DoesNotExist:
+        pass
+
+@database_sync_to_async
+def delete_profile_group_requests_sent(profile):
+    group_requests = list(profile.group_requests_sent.all())
+    for group_request in group_requests:
+        group_request.delete()
+
+@database_sync_to_async
+def are_grouped(profile_1, profile_2):
+    if profile_1.group == profile_2.group:
+        return True
+    return False
+
+@database_sync_to_async
+def is_group_chief(profile):
+    profile.refresh_from_db()
+    if profile.group is not None:
+        if profile.group.chief == profile:
+            return True
+    return False
+
+@database_sync_to_async
+def get_profile_group_members(profile):
+    if profile.group == None:
+        return []
+    return list(profile.group.members.all())
+
+@database_sync_to_async
+def get_profile_group_request(profile):
+    if hasattr(profile, "group_request_received"):
+        return profile.group_request_received
+
+@database_sync_to_async
+def get_group_request_group(group_request):
+    try:
+        group = Group.objects.get(pk=group_request.to_group.pk)
+    except Group.DoesNotExist:
+        group = None
+    return group
+
+@database_sync_to_async
+def update_profile_group(profile, new_group):
+    async_to_sync(leave_profile_group)(profile)
+    profile.group = new_group
+    profile.save()
+
+@database_sync_to_async
+def get_group_members(group):
+    return list(group.members.all())
