@@ -372,6 +372,11 @@ class EventConsumer(AsyncWebsocketConsumer):
         if 'new_friend' in event and event['new_friend']:
             await self.join_friend_channel(friend_pk=event['profile_id'])
         await self.send(text_data=json.dumps({
+            'type': 'friend_remove',
+            'profile_id': event['profile_id'],
+            })
+        )
+        await self.send(text_data=json.dumps({
             'type': 'friend',
             'profile_id': event['profile_id'],
             'name': event['name'],
@@ -424,6 +429,11 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def send_group_member(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'group_member_remove',
+            'profile_id': event['profile_id'],
+            })
+        )
         await self.send(text_data=json.dumps({
             'type': 'group_member',
             'profile_id': event['profile_id'],
