@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: elasticsearch-v7-filebeat
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    jsonData:
+      index: '[filebeat-]YYYY.MM.DD'
+      interval: Daily
+      timeField: '@timestamp'
+      logMessageField: message
+      logLevelField: fields.level
+      dataLinks:
+        - datasourceUid: my_jaeger_uid # Target UID needs to be known
+          field: traceID
+          url: '$${__value.raw}' # Careful about the double "$$" because of env var expansion

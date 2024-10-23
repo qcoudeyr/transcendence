@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-all: create-data-dirs build-and-up
+all: create-data-dirs setup build-and-up
 
 detect-and-install-docker:
 	@echo "Checking for Docker..."
@@ -35,20 +35,29 @@ detect-and-install-docker:
 create-data-dirs:
 	@echo "Creating data directories if they do not exist..."
 
-	@mkdir -p ./srcs/data/django_data ./srcs/data/portainer_data ./srcs/data/postgres_data ./srcs/data/vault_data ./srcs/data/website_data ./srcs/data/redis_data ./srcs/data/elasticsearch_data ./srcs/data/apm_server_data ./srcs/data/fleet_server_data
+	@mkdir -p ./srcs/data/django_data \
+		./srcs/data/portainer_data \
+		./srcs/data/postgres_data \
+		./srcs/data/vault_data \
+		./srcs/data/website_data \
+		./srcs/data/redis_data \
+		./srcs/data/elasticsearch_data \
+		./srcs/data/apm_server_data \
+		./srcs/data/fleet_server_data \
+		./srcs/data/grafana_data
 
 	@echo "Data directories created."
 
 reset_db:
 	@echo "Removing migrations..."
-	@docker exec django remove_migrations.sh || true
-	@docker exec channels remove_migrations.sh || true
+	@docker exec tr_django remove_migrations.sh || true
+	@docker exec tr_channels remove_migrations.sh || true
 	@echo "Stopping db related services..."
-	@docker stop channels django
-	@docker stop postgresql
-	@docker rm postgresql
+	@docker stop tr_channels tr_django
+	@docker stop tr_postgresql
+	@docker rm tr_postgresql
 	@echo "Removing database..."
-	@sudo rm -rf srcs/data/postgres_data
+	@sudo rm -rf ./srcs/data/postgres_data
 	@echo "Starting db related services..."
 	@make
 
@@ -58,8 +67,8 @@ build-and-up:
 	@echo "Build Complete !"
 fclean:
 	@echo "Removing migrations..."
-	@docker exec django remove_migrations.sh || true
-	@docker exec channels remove_migrations.sh || true
+	@docker exec tr_django remove_migrations.sh || true
+	@docker exec tr_channels remove_migrations.sh || true
 	@echo "Stopping and removing all Docker containers..."
 	@cd ./srcs &&  docker-compose down --volumes --remove-orphans || true
 	@docker stop $$(docker ps -q) || true
@@ -71,8 +80,8 @@ fclean:
 	@echo "Removing all Docker networks..."
 	@docker network rm $$(docker network ls -q) || true
 	@echo "Removing database..."
-	@sudo rm -rf srcs/data/postgres_data
-	@sudo rm -rf srcs/data/elasticsearch_data
+	@sudo rm -rf ./srcs/data/postgres_data
+	@sudo rm -rf ./srcs/data/elasticsearch_data
 	@sudo rm -rf ./srcs/data/apm_server_data
 	@sudo rm -rf ./srcs/data/fleet_server_data
 	@echo "Cleanup complete."
@@ -107,6 +116,26 @@ restart:
 %:
 	@$(MAKE) restart container=$@
 
+
+
+DOCKER_DAEMON_CONFIG_PATH := /etc/docker/daemon.json
+
+.PHONY: configure-daemon restart-docker
+
+setup:
+	@echo "Configuring Docker Daemon to expose Prometheus metrics..."
+	@if ! grep -q '"metrics-addr": "127.0.0.1:9323"' $(DOCKER_DAEMON_CONFIG_PATH); then \
+		if [ ! -f $(DOCKER_DAEMON_CONFIG_PATH) ]; then \
+			echo '{ "metrics-addr": "127.0.0.1:9323", "experimental": true }' | sudo tee $(DOCKER_DAEMON_CONFIG_PATH); \
+		else \
+			jq '. + { "metrics-addr": "127.0.0.1:9323", "experimental": true }' $(DOCKER_DAEMON_CONFIG_PATH) | sudo tee $(DOCKER_DAEMON_CONFIG_PATH); \
+		@echo "Restarting Docker service..." \
+		@sudo systemctl restart docker \
+		fi \
+	else \
+		echo "Metrics configuration already present in Docker Daemon config."; \
+	fi
+
 re: fclean all
 
-.PHONY: all build-and-up fclean re restart stop start
+.PHONY: all build-and-up fclean re restart stop start setup

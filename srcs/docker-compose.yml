@@ -449,7 +449,7 @@ services:
     volumes:
       - ./requirements/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9091:9090"
+      - "9090:9090"
     networks:
       transcendence:
         ipv4_address: 10.0.10.30
@@ -459,12 +459,17 @@ services:
         max-size: "200k"
         max-file: "10"
     restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 #######################
 ########GRAFANA########
 #######################
   grafana:
     image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/usr/share/grafana/
+      - ./requirements/grafana:/usr/share/grafana/conf/provisioning/datasources
     container_name: tr_grafana
     ports:
       - "3001:3000"
@@ -607,6 +612,13 @@ volumes:
       type: "none"
       o: "bind"
       device: "./data/fleet_server_data/"
+
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/grafana_data/"
 
 ########################
 ########NETWORKS########

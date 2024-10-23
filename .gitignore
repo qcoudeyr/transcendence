@@ -1,5 +1,7 @@
 *.env*
 srcs/data/postgres_data/*
+!srcs/data/grafana_data/conf
+srcs/data/grafana_data/
 srcs/data/portainer_data/*
 srcs/data/es_data/nodes/
 srcs/data/django_data/my_env/*
