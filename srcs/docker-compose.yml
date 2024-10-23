@@ -8,7 +8,11 @@ networks:
       driver: default
       config:
         - subnet: 10.0.10.0/24
-
+  elastic:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.20.0/16
 #######################
 ########VOLUMES########
 #######################
