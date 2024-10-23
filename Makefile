@@ -35,31 +35,34 @@ detect-and-install-docker:
 create-data-dirs:
 	@echo "Creating data directories if they do not exist..."
 
-	@mkdir -p ./srcs/data/django_data ./srcs/data/portainer_data ./srcs/data/postgres_data ./srcs/data/vault_data ./srcs/data/website_data ./srcs/data/redis_data ./srcs/data/elasticsearch_data ./srcs/data/apm_server_data ./srcs/data/fleet_server_data
+	@mkdir -p ./srcs/data/django_data ./srcs/data/portainer_data ./srcs/data/postgres_data \
+		./srcs/data/vault_data ./srcs/data/website_data \
+		./srcs/data/redis_data ./srcs/data/elk/logstash_ingest_data/ \
+		./srcs/data/filebeat_ingest_data/
 
 	@echo "Data directories created."
 
 reset_db:
 	@echo "Removing migrations..."
-	@docker exec django remove_migrations.sh || true
-	@docker exec channels remove_migrations.sh || true
+	@docker exec tr_django remove_migrations.sh || true
+	@docker exec tr_channels remove_migrations.sh || true
 	@echo "Stopping db related services..."
-	@docker stop channels django
-	@docker stop postgresql
-	@docker rm postgresql
+	@docker stop tr_channels tr_django
+	@docker stop tr_postgresql
+	@docker rm tr_postgresql
 	@echo "Removing database..."
 	@sudo rm -rf srcs/data/postgres_data
 	@echo "Starting db related services..."
 	@make
 
 build-and-up:
-	@cd ./srcs && docker compose up setup && docker compose up -d
+	@cd ./srcs && docker compose up -d
 	@sleep 5 && docker exec tr_nginx_modsecurity_crs rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx_modsecurity_crs nginx -s reload || true
 	@echo "Build Complete !"
 fclean:
 	@echo "Removing migrations..."
-	@docker exec django remove_migrations.sh || true
-	@docker exec channels remove_migrations.sh || true
+	@docker exec tr_django remove_migrations.sh || true
+	@docker exec tr_channels remove_migrations.sh || true
 	@echo "Stopping and removing all Docker containers..."
 	@cd ./srcs &&  docker-compose down --volumes --remove-orphans || true
 	@docker stop $$(docker ps -q) || true

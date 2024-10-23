@@ -1,30 +1,369 @@
+########################
+########NETWORKS########
+########################
+networks:
+  transcendence:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.10.0/24
+
+#######################
+########VOLUMES########
+#######################
+volumes:
+  profile_share:
+
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/postgres_data/"
+
+  # django_data:
+  #   driver: local
+  #   driver_opts:
+  #     type: "none"
+  #     o: "bind"
+  #     device: "./data/django_data/"
+
+  portainer_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/portainer_data/"
+
+  media_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/media_data/"
+
+  certs:
+    driver: local
+
+  esdata01:
+    driver: local
+
+  kibanadata:
+    driver: local
+
+  metricbeatdata01:
+    driver: local
+
+  filebeatdata01:
+    driver: local
+
+  logstashdata01:
+    driver: local
+
+  fleetserverdata:
+    driver: local
+
+
+######################
+#######SERVICES#######
+######################
+
 services:
   setup:
-    profiles:
-      - setup
-    build:
-      context: ./requirements/elastic/setup/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
     container_name: tr_setup
-    init: true
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
-      - ./requirements/elastic/setup/entrypoint.sh:/entrypoint.sh
-      - ./requirements/elastic/setup/lib.sh:/lib.sh
-      - ./requirements/elastic/setup/roles:/roles
-    environment:
-      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
-      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
-      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
-      METRICBEAT_INTERNAL_PASSWORD: ${METRICBEAT_INTERNAL_PASSWORD:-}
-      FILEBEAT_INTERNAL_PASSWORD: ${FILEBEAT_INTERNAL_PASSWORD:-}
-      HEARTBEAT_INTERNAL_PASSWORD: ${HEARTBEAT_INTERNAL_PASSWORD:-}
-      MONITORING_INTERNAL_PASSWORD: ${MONITORING_INTERNAL_PASSWORD:-}
-      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
+      - certs:/usr/share/elasticsearch/config/certs
+    user: "0"
+    command: >
+      bash -c '
+        if [ x${ELASTIC_PASSWORD} == x ]; then
+          echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
+          exit 1;
+        elif [ x${KIBANA_PASSWORD} == x ]; then
+          echo "Set the KIBANA_PASSWORD environment variable in the .env file";
+          exit 1;
+        fi;
+        if [ ! -f config/certs/ca.zip ]; then
+          echo "Creating CA";
+          bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
+          unzip config/certs/ca.zip -d config/certs;
+        fi;
+        if [ ! -f config/certs/certs.zip ]; then
+          echo "Creating certs";
+          echo -ne \
+          "instances:\n"\
+          "  - name: es01\n"\
+          "    dns:\n"\
+          "      - es01\n"\
+          "      - localhost\n"\
+          "    ip:\n"\
+          "      - 127.0.0.1\n"\
+          "  - name: kibana\n"\
+          "    dns:\n"\
+          "      - kibana\n"\
+          "      - localhost\n"\
+          "    ip:\n"\
+          "      - 127.0.0.1\n"\
+          "  - name: fleet-server\n"\
+          "    dns:\n"\
+          "      - fleet-server\n"\
+          "      - localhost\n"\
+          "    ip:\n"\
+          "      - 127.0.0.1\n"\
+          > config/certs/instances.yml;
+          bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+          unzip config/certs/certs.zip -d config/certs;
+        fi;
+        echo "Setting file permissions"
+        chown -R root:root config/certs;
+        find . -type d -exec chmod 750 \{\} \;;
+        find . -type f -exec chmod 640 \{\} \;;
+        echo "Waiting for Elasticsearch availability";
+        until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
+        echo "Setting kibana_system password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "Setting logstash_system password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/logstash_system/_password -d "{\"password\":\"${LOGSTASH_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "Setting beats_system password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/ beats_system /_password -d "{\"password\":\"${BEATS_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "Setting apm_system password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/apm_system/_password -d "{\"password\":\"${APM_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "Setting remote_monitoring_user password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/remote_monitoring_user/_password -d "{\"password\":\"${RMU_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "All done!";
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
     networks:
-      - transcendence
+      - elastic
+
+  es01:
+    container_name: tr_es01
     depends_on:
-      - elasticsearch
+      setup:
+        condition: service_healthy
+    image: elasticsearch:${STACK_VERSION}
+    labels:
+      co.elastic.logs/module: elasticsearch
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT}:9200
+    environment:
+      - node.name=es01
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=certs/es01/es01.key
+      - xpack.security.http.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.key=certs/es01/es01.key
+      - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.license.self_generated.type=${LICENSE}
+    mem_limit: ${ES_MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    networks:
+      elastic:
+        ipv4_address: 10.0.20.10
+
+  kibana:
+    container_name: tr_kibana
+    depends_on:
+      es01:
+        condition: service_healthy
+    image: kibana:${STACK_VERSION}
+    labels:
+      co.elastic.logs/module: kibana
+    volumes:
+      - certs:/usr/share/kibana/config/certs
+      - kibanadata:/usr/share/kibana/data
+      - ./requirements/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - ${KIBANA_PORT}:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=https://es01:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+      - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_REPORTING_KIBANASERVER_HOSTNAME=localhost
+      - SERVER_SSL_ENABLED=true
+      - SERVER_SSL_CERTIFICATE=config/certs/kibana/kibana.crt
+      - SERVER_SSL_KEY=config/certs/kibana/kibana.key
+      - SERVER_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+      - ELASTIC_APM_SECRET_TOKEN=${ELASTIC_APM_SECRET_TOKEN}
+    mem_limit: ${KB_MEM_LIMIT}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -I -s --cacert config/certs/ca/ca.crt https://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    networks:
+      elastic:
+        ipv4_address: 10.0.20.11
+
+  metricbeat01:
+    container_name: tr_metricbeat01
+    depends_on:
+      es01:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    image: elastic/metricbeat:${STACK_VERSION}
+    user: root
+    volumes:
+      - certs:/usr/share/metricbeat/certs
+      - metricbeatdata01:/usr/share/metricbeat/data
+      - ./requirements/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /proc:/hostfs/proc:ro
+      - /:/hostfs:ro
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://es01:9200
+      - KIBANA_HOSTS=https://kibana:5601
+      - LOGSTASH_HOSTS=http://logstash01:9600
+      - CA_CERT=certs/ca/ca.crt
+      - ES_CERT=certs/es01/es01.crt
+      - ES_KEY=certs/es01/es01.key
+      - KB_CERT=certs/kibana/kibana.crt
+      - KB_KEY=certs/kibana/kibana.key
+    command:
+      - --strict.perms=false
+    networks:
+      elastic:
+        ipv4_address: 10.0.20.12
+
+  filebeat01:
+    container_name: tr_filebeat01
+    depends_on:
+      es01:
+        condition: service_healthy
+    image: elastic/filebeat:${STACK_VERSION}
+    user: root
+    volumes:
+      - certs:/usr/share/filebeat/certs
+      - filebeatdata01:/usr/share/filebeat/data
+      - ./data/elk/filebeat_ingest_data/:/usr/share/filebeat/ingest_data/
+      - ./requirements/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    environment:
+      - FILEBEAT_INTERNAL_PASSWORD=${FILEBEAT_INTERNAL_PASSWORD}
+      - BEATS_SYSTEM_PASSWORD=${BEATS_PASSWORD}
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://es01:9200
+      - KIBANA_HOSTS=https://kibana:5601
+      - LOGSTASH_HOSTS=http://logstash01:9600
+      - CA_CERT=certs/ca/ca.crt
+    command:
+      - --strict.perms=false
+    networks:
+      elastic:
+        ipv4_address: 10.0.20.13
+
+  logstash01:
+    container_name: tr_logstash01
+    depends_on:
+      es01:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    image: logstash:${STACK_VERSION}
+    labels:
+      co.elastic.logs/module: logstash
+    user: root
+    volumes:
+      - certs:/usr/share/logstash/certs
+      - logstashdata01:/usr/share/logstash/data
+      - "./data/elk/logstash_ingest_data/:/usr/share/logstash/ingest_data/"
+      - ./requirements/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    environment:
+      - xpack.monitoring.enabled=false
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://es01:9200
+    networks:
+      elastic:
+        ipv4_address: 10.0.20.14
+
+  fleet-server:
+    container_name: tr_fleet_server
+    depends_on:
+      kibana:
+        condition: service_healthy
+      es01:
+        condition: service_healthy
+    image: elastic/elastic-agent:${STACK_VERSION}
+    volumes:
+      - certs:/certs
+      - fleetserverdata:/usr/share/elastic-agent
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
+      - "/proc:/hostfs/proc:ro"
+      - "/:/hostfs:ro"
+    ports:
+      - ${FLEET_PORT}:8220
+      - ${APMSERVER_PORT}:8200
+    user: root
+    environment:
+      - SSL_CERTIFICATE_AUTHORITIES=/certs/ca/ca.crt
+      - CERTIFICATE_AUTHORITIES=/certs/ca/ca.crt
+      - FLEET_CA=/certs/ca/ca.crt
+      - FLEET_ENROLL=1
+      - FLEET_INSECURE=true
+      - FLEET_SERVER_ELASTICSEARCH_CA=/certs/ca/ca.crt
+      - FLEET_SERVER_ELASTICSEARCH_HOST=https://es01:9200
+      - FLEET_SERVER_ELASTICSEARCH_INSECURE=true
+      - FLEET_SERVER_ENABLE=1
+      - FLEET_SERVER_CERT=/certs/fleet-server/fleet-server.crt
+      - FLEET_SERVER_CERT_KEY=/certs/fleet-server/fleet-server.key
+      - FLEET_SERVER_INSECURE_HTTP=true
+      - FLEET_SERVER_POLICY_ID=fleet-server-policy
+      - FLEET_URL=https://fleet-server:8220
+      - KIBANA_FLEET_CA=/certs/ca/ca.crt
+      - KIBANA_FLEET_SETUP=1
+      - KIBANA_FLEET_USERNAME=elastic
+      - KIBANA_FLEET_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_HOST=https://kibana:5601
+    networks:
+      elastic:
+        ipv4_address: 10.0.20.15
 
 ##########################
 ########POSTGRESQL########
@@ -138,307 +477,6 @@ services:
         max-file: "10"
     restart: always
 
-###########################
-###### ELASTICSEARCH ######
-###########################
-  elasticsearch:
-    build:
-      context: ./requirements/elasticsearch/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
-    container_name: tr_elasticsearch
-    volumes:
-      - ./requirements/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
-      - elasticsearch_data:/usr/share/elasticsearch/data:Z
-    ports:
-      - 9200:9200
-      - 9300:9300
-    environment:
-      node.name: elasticsearch
-      ES_JAVA_OPTS: -Xms512m -Xmx512m
-      # Bootstrap password.
-      # Used to initialize the keystore during the initial startup of
-      # Elasticsearch. Ignored on subsequent runs.
-      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
-      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
-      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
-      discovery.type: single-node
-    hostname: elasticsearch
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.13
-    restart: unless-stopped
-
-
-######################
-###### LOGSTASH ######
-######################
-  logstash:
-    build:
-      context: ./requirements/logstash/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
-    container_name: tr_logstash
-    volumes:
-      - ./requirements/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
-      - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
-    ports:
-      - 5044:5044
-      - 50000:50000/tcp
-      - 50000:50000/udp
-      - 9600:9600
-    environment:
-      LS_JAVA_OPTS: -Xms256m -Xmx256m
-      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.14
-    hostname: logstash
-    depends_on:
-      - elasticsearch
-    restart: unless-stopped
-
-
-####################
-###### KIBANA ######
-####################
-  kibana:
-    build:
-      context: ./requirements/kibana/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
-    container_name: tr_kibana
-    volumes:
-      - ./requirements/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
-    ports:
-      - 5601:5601
-    environment:
-      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.15
-    hostname: kibana
-    depends_on:
-      - elasticsearch
-    restart: unless-stopped
-
-######################
-###### FILEBEAT ######
-######################
-  filebeat:
-    build:
-      context: ./requirements/filebeat/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
-    # Run as 'root' instead of 'filebeat' (uid 1000) to allow reading
-    # 'docker.sock' and the host's filesystem.
-    container_name: tr_filebeat
-    user: root
-    command:
-      # Log to stderr.
-      - -e
-      # Disable config file permissions checks. Allows mounting
-      # 'config/filebeat.yml' even if it's not owned by root.
-      # see: https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
-      - --strict.perms=false
-    volumes:
-      - ./requirements/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
-      - type: bind
-        source: /var/lib/docker/containers
-        target: /var/lib/docker/containers
-        read_only: true
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        read_only: true
-    hostname: filebeat
-    environment:
-      FILEBEAT_INTERNAL_PASSWORD: ${FILEBEAT_INTERNAL_PASSWORD:-}
-      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.22
-#####################
-###### CURATOR ######
-#####################
-  curator:
-    build:
-      context: ./requirements/curator/
-    init: true
-    container_name: tr_curator
-    volumes:
-      - ./requirements/curator/config/curator.yml:/.curator/curator.yml:ro,Z
-      - ./requirements/curator/config/delete_log_files_curator.yml:/.curator/delete_log_files_curator.yml:ro,Z
-    environment:
-      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
-    hostname: curator
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.16
-    depends_on:
-      - elasticsearch
-
-##########################
-###### FLEET-SERVER ######
-##########################
-
-  fleet-server:
-    build:
-      context: ./requirements/fleet/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
-    # Run as 'root' instead of 'elastic-agent' (uid 1000) to allow reading
-    # 'docker.sock' and the host's filesystem.
-    container_name: tr_fleet_server
-    user: root
-    volumes:
-      - fleet_server_data:/usr/share/elastic-agent/state:Z
-      - type: bind
-        source: /var/lib/docker/containers
-        target: /var/lib/docker/containers
-        read_only: true
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        read_only: true
-    environment:
-      FLEET_SERVER_ENABLE: '1'
-      FLEET_SERVER_INSECURE_HTTP: '1'
-      FLEET_SERVER_HOST: 0.0.0.0
-      FLEET_SERVER_POLICY_ID: fleet-server-policy
-      # Fleet plugin in Kibana
-      KIBANA_FLEET_SETUP: '1'
-      # Enrollment.
-      # (a) Auto-enroll using basic authentication
-      ELASTICSEARCH_USERNAME: elastic
-      ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-}
-      # (b) Enroll using a pre-generated service token
-      #FLEET_SERVER_SERVICE_TOKEN: <service_token>
-    ports:
-      - 8220:8220
-    hostname: fleet-server
-    # Elastic Agent does not retry failed connections to Kibana upon the initial enrollment phase.
-    restart: on-failure
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.18
-    depends_on:
-      - elasticsearch
-      - kibana
-
-########################
-###### APM-SERVER ######
-########################
-  apm-server:
-    build:
-      context: ./requirements/fleet/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
-    container_name: tr_apm_server
-    volumes:
-      - apm_server_data:/usr/share/elastic-agent/state:Z
-    environment:
-      FLEET_ENROLL: '1'
-      FLEET_TOKEN_POLICY_NAME: Agent Policy APM Server
-      FLEET_INSECURE: '1'
-      FLEET_URL: http://fleet-server:8220
-      # Enrollment.
-      # (a) Auto-enroll using basic authentication
-      ELASTICSEARCH_USERNAME: elastic
-      ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-}
-      # (b) Enroll using a pre-generated enrollment token
-      #FLEET_ENROLLMENT_TOKEN: <enrollment_token>
-    ports:
-      - 8200:8200
-    hostname: apm-server
-    # Elastic Agent does not retry failed connections to Kibana upon the initial enrollment phase.
-    restart: on-failure
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.19
-    depends_on:
-      - elasticsearch
-      - kibana
-      - fleet-server
-
-#######################
-###### HEARTBEAT ######
-#######################
-
-  heartbeat:
-    build:
-      context: ./requirements/heartbeat/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
-    container_name: tr_heartbeat
-    command:
-      # Log to stderr.
-      - -e
-      # Disable config file permissions checks. Allows mounting
-      # 'config/heartbeat.yml' even if it's not owned by root.
-      # see: https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
-      - --strict.perms=false
-    volumes:
-      - ./requirements/heartbeat/config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro,Z
-    environment:
-      HEARTBEAT_INTERNAL_PASSWORD: ${HEARTBEAT_INTERNAL_PASSWORD:-}
-      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.20
-    depends_on:
-      - elasticsearch
-
-########################
-###### METRICBEAT ######
-########################
-
-  metricbeat:
-    build:
-      context: ./requirements/metricbeat/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
-    container_name: tr_metricbeat
-    # Run as 'root' instead of 'metricbeat' (uid 1000) to allow reading
-    # 'docker.sock' and the host's filesystem.
-    user: root
-    command:
-      # Log to stderr.
-      - -e
-      # Disable config file permissions checks. Allows mounting
-      # 'config/metricbeat.yml' even if it's not owned by root.
-      # see: https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
-      - --strict.perms=false
-      # Mount point of the host’s filesystem. Required to monitor the host
-      # from within a container.
-      - --system.hostfs=/hostfs
-    volumes:
-      - ./requirements/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro,Z
-      - type: bind
-        source: /
-        target: /hostfs
-        read_only: true
-      - type: bind
-        source: /sys/fs/cgroup
-        target: /hostfs/sys/fs/cgroup
-        read_only: true
-      - type: bind
-        source: /proc
-        target: /hostfs/proc
-        read_only: true
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        read_only: true
-    environment:
-      METRICBEAT_INTERNAL_PASSWORD: ${METRICBEAT_INTERNAL_PASSWORD:-}
-      MONITORING_INTERNAL_PASSWORD: ${MONITORING_INTERNAL_PASSWORD:-}
-      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.21
-    depends_on:
-      - elasticsearch
 
 ##########################
 ########PROMETHEUS########
@@ -545,7 +583,7 @@ services:
       - IPC_LOCK
     networks:
       transcendence:
-        ipv4_address: 10.0.10.69
+        ipv4_address: 10.0.10.80
     logging:
       driver: "json-file"
       options:
@@ -553,68 +591,3 @@ services:
         max-file: "10"
     restart: always
 
-#######################
-########VOLUMES########
-#######################
-volumes:
-  profile_share:
-
-  postgres_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/postgres_data/"
-
-  elasticsearch_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/elasticsearch_data/"
-
-  # django_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: "none"
-  #     o: "bind"
-  #     device: "./data/django_data/"
-
-  portainer_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/portainer_data/"
-
-  media_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/media_data/"
-
-  apm_server_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/apm_server_data/"
-
-  fleet_server_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/fleet_server_data/"
-
-########################
-########NETWORKS########
-########################
-networks:
-  transcendence:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.0.10.0/24

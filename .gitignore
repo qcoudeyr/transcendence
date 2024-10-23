@@ -23,4 +23,5 @@ srcs/data/django_data/transcendence/profiles/migrations/0001_initial.py
 srcs/data/apm_server_data/*
 srcs/data/elasticsearch_data/*
 srcs/data/fleet_server_data/*
-
+srcs/data/elk/*
+srcs/data/django_data/transcendence/elastic*
