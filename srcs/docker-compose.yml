@@ -155,7 +155,7 @@ services:
       - 9300:9300
     environment:
       node.name: elasticsearch
-      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
       # Bootstrap password.
       # Used to initialize the keystore during the initial startup of
       # Elasticsearch. Ignored on subsequent runs.
@@ -213,6 +213,7 @@ services:
     ports:
       - 5601:5601
     environment:
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
       transcendence:
@@ -253,6 +254,7 @@ services:
         read_only: true
     hostname: filebeat
     environment:
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
       FILEBEAT_INTERNAL_PASSWORD: ${FILEBEAT_INTERNAL_PASSWORD:-}
       BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
     networks:
@@ -270,6 +272,7 @@ services:
       - ./requirements/curator/config/curator.yml:/.curator/curator.yml:ro,Z
       - ./requirements/curator/config/delete_log_files_curator.yml:/.curator/delete_log_files_curator.yml:ro,Z
     environment:
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
     hostname: curator
     networks:
@@ -314,6 +317,7 @@ services:
       ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-}
       # (b) Enroll using a pre-generated service token
       #FLEET_SERVER_SERVICE_TOKEN: <service_token>
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
     ports:
       - 8220:8220
     hostname: fleet-server
@@ -348,6 +352,7 @@ services:
       ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-}
       # (b) Enroll using a pre-generated enrollment token
       #FLEET_ENROLLMENT_TOKEN: <enrollment_token>
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
     ports:
       - 8200:8200
     hostname: apm-server
@@ -383,6 +388,7 @@ services:
     environment:
       HEARTBEAT_INTERNAL_PASSWORD: ${HEARTBEAT_INTERNAL_PASSWORD:-}
       BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
     networks:
       transcendence:
         ipv4_address: 10.0.10.20
@@ -434,6 +440,7 @@ services:
       METRICBEAT_INTERNAL_PASSWORD: ${METRICBEAT_INTERNAL_PASSWORD:-}
       MONITORING_INTERNAL_PASSWORD: ${MONITORING_INTERNAL_PASSWORD:-}
       BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
     networks:
       transcendence:
         ipv4_address: 10.0.10.21
