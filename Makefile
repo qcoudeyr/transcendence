@@ -149,6 +149,27 @@ restart-docker:
 	@$(MAKE) restart-docker container=$@
 
 
+
+# Add this to your existing Makefile
+show-vault-token:
+	@if [ ! -f ./srcs/vault_root_token.gpg ]; then \
+		echo "Error: Encrypted token file not found at ./srcs/vault_root_token.gpg"; \
+		exit 1; \
+	fi
+	@# Decrypt and display first line only, immediately clear from memory
+	@gpg --quiet --decrypt ./srcs/vault_root_token.gpg 2>/dev/null | head -n1 | tr -d '\n' | \
+	{ read token; \
+		clear; \
+		tput cup 0 0; \
+		echo "Vault Token (will clear in 10 seconds):"; \
+		echo "$$token"; \
+		sleep 10; \
+		clear; \
+		tput cup 0 0; \
+		echo "Token cleared from screen."; \
+	}
+
+
 re: fclean all
 
-.PHONY: all build-and-up fclean re restart-docker stop-docker start-docker setup
+.PHONY: all build-and-up fclean re restart-docker stop-docker start-docker setup show-vault-token
