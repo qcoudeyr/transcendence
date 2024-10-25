@@ -1,36 +1,6 @@
 SHELL := /bin/bash
 
-all: create-data-dirs setup build-and-up
-
-detect-and-install-docker:
-	@echo "Checking for Docker..."
-	@if ! command -v docker &> /dev/null; then \
-		echo "Docker not found. Installing Docker..."; \
-		sudo apt update; \
-		sudo apt install -y ca-certificates curl gnupg lsb-release; \
-		curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg; \
-		echo "deb [arch=$$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $$(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null; \
-		sudo apt update; \
-		sudo apt install -y docker-ce docker-ce-cli containerd.io; \
-	else \
-		echo "Docker is already installed."; \
-	fi
-
-	@echo "Checking for Docker Compose V2..."
-	@if ! docker compose version &> /dev/null; then \
-		echo "Docker Compose V2 not found. Installing Docker Compose V2..."; \
-		sudo apt install -y docker-compose-plugin; \
-	else \
-		echo "Docker Compose V2 is already installed."; \
-	fi
-
-	@echo "Ensuring Docker Compose V2 is symlinked..."
-	@if [ ! -L /usr/local/bin/docker-compose ]; then \
-		echo "Creating symlink for Docker Compose V2..."; \
-		sudo ln -sf /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose; \
-	else \
-		echo "Symlink for Docker Compose V2 already exists."; \
-	fi
+all: create-data-dirs init-vault build-and-up init-portainer
 
 create-data-dirs:
 	@echo "Creating data directories if they do not exist..."
@@ -44,28 +14,85 @@ create-data-dirs:
 		./srcs/data/elasticsearch_data \
 		./srcs/data/apm_server_data \
 		./srcs/data/fleet_server_data \
-		./srcs/data/grafana_data
+		./srcs/data/grafana_data \
+		./srcs/data/logs
 
 	@echo "Data directories created."
 
-reset_db:
-	@echo "Removing migrations..."
-	@docker exec tr_django remove_migrations.sh || true
-	@docker exec tr_channels remove_migrations.sh || true
-	@echo "Stopping db related services..."
-	@docker stop tr_channels tr_django
-	@docker stop tr_postgresql
-	@docker rm tr_postgresql
-	@echo "Removing database..."
-	@sudo rm -rf ./srcs/data/postgres_data
-	@echo "Starting db related services..."
-	@make
-
 build-and-up:
 	@cd ./srcs && docker compose up setup && docker compose up -d
-	@sleep 5 && docker exec tr_nginx_modsecurity_crs rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx_modsecurity_crs nginx -s reload || true
+	@sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true
 	@echo "Build Complete !"
-fclean:
+
+init-portainer:
+	@echo "Starting of the init scripts..."
+	@echo "Portainer init started..."
+	@./srcs/scripts/portainer_init.sh; \
+	R_VALUE=$$?; \
+	if [ $$R_VALUE -eq 0 ]; then \
+		echo "Portainer init done!"; \
+	else \
+		echo "Portainer init script failed with return value $$R_VALUE!"; \
+	fi || true
+
+init-vault:
+	@echo "Starting Vault container..."
+	@cd ./srcs && docker compose up vault -d
+	@echo "Vault container started !"
+	@echo "Vault initialization started..."
+	@cd ./srcs && ./scripts/vault_init.sh; \
+	R_VALUE=$$?; \
+	if [ $$R_VALUE -eq 0 ]; then \
+		echo "Vault init done!"; \
+	else \
+		echo "Vault init script failed with return value $$R_VALUE!"; \
+	fi || true
+	@echo "Vault setup started..."
+	@cd ./srcs && ./scripts/vault_setup.sh; \
+	R_VALUE=$$?; \
+	if [ $$R_VALUE -eq 0 ]; then \
+		echo "Vault setup done!"; \
+	else \
+		echo "Vault setup script failed with return value $$R_VALUE!"; \
+	fi || true
+
+clean-sensitive-data:
+	@echo "Cleaning up sensitive data..."
+
+	# Find the GPG key fingerprint for "vault-key"
+	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10); \
+	if [ -n "$$GPG_FINGERPRINT" ]; then \
+		# Remove the GPG private key (secret key) by fingerprint \
+		gpg --batch --yes --delete-secret-keys "$$GPG_FINGERPRINT"; \
+		if [ $$? -eq 0 ]; then \
+			echo "GPG secret key '$$GPG_FINGERPRINT' removed successfully."; \
+		else \
+			echo "Failed to remove GPG secret key."; \
+		fi; \
+	else \
+		echo "No GPG secret key found for 'vault-key'."; \
+	fi
+
+	# Check if the public key exists separately
+	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10); \
+	if [ -n "$$GPG_FINGERPRINT" ]; then \
+		gpg --batch --yes --delete-keys "$$GPG_FINGERPRINT"; \
+		if [ $$? -eq 0 ]; then \
+			echo "GPG public key '$$GPG_FINGERPRINT' removed successfully."; \
+		else \
+			echo "Failed to remove GPG public key."; \
+		fi; \
+	else \
+		echo "No GPG public key found for 'vault-key'."; \
+	fi
+	# Remove the encrypted root token file
+	@cd ./srcs/ && rm -f vault_root_token.gpg
+	@if [ $$? -eq 0 ]; then echo "Encrypted file 'vault_root_token.gpg' removed successfully."; else echo "Failed to remove 'root_token.gpg'."; fi
+
+	@echo "Sensitive data cleanup complete."
+
+
+fclean: clean-data clean-sensitive-data
 	@echo "Removing migrations..."
 	@docker exec tr_django remove_migrations.sh || true
 	@docker exec tr_channels remove_migrations.sh || true
@@ -86,17 +113,22 @@ fclean:
 	@sudo rm -rf ./srcs/data/fleet_server_data
 	@echo "Cleanup complete."
 
-stop:
+stop-docker:
 	@echo "Stopping Docker daemon and all containers..."
 	@sudo systemctl stop docker* > /dev/null 2>&1
 	@echo "All Docker containers stopped!"
 
-start:
+start-docker:
 	@echo "Starting Docker daemon..."
 	@sudo systemctl start docker.service docker.socket > /dev/null 2>&1
 	@echo "Docker daemon started!"
 
-restart:
+clean-data:
+	@echo "Cleaning of the data folder..."
+	@sudo find srcs/data -mindepth 1 -maxdepth 1 ! -name 'django_data' ! -name 'media_data' ! -name 'website_data' ! -name 'channels_data' -exec rm -rf {} +
+	@echo "Cleaning done !"
+
+restart-docker:
 	@if [ -z "$(container)" ]; then \
 		echo "Restarting all Docker containers..."; \
 		docker restart $$(docker ps -q) > /dev/null 2>&1; \
@@ -114,28 +146,9 @@ restart:
 		fi \
 	fi
 %:
-	@$(MAKE) restart container=$@
+	@$(MAKE) restart-docker container=$@
 
-
-
-DOCKER_DAEMON_CONFIG_PATH := /etc/docker/daemon.json
-
-.PHONY: configure-daemon restart-docker
-
-setup:
-	@echo "Configuring Docker Daemon to expose Prometheus metrics..."
-	@if ! grep -q '"metrics-addr": "127.0.0.1:9323"' $(DOCKER_DAEMON_CONFIG_PATH); then \
-		if [ ! -f $(DOCKER_DAEMON_CONFIG_PATH) ]; then \
-			echo '{ "metrics-addr": "127.0.0.1:9323", "experimental": true }' | sudo tee $(DOCKER_DAEMON_CONFIG_PATH); \
-		else \
-			jq '. + { "metrics-addr": "127.0.0.1:9323", "experimental": true }' $(DOCKER_DAEMON_CONFIG_PATH) | sudo tee $(DOCKER_DAEMON_CONFIG_PATH); \
-		@echo "Restarting Docker service..." \
-		@sudo systemctl restart docker \
-		fi \
-	else \
-		echo "Metrics configuration already present in Docker Daemon config."; \
-	fi
 
 re: fclean all
 
-.PHONY: all build-and-up fclean re restart stop start setup
+.PHONY: all build-and-up fclean re restart-docker stop-docker start-docker setup

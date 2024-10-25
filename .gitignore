@@ -1,4 +1,6 @@
 *.env*
+!srcs/template_credential.env
+!srcs/.env
 srcs/data/postgres_data/*
 !srcs/data/grafana_data/conf
 srcs/data/grafana_data/
@@ -26,3 +28,5 @@ srcs/data/apm_server_data/*
 srcs/data/elasticsearch_data/*
 srcs/data/fleet_server_data/*
 
+srcs/data/vault_data/data/vault.db
+srcs/vault_root_token.gpg
