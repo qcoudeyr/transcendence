@@ -1,12 +1,40 @@
 services:
+  setup:
+    profiles:
+      - setup
+    build:
+      context: ./requirements/setup/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_setup
+    hostname: setup
+    init: true
+    volumes:
+      - ./data/credentials/setup_approle.env:/vault/config/setup_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - ./requirements/setup/entrypoint.sh:/entrypoint.sh
+      - ./requirements/setup/lib.sh:/lib.sh
+      - ./requirements/setup/roles:/roles
+    environment:
+      - SERVICE_NAME=setup
+      - SECRET_PATH=setup
+      - VAULT_ADDR=${VAULT_ADDR}
+    networks:
+      - transcendence
+    depends_on:
+      - vault
+      - elasticsearch
+
 ##########################
 ########POSTGRESQL########
 ##########################
   postgresql:
     build:
       context: ./requirements/postgresql
-    container_name: postgresql
+    container_name: tr_postgresql
     volumes:
+      - ./data/credentials/postgresql_approle.env:/vault/config/postgresql_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
       - postgres_data:/var/lib/postgresql/data
     restart: always
     expose:
@@ -14,66 +42,68 @@ services:
     networks:
       transcendence:
         ipv4_address: 10.0.10.12
+    hostname: postgresql
     environment:
+      - VAULT_ADDR=${VAULT_ADDR}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
+      - SERVICE_NAME=postgresql
+      - SECRET_PATH=postgresql
+    entrypoint: ["/vault/entrypoint/entrypoint.sh","docker-entrypoint.sh"]
+    command: "postgres"
 
 ######################
 ########DJANGO########
 ######################
   django:
-    container_name: django
+    container_name: tr_django
     build:
       context: ./requirements/django
+    hostname: django
     restart: always
     volumes:
       - ./data/django_data:/app
       - ./data/media_data:/app/media
-      # - profile_share:/app/transcendence/profiles:rw
+      - ./data/credentials/django_approle.env:/vault/config/django_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
     expose:
       - 8000
     ports:
       - "8000:8000"
     depends_on:
+      - vault
       - postgresql
     networks:
       transcendence:
         ipv4_address: 10.0.10.10
     environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=django
+      - SECRET_PATH=django
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
       - DJANGO_SUPERUSER_NAME=${DJANGO_SUPERUSER_NAME}
-      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
       - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
+    entrypoint: ["/vault/entrypoint/entrypoint.sh"]
+    command: "start.sh"
 
 ######################
 #######CHANNELS#######
 ######################
   channels:
-    container_name: channels
+    container_name: tr_channels
     build: ./requirements/channels
     restart: always
+    hostname: channels
     volumes:
       - ./data/channels_data:/app
       - ./data/django_data/transcendence/profiles:/app/transcendence/profiles
-      # - profile_share:/app/transcendence/profiles:ro
+      - ./data/credentials/channels_approle.env:/vault/config/channels_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
     expose:
       - 8002
     ports:
@@ -82,46 +112,420 @@ services:
       transcendence:
         ipv4_address: 10.0.10.11
     depends_on:
+      - vault
       - redis
       - postgresql
       - django
     environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=channels
+      - SECRET_PATH=channels
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+    entrypoint: ["/vault/entrypoint/entrypoint.sh"]
+    command: "start.sh"
 
-######################
-########NODEJS########
-######################
-  nodejs:
-    build:
-      context: ./requirements/nodejs
-    container_name: nodejs
-    volumes:
-      - ./data/website_data:/app/static
-    ports:
-      - "3000:3000"
+#####################
+########REDIS########
+#####################
+  redis:
+    image: redis:7
+    container_name: tr_redis
+    expose:
+      - 6379
+    hostname: redis
     networks:
       transcendence:
-        ipv4_address: 10.0.10.60
-    depends_on:
-      - django
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
+        ipv4_address: 10.0.10.70
     restart: always
+    environment:
+      - VAULT_ADDR=${VAULT_ADDR}
+
+###########################
+###### ELASTICSEARCH ######
+###########################
+  elasticsearch:
+    build:
+      context: ./requirements/elasticsearch/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_elasticsearch
+    volumes:
+      - ./data/credentials/elasticsearch_approle.env:/vault/config/elasticsearch_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - ./requirements/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
+      - elasticsearch_data:/usr/share/elasticsearch/data:Z
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=elasticsearch
+      - SECRET_PATH=elasticsearch
+      - node.name=elasticsearch
+      - discovery.type=single-node
+    hostname: elasticsearch
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.13
+    restart: unless-stopped
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/bin/tini","--","/usr/local/bin/docker-entrypoint.sh"]
+    command: "eswrapper"
+
+######################
+###### LOGSTASH ######
+######################
+  logstash:
+    build:
+      context: ./requirements/logstash/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_logstash
+    volumes:
+      - ./requirements/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+      - ./data/credentials/logstash_approle.env:/vault/config/logstash_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+    ports:
+      - 5044:5044
+      - 50000:50000/tcp
+      - 50000:50000/udp
+      - 9600:9600
+    environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=logstash
+      - SECRET_PATH=logstash
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.14
+    hostname: logstash
+    depends_on:
+      - vault
+      - elasticsearch
+    restart: unless-stopped
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/local/bin/docker-entrypoint"]
+
+####################
+###### KIBANA ######
+####################
+  kibana:
+    build:
+      context: ./requirements/kibana/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_kibana
+    volumes:
+      - ./requirements/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+      - ./data/credentials/kibana_approle.env:/vault/config/kibana_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+    ports:
+      - 5601:5601
+    environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=kibana
+      - SECRET_PATH=kibana
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.15
+    hostname: kibana
+    depends_on:
+      - vault
+      - elasticsearch
+    restart: unless-stopped
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/bin/tini","--"]
+    command: "/usr/local/bin/kibana-docker"
+
+######################
+###### FILEBEAT ######
+######################
+  filebeat:
+    build:
+      context: ./requirements/filebeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_filebeat
+    user: root
+    volumes:
+      - ./requirements/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
+      - ./data/credentials/filebeat_approle.env:/vault/config/filebeat_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    hostname: filebeat
+    environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=filebeat
+      - SECRET_PATH=filebeat
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.22
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/bin/tini","--","/usr/local/bin/docker-entrypoint"]
+    command: ["-environment", "container", -e, --strict.perms=false]
+
+#####################
+###### CURATOR ######
+#####################
+  curator:
+    build:
+      context: ./requirements/curator/
+    init: true
+    container_name: tr_curator
+    volumes:
+      - ./requirements/curator/config/curator.yml:/.curator/curator.yml:ro,Z
+      - ./requirements/curator/config/delete_log_files_curator.yml:/.curator/delete_log_files_curator.yml:ro,Z
+      - ./data/credentials/curator_approle.env:/vault/config/curator_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+    environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=curator
+      - SECRET_PATH=curator
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    hostname: curator
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.16
+    depends_on:
+      - vault
+      - elasticsearch
+
+##########################
+###### FLEET-SERVER ######
+##########################
+
+  fleet-server:
+    build:
+      context: ./requirements/fleet/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_fleet_server
+    user: root
+    volumes:
+      - ./data/credentials/fleet-server_approle.env:/vault/config/fleet-server_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - fleet_server_data:/usr/share/elastic-agent/state:Z
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    environment:
+      SET_ENV: 1
+      VAULT_ADDR: http://vault:8300
+      SERVICE_NAME: fleet-server
+      SECRET_PATH: fleet-server
+      FLEET_SERVER_ENABLE: 1
+      FLEET_SERVER_INSECURE_HTTP: 1
+      FLEET_SERVER_HOST: 0.0.0.0
+      FLEET_SERVER_POLICY_ID: fleet-server-policy
+      KIBANA_FLEET_SETUP: 1
+      ELASTICSEARCH_USERNAME: elastic
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
+      DEBUG: true
+    ports:
+      - 8220:8220
+    hostname: fleet-server
+    restart: on-failure
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.18
+    depends_on:
+      - vault
+      - elasticsearch
+      - kibana
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/bin/tini" ,"--" ,"/usr/local/bin/docker-entrypoint"]
+
+########################
+###### APM-SERVER ######
+########################
+  apm-server:
+    build:
+      context: ./requirements/fleet/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_apm_server
+    volumes:
+      - apm_server_data:/usr/share/elastic-agent/state:Z
+      - ./data/credentials/apm-server_approle.env:/vault/config/apm-server_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+    environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=apm-server
+      - SECRET_PATH=apm-server
+      - FLEET_ENROLL=1
+      - FLEET_TOKEN_POLICY_NAME=Agent Policy APM Server
+      - FLEET_INSECURE=1
+      - FLEET_URL=http://fleet-server:8220
+      - ELASTICSEARCH_USERNAME=elastic
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    ports:
+      - 8200:8200
+    hostname: apm-server
+    restart: on-failure
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.19
+    depends_on:
+      - vault
+      - elasticsearch
+      - kibana
+      - fleet-server
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/bin/tini" ,"--" ,"/usr/local/bin/docker-entrypoint"]
+
+#######################
+###### HEARTBEAT ######
+#######################
+  heartbeat:
+    build:
+      context: ./requirements/heartbeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_heartbeat
+    volumes:
+      - ./requirements/heartbeat/config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro,Z
+      - ./data/credentials/heartbeat_approle.env:/vault/config/heartbeat_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+    environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=heartbeat
+      - SECRET_PATH=heartbeat
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.20
+    hostname: heartbeat
+    depends_on:
+      - vault
+      - elasticsearch
+    entrypoint: ["/vault/entrypoint/entrypoint.sh"]
+    command: "heartbeat -e --strict.perms=false"
+
+########################
+###### METRICBEAT ######
+########################
+
+  metricbeat:
+    build:
+      context: ./requirements/metricbeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_metricbeat
+    user: root
+    volumes:
+      - ./requirements/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro,Z
+      - ./data/credentials/metricbeat_approle.env:/vault/config/metricbeat_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - type: bind
+        source: /
+        target: /hostfs
+        read_only: true
+      - type: bind
+        source: /sys/fs/cgroup
+        target: /hostfs/sys/fs/cgroup
+        read_only: true
+      - type: bind
+        source: /proc
+        target: /hostfs/proc
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    environment:
+      VAULT_ADDR : "http://vault:8300"
+      SERVICE_NAME : "metricbeat"
+      SECRET_PATH : "metricbeat"
+      ES_JAVA_OPTS : "-Xms256m -Xmx256m"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.21
+    hostname: metricbeat
+    depends_on:
+      - vault
+      - elasticsearch
+    entrypoint: ["/vault/entrypoint/entrypoint.sh"]
+    command: "metricbeat -e --strict.perms=false --system.hostfs=/hostfs"
+
+##########################
+########PROMETHEUS########
+##########################
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tr_prometheus
+    volumes:
+      - ./requirements/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.30
+    restart: always
+    hostname: prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
+
+#######################
+########GRAFANA########
+#######################
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/usr/share/grafana/
+      - ./requirements/grafana:/usr/share/grafana/conf/provisioning/datasources
+    container_name: tr_grafana
+    ports:
+      - "3001:3000"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.31
+    depends_on:
+      - vault
+      - prometheus
+    restart: always
+    hostname: grafana
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
+
+#########################
+########PORTAINER########
+#########################
+  portainer:
+    image: portainer/portainer-ce:2.20.3
+    container_name: tr_portainer
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "${PORTAINER_PORT}:${PORTAINER_PORT}"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.40
+    hostname: portainer
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
 
 #####################
 ########NGINX########
 #####################
-  nginx_modsecurity_crs:
-    image: owasp/modsecurity-crs:4.3.0-nginx-202406090906
-    container_name: nginx_modsecurity_crs
+  nginx:
+    image: owasp/modsecurity-crs:4.7.0-nginx-202410090410
+    container_name: tr_nginx
     ports:
       - "80:80"
       - "443:443"
@@ -129,256 +533,86 @@ services:
       - ./requirements/nginx/nginx.conf:/etc/nginx/transcendence.conf
       - ./requirements/nginx/default.conf:/etc/nginx/conf.d/transcendence.conf
       - ./requirements/nginx/proxy_params:/etc/nginx/proxy_params
-      - ./data/website_data/:/app/static/
+      - ./data/website_data/:/app/static/:ro
       - ./data/media_data/:/app/media/
     networks:
       transcendence:
         ipv4_address: 10.0.10.2
+    hostname: nginx
     depends_on:
+      - vault
       - django
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-
-#####################
-########REDIS########
-#####################
-  redis:
-    image: redis:7
-    container_name: redis
-    expose:
-      - 6379
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.70
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-
-#############################
-########ELASTICSEARCH########
-#############################
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
-    container_name: elasticsearch
     environment:
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
-      - xpack.security.enabled=false
-      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.20
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-########################
-########LOGSTASH########
-########################
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.10.1
-    container_name: logstash
-    environment:
-      - "LS_JAVA_OPTS=-Xms128m -Xmx128m"
-      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    volumes:
-      - ./requirements/logstash/config:/usr/share/logstash/config
-      - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline
-    ports:
-      - "5044:5044"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.21
-    depends_on:
-      - elasticsearch
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-########################
-########FILEBEAT########
-########################
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:7.13.4
-    container_name: filebeat
-    volumes:
-      - ./requirements/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - /var/lib/docker/containers:/var/lib/docker/containers:rshared,ro
-      - /var/run/docker.sock:/var/run/docker.sock:rshared,ro
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.50
-    environment:
-      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    depends_on:
-      - logstash
-    restart: always
-
-######################
-########KIBANA########
-######################
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.10.1
-    container_name: kibana
-    ports:
-      - "5601:5601"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.22
-    volumes:
-      - ./requirements/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
-    depends_on:
-      - elasticsearch
-    environment:
-      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - XPACK_SECURITY_ENCRYPTIONKEY=${XPACK_SECURITY_ENCRYPTIONKEY}
-      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY}
-      - XPACK_REPORTING_ENCRYPTIONKEY=${XPACK_REPORTING_ENCRYPTIONKEY}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-##########################
-########PROMETHEUS########
-##########################
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    volumes:
-      - ./requirements/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9091:9090"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.30
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-#######################
-########GRAFANA########
-#######################
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3001:3000"
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.31
-    depends_on:
-      - prometheus
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: always
-
-#########################
-########PORTAINER########
-#########################
-  portainer:
-    image: portainer/portainer-ce:2.20.3
-    container_name: portainer
-    command: -H unix:///var/run/docker.sock
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-    ports:
-      - "${PORTAINER_PORT}:${PORTAINER_PORT}"
-    environment:
-      - PORTAINER_USER=${PORTAINER_USER}
-      - PORTAINER_PASSWORD=${PORTAINER_PASSWORD}
-      - PORTAINER_HOST=${PORTAINER_HOST}
-      - PORTAINER_PORT=${PORTAINER_PORT}
-    networks:
-      transcendence:
-        ipv4_address: 10.0.10.40
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
+      VAULT_ADDR: ${VAULT_ADDR}
 
 #####################
 ########VAULT########
 #####################
   vault:
     image: hashicorp/vault:latest
-    container_name: vault
+    container_name: tr_vault
     ports:
-      - "8200:8200"
+      - "8300:8300"
+      - "8301:8301"
+    volumes:
+      - ./requirements/vault/certs/:/certs/:rw
+      - ./requirements/vault/config/:/vault/config/:rw
+      - ./data/vault_data/data:/vault/data/:rw
+      - ./data/vault_data/logs/:/vault/logs/:rw
+      - ./data/vault_data/file:/vault/file/:rw
     environment:
-      - VAULT_ADDR=http://0.0.0.0:8200
-      - VAULT_DEV_ROOT_TOKEN_ID=myroot
+      VAULT_ADDR: "http://vault:8300"
+      VAULT_API_ADDR: "http://vault:8301"
+      VAULT_ADDRESS: "http://vault:8300"
+      VAULT_UI: true
     cap_add:
       - IPC_LOCK
     networks:
       transcendence:
         ipv4_address: 10.0.10.69
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
+    hostname: vault
     restart: always
+    entrypoint: vault server -config /vault/config/config.hcl
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 #######################
 ########VOLUMES########
 #######################
 volumes:
   profile_share:
+
   postgres_data:
     driver: local
     driver_opts:
       type: "none"
       o: "bind"
       device: "./data/postgres_data/"
+
+  elasticsearch_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/elasticsearch_data/"
+
   # django_data:
   #   driver: local
   #   driver_opts:
   #     type: "none"
   #     o: "bind"
   #     device: "./data/django_data/"
-  es_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/es_data/"
+
   portainer_data:
     driver: local
     driver_opts:
       type: "none"
       o: "bind"
       device: "./data/portainer_data/"
+
   media_data:
     driver: local
     driver_opts:
@@ -386,11 +620,33 @@ volumes:
       o: "bind"
       device: "./data/media_data/"
 
+  apm_server_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/apm_server_data/"
+
+  fleet_server_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/fleet_server_data/"
+
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/grafana_data/"
+
 ########################
 ########NETWORKS########
 ########################
 networks:
   transcendence:
+    name: tr_network
     driver: bridge
     ipam:
       driver: default

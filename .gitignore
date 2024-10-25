@@ -1,5 +1,9 @@
 *.env*
+!srcs/template_credential.env
+!srcs/.env
 srcs/data/postgres_data/*
+!srcs/data/grafana_data/conf
+srcs/data/grafana_data/
 srcs/data/portainer_data/*
 srcs/data/es_data/nodes/
 srcs/data/django_data/my_env/*
@@ -20,3 +24,9 @@ db.sqlite3
 srcs/data/redis_data/*
 srcs/data/django_data/transcendence/profiles/migrations/__init__.py
 srcs/data/django_data/transcendence/profiles/migrations/0001_initial.py
+srcs/data/apm_server_data/*
+srcs/data/elasticsearch_data/*
+srcs/data/fleet_server_data/*
+
+srcs/data/vault_data/data/vault.db
+srcs/vault_root_token.gpg
