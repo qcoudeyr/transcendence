@@ -8,7 +8,7 @@ export function displayGroupList(name, profile_id, avatar) {
     const groupListContainer = document.getElementById("grp-list");
 
     const friend = document.createElement('div');
-    friend.id = 'friend_' + profile_id;
+    friend.id = 'grp-friend_' + profile_id;
     friend.classList.add('friend');
 
     const nameSpan = document.createElement('span');
@@ -159,7 +159,7 @@ export function removeGroupRequest(request_id) {
 
 export function removeFriendFromGroup(profile_id) {
     // Locate the friend element by its unique ID
-    const friendElement = document.getElementById('friend_' + profile_id);
+    const friendElement = document.getElementById('grp-friend_' + profile_id);
     if (friendElement) {
         friendElement.remove();
         console.log(`Friend with profile_id ${profile_id} has left the group.`);
