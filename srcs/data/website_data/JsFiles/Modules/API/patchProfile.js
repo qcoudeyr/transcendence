@@ -45,7 +45,11 @@ export function updateProfile(event) {
     })
     .then(data => {
         console.log('Profile updated successfully:', data);
-        getNameBioAndAvatar(); // Call the imported function
+        // getNameBioAndAvatar(); // Call the imported function
+		localStorage.setItem("name", data.name);
+		localStorage.setItem("biography", data.biography);
+		localStorage.setItem("avatar_url", data.avatar);
+		localStorage.setItem("id",data.id);
 		location.reload();
     })
     .catch(error => {
