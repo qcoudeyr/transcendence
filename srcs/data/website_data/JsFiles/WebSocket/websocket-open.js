@@ -3,7 +3,7 @@ import { friendRequestReceive, friendRequestRemoveDiv } from "./friendRequests.j
 import { displayFriendList, removeReceivedFriend } from "./friendDisplay.js";
 import { displayPrivateMessage } from "./chatSend.js";
 import { friendRequestNotification } from "./notifications-displays.js";
-import { removeGroupRequest, groupRequestRevieve, displayGroupList } from "./groupRequests.js";
+import { removeFriendFromGroup, removeGroupRequest, groupRequestRevieve, displayGroupList } from "./groupRequests.js";
 
 let socket;
 
@@ -97,6 +97,10 @@ function openWebsocket(socketurl){
 			if(content.type === 'group_request_remove')
 			{
 				removeGroupRequest(content.profile_id);
+			}
+			if(content.type === 'group_member_remove')
+			{
+				removeFriendFromGroup(content.profile_id);
 			}
 		}
 	}

@@ -49,12 +49,11 @@ function showLeaveButtonIfMultipleFriends() {
             leaveButton = document.createElement("button");
             leaveButton.id = "leave-btn";
             leaveButton.textContent = "Leave Group";
+			leaveButton.class = "leaveGroup-button"
             leaveButton.onclick = () => {
-                const lastFriend = friends[friends.length - 1];
-                if (lastFriend) {
-                    lastFriend.remove();
-                    showLeaveButtonIfMultipleFriends(); // Recheck if button should remain
-                }
+                socket.send(JSON.stringify({
+					"type": "group_leave",
+				}));
             };
             groupListContainer.parentNode.insertBefore(leaveButton, groupListContainer);
         }
@@ -147,7 +146,6 @@ export function groupRequestRevieve(profileId, name, avatar)
 {
 	grpRequestNotification(name);
 	grpRequestDisplay(name, profileId, avatar);
-
 	//create a button with accept and refuse and send to server true or false
 }
 
@@ -156,6 +154,17 @@ export function removeGroupRequest(request_id) {
     if (requestElement) {
         requestElement.remove();
     }
+}
+
+export function removeFriendFromGroup(profile_id) {
+    // Locate the friend element by its unique ID
+    const friendElement = document.getElementById('friend_' + profile_id);
+    if (friendElement) {
+        friendElement.remove();
+        console.log(`Friend with profile_id ${profile_id} has left the group.`);
+        // Recheck if the leave button should remain
+        showLeaveButtonIfMultipleFriends();
+	}
 }
 
 //TODO create a function to leave the group and send 'group leave';
