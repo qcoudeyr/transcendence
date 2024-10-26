@@ -140,12 +140,12 @@ function handleGrpRequestResponse(isAccepted)
 			"type": "group_request_answer",
 			'answer': isAccepted ? true : false,
 		}));
-		if (isAccepted === true)
-			{
-				socket.send(JSON.stringify({
-					"type": "group_list",
-				}));
-			}
+		// if (isAccepted === true)
+		// 	{
+		// 		socket.send(JSON.stringify({
+		// 			"type": "group_list",
+		// 		}));
+		// 	}
 	
 		console.log(`Group request ${isAccepted ? 'accepted' : 'rejected'}`);
 }
