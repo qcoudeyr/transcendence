@@ -40,10 +40,10 @@ export function websocketConnect()
 }
 
 function openWebsocket(socketurl){
-	console.log('\x1b[33mWebsocket connecting..\x1b[0m');
+	console.log('\x1b[33m[Websocket] Connecting..\x1b[0m');
 	socket = new WebSocket(socketurl);
 	socket.onopen = function(e) {
-		console.log("\x1b[34m [WebSocket] Connection established !\x1b[0m");
+		console.log("\x1b[34m[WebSocket] Connection established !\x1b[0m");
 		socket.send(JSON.stringify({
             'type': 'friend_list',
         }));
@@ -91,7 +91,6 @@ function openWebsocket(socketurl){
 			}
 			if(content.type === 'group_member')
 			{
-				console.log("im never here n..");
 				displayGroupList(content.name, content.profile_id, content.avatar);
 			}
 			if(content.type === 'group_request_remove')
