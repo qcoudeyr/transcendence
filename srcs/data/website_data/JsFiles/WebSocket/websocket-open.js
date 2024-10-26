@@ -40,7 +40,7 @@ export function websocketConnect()
 }
 
 function openWebsocket(socketurl){
-	console.info('[Websocket] Connecting...');
+	console.log('\x1b[33mWebsocket connecting..\x1b[0m');
 	socket = new WebSocket(socketurl);
 	socket.onopen = function(e) {
 		console.info("[WebSocket] Connection established !");
