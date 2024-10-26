@@ -1,4 +1,4 @@
-leaveGroup-button {
+.leaveGroup-button {
 	background: none;
 	border: 0;
 	box-sizing: border-box;
@@ -20,8 +20,8 @@ leaveGroup-button {
 	width: 100px;
   }
   
-  leaveGroup-button::before,
-  leaveGroup-button::after {
+  .leaveGroup-button::before,
+  .leaveGroup-button::after {
 	background-color: white;
 	content: '';
 	display: block;
@@ -34,22 +34,22 @@ leaveGroup-button {
 	z-index: -1;
   }
   
-  leaveGroup-button::before {
+  .leaveGroup-button::before {
 	top: 0;
 	transform: rotate(45deg);
   }
   
-  leaveGroup-button::after {
+.leaveGroup-button::after {
 	bottom: 0;
 	transform: rotate(-45deg);
   }
   
-  leaveGroup-button:hover {
+.leaveGroup-button:hover {
 	color: #8A2387;
   }
   
-  leaveGroup-button:hover::before,
-  leaveGroup-button:hover::after {
+.leaveGroup-button:hover::before,
+.leaveGroup-button:hover::after {
 	height: 50px;
 	transform: rotate(0deg);
   }
