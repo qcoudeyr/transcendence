@@ -1,4 +1,5 @@
 import { grpRequestNotification } from "./notifications-displays.js"
+import { getFriendsAvatar } from "./friendRequests.js";
 
 
 export function displayGroupList(name, profile_id, avatar) {
