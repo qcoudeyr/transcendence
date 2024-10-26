@@ -16,6 +16,7 @@
 	margin-left: 50px;
 	margin-bottom: 5px; /* Space above the button */
 	text-shadow: none;
+	padding-top: 2px;
   }
   .leaveGroup-button:hover {
 	box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
