@@ -40,10 +40,10 @@ export function websocketConnect()
 }
 
 function openWebsocket(socketurl){
-	console.log('[Websocket] Connecting...');
+	console.info('[Websocket] Connecting...');
 	socket = new WebSocket(socketurl);
 	socket.onopen = function(e) {
-		console.log("[WebSocket] Connection established !");
+		console.info("[WebSocket] Connection established !");
 		socket.send(JSON.stringify({
             'type': 'friend_list',
         }));
