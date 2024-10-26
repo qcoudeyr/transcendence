@@ -139,7 +139,13 @@ function handleGrpRequestResponse(isAccepted)
 			"type": "group_request_answer",
 			'answer': isAccepted ? true : false,
 		}));
-	
+		if (isAccepted === true)
+			{
+				socket.send(JSON.stringify({
+					"type": "group_request_remove",
+					'answer': isAccepted ? true : false,
+				}));
+			}
 	
 		console.log(`Group request ${isAccepted ? 'accepted' : 'rejected'}`);
 }
@@ -150,6 +156,15 @@ export function groupRequestRevieve(profileId, name, avatar)
 	grpRequestDisplay(name, profileId, avatar);
 
 	//create a button with accept and refuse and send to server true or false
+}
+
+export function removeGroupRequest(request_id) {
+    const requestElement = document.getElementById('grp_request_' + request_id);
+    if (requestElement) {
+        requestElement.remove();
+    } else {
+        console.error("Request element not found for ID:", request_id);
+    }
 }
 
 //TODO create a function to leave the group and send 'group leave';
