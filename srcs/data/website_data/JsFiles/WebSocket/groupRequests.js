@@ -1,5 +1,6 @@
 import { grpRequestNotification, notificationReset } from "./notifications-displays.js"
 import { getFriendsAvatar } from "./friendRequests.js";
+import { getWebsocket } from "./websocket-open.js";
 
 
 export function displayGroupList(name, profile_id, avatar) {
