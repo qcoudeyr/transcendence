@@ -91,6 +91,7 @@ function openWebsocket(socketurl){
 			}
 			if(content.type === 'group_member')
 			{
+				console.log("im never here n..");
 				displayGroupList(content.name, content.profile_id, content.avatar);
 			}
 			if(content.type === 'group_request_remove')

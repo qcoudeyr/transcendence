@@ -126,7 +126,6 @@ function grpRequestDisplay(name, request_id, avatar)
     friendRequestDiv.appendChild(nameSpan);
     friendRequestDiv.appendChild(actionsDiv);
 
-    // Append the friend request div to the request list container
     requestListDiv.prepend(friendRequestDiv);
 }
 
