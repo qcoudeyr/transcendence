@@ -2,7 +2,7 @@ import { getNameBioAndAvatar } from "./getProfileInfo.js";
 
 let selectedAvatarFile = null; // Global variable to store the selected avatar file
 
-export function updateProfile(event) {
+export async function updateProfile(event) {
     event.preventDefault(); // Prevent the form from submitting traditionally
 
     // Get form values using IDs
@@ -27,7 +27,7 @@ export function updateProfile(event) {
     });
 
     // Send the PATCH request
-    fetch('/api/profile/me/', {
+    await fetch('/api/profile/me/', {
         method: 'PATCH',
         headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('accessToken') // Authentication token
