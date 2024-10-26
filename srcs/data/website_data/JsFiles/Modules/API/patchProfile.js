@@ -54,7 +54,7 @@ export function updateProfile(event) {
 }
 
 // Bind the updateProfile function to the button click event
-// document.getElementById('profile-edit-submit-btn').addEventListener('click', updateProfile);
+document.getElementById('profile-edit-submit-btn').addEventListener('click', updateProfile);
 
 // Drag and Drop Functionality
 const uploadArea = document.getElementById("uploadArea");
