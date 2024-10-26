@@ -89,7 +89,7 @@ export function displayFriendList(name, profile_id, avatar, status) {
     friend.appendChild(actionsDiv);
 
     // Append or prepend the friend container based on the status
-    if (status === "ON") {
+    if (status === "Online") {
         // Prepend online friends to the top
         friend_list.prepend(friend);
     } else {
