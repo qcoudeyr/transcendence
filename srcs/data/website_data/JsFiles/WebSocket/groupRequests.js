@@ -20,6 +20,13 @@ export function displayGroupList(name, profile_id, avatar) {
     // Append avatar and load its URL
     friend.appendChild(avatarImg);
     getFriendsAvatar(avatar)
+        .then(imageURL => {
+            avatarImg.src = imageURL; // Set the avatar image once fetched
+        })
+        .catch(error => {
+            console.error('Error fetching avatar:', error);
+            avatarImg.src = './default-avatar.png'; // Set a default avatar in case of error
+        });
 	friend.appendChild(nameSpan);
 	groupListContainer.appendChild(friend);
 }
