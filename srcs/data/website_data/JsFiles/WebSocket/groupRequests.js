@@ -50,7 +50,7 @@ function showLeaveButtonIfMultipleFriends() {
             leaveButton = document.createElement("button");
             leaveButton.id = "leave-btn";
             leaveButton.textContent = "Leave Group";
-			leaveButton.class = "leaveGroup-button"
+			leaveButton.classList.add("leaveGroup-button");
             leaveButton.onclick = () => {
                 socket.send(JSON.stringify({
 					"type": "group_leave",
