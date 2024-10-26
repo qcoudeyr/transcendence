@@ -4,6 +4,7 @@ import { getWebsocket } from "./websocket-open.js";
 
 
 export function displayGroupList(name, profile_id, avatar) {
+	console.log('im i here at some point ????');
     const groupListContainer = document.getElementById("grp-list");
 
     const friend = document.createElement('div');
