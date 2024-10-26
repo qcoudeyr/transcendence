@@ -139,12 +139,6 @@ function handleGrpRequestResponse(isAccepted)
 			"type": "group_request_answer",
 			'answer': isAccepted ? true : false,
 		}));
-		// if (isAccepted === true)
-		// 	{
-		// 		socket.send(JSON.stringify({
-		// 			"type": "group_list",
-		// 		}));
-		// 	}
 	
 		console.log(`Group request ${isAccepted ? 'accepted' : 'rejected'}`);
 }
@@ -161,8 +155,6 @@ export function removeGroupRequest(request_id) {
     const requestElement = document.getElementById('grp_request_' + request_id);
     if (requestElement) {
         requestElement.remove();
-    } else {
-        console.error("No grp request found.");
     }
 }
 
