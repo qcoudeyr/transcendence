@@ -100,7 +100,12 @@ export function displayFriendList(name, profile_id, avatar, status) {
 
 // Function to invite a friend to a group
 function inviteToGroup(profile_id) {
-    console.log(`Inviting friend with profile_id: ${profile_id} to a group.`);
+	let socket = getWebsocket();
+	socket.send(JSON.stringify(
+	{
+		'type': 'group_request',
+		'profile_id': profile_id
+	}));
     // Add your invite logic here (e.g., open group invite dialog, send invite, etc.)
 }
 

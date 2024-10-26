@@ -49,6 +49,9 @@ function openWebsocket(socketurl){
 		socket.send(JSON.stringify({
             'type': 'friend_request_list',
         }));
+		socket.send(JSON.stringify({
+            'type': 'group_list',
+        }));
 	};
 	socket.onmessage = function(event) {
 		// alert(`[message] Data received from server: ${event.data}`);
@@ -80,6 +83,10 @@ function openWebsocket(socketurl){
 			if (content.type === 'friend_remove')
 			{
 				removeReceivedFriend(content.profile_id);
+			}
+			if(content.type === 'group_request')
+			{
+				groupRequestRevieve(content.profile_id);
 			}
 		}
 	}

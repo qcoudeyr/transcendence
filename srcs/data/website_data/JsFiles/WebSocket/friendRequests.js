@@ -128,7 +128,6 @@ function handleFriendRequestResponse(request_id, isAccepted) {
         'request_id': request_id
     }));
 
-    friendRequestRemoveDiv(request_id);
 
     console.log(`Friend request ${isAccepted ? 'accepted' : 'rejected'} for request_id: ${request_id}`);
 }
