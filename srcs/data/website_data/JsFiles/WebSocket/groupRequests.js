@@ -163,7 +163,7 @@ export function removeGroupRequest(request_id) {
     if (requestElement) {
         requestElement.remove();
     } else {
-        console.error("Request element not found for ID:", request_id);
+        console.error("No grp request found.");
     }
 }
 
