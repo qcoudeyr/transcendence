@@ -67,7 +67,7 @@ function showLeaveButtonIfMultipleFriends() {
 
 function grpRequestDisplay(name, request_id, avatar)
 {
-	const requestListDiv = document.getElementById('friends_list');
+	const requestListDiv = document.getElementById('friends-list');
 
     // Create the main friend request div
     const friendRequestDiv = document.createElement('div');
