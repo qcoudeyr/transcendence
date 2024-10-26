@@ -23,9 +23,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	switchProfileSection(profileLinks, profileSections);
 
 	// Update navbar and handle play button
-	if (localStorage.getItem("accessToken")) {
-		checkToken();
-	}
 	
 	updateNavbar();
 	playButtonSetup();
