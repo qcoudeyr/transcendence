@@ -45,7 +45,7 @@ gltfLoader.load(
     robotController.scale.set(initialScale, initialScale, initialScale);
   },
   (xhr) => {
-    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
   },
   (error) => {
     console.error('An error happened during GLTF loading:', error);

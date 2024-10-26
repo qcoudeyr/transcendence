@@ -198,7 +198,6 @@ function goHome() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM fully loaded and parsed');
   const unloadButton = document.getElementById('unloadButton');
   if (unloadButton) {
     unloadButton.addEventListener('click', () => {

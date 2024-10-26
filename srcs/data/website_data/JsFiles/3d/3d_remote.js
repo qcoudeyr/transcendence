@@ -43,7 +43,7 @@ gltfLoader.load(
     remoteController.scale.set(10, 10, 10);
   },
   (xhr) => {
-    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
   },
   (error) => {
     console.error('An error happened during GLTF loading:', error);

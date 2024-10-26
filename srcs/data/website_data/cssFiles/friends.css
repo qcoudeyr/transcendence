@@ -1,3 +1,59 @@
+leaveGroup-button {
+	background: none;
+	border: 0;
+	box-sizing: border-box;
+	color: transparent;
+	cursor: pointer;
+	font-family: 'Josefin Sans', sans-serif;
+	font-size: 18px;
+	left: 50%;
+	letter-spacing: 1.5px;
+	line-height: 90px;
+	outline: none;
+	overflow: hidden;
+	padding: 10px 0 0;
+	position: absolute;
+	text-transform: uppercase;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	transition: all 0.2s ease-in;
+	width: 100px;
+  }
+  
+  leaveGroup-button::before,
+  leaveGroup-button::after {
+	background-color: white;
+	content: '';
+	display: block;
+	height: 3px;
+	left: 0;
+	position: absolute;
+	transform-origin: center left;
+	transition: all 0.2s ease-in;
+	width: 141.4214px;
+	z-index: -1;
+  }
+  
+  leaveGroup-button::before {
+	top: 0;
+	transform: rotate(45deg);
+  }
+  
+  leaveGroup-button::after {
+	bottom: 0;
+	transform: rotate(-45deg);
+  }
+  
+  leaveGroup-button:hover {
+	color: #8A2387;
+  }
+  
+  leaveGroup-button:hover::before,
+  leaveGroup-button:hover::after {
+	height: 50px;
+	transform: rotate(0deg);
+  }
+
 .sidebar {
     position: fixed;
     right: 0px;

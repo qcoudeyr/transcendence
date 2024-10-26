@@ -52,15 +52,11 @@
 	<!-- FRIENDS -->
 	<div class="sidebar">
 		<div class="friend-container">
-			<div class="group-list">
-				<div class="friend">
+			<div id="grp-list" class="group-list">
+				<!-- <div class="friend">
 					<img src="./images/logo.png" alt="Friend Avatar" class="avatar">
 					<span class="friend-name">Luke</span>
-				</div>
-				<div class="friend">
-					<img src="./images/trophy.png" alt="Friend Avatar" class="avatar">
-					<span class="friend-name">Geoffrey</span>
-				</div>
+				</div> -->
 			</div>
 			<div id="friends-list" class="friends-list">
 				<!-- <div id="friend" class="friend">
@@ -97,8 +93,8 @@
 
     <nav>
         <a href="#home" data-section="home" class="neonText">Home</a>
-        <a href="#play" data-section="play" class="neonText">QuickPlay</a>
-        <a href="#tournaments" data-section="tournaments" class="neonText">Tournaments</a>
+        <a href="#play" data-section="play" class="neonText">Play</a>
+        <!-- <a href="#tournaments" data-section="tournaments" class="neonText">Tournaments</a> -->
         <a href="#statistiques" data-section="statistics" class="neonText">Statistics</a>
         <a href="#connexion" data-section="connexion" class="neonText">Connexion</a>
 		<a href="#profile" data-section="profile" class="neonText">Account</a>
@@ -412,6 +408,7 @@
 	<script type="module" src="/JsFiles/WebSocket/websocket-open.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/friendRequests.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/friendDisplay.js"></script>
+	<script type="module" src="/JsFiles/WebSocket/groupRequest.js"></script>
 	<script src="/JsFiles/WebSocket/friendsButtons.js"></script>
 	<!-- <script src="JsFiles/Pages/drag&drop.js"></script> -->
 	<script src="JsFiles/Pages/login.js"></script>
