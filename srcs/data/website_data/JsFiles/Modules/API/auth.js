@@ -1,25 +1,25 @@
-export function checkToken() {
-    fetch("/api/media/auth/", {
-        method: "POST",
-        headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
-        },
-        body: null
-    })
-    .then((response) => response.ok ? response.json() : Promise.reject(response))
-    .then((data) => {
-        if (data.authenticated) {
-            console.log('Token is valid, proceeding.');
-        } else {
-            throw new Error('Authentication failed');
-        }
-    })
-    .catch((error) => {
-        alert('Login no longer valid, reloading...');
-        localStorage.clear();
-        window.location.reload();
-    });
-}
+// export function checkToken() {
+//     fetch("/api/media/auth/", {
+//         method: "POST",
+//         headers: {
+//             'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+//         },
+//         body: null
+//     })
+//     .then((response) => response.ok ? response.json() : Promise.reject(response))
+//     .then((data) => {
+//         if (data.authenticated) {
+//             console.log('Token is valid, proceeding.');
+//         } else {
+//             throw new Error('Authentication failed');
+//         }
+//     })
+//     .catch((error) => {
+//         alert('Login no longer valid, reloading...');
+//         localStorage.clear();
+//         window.location.reload();
+//     });
+// }
 
 export function setupLogin() {
 	const LoginForm = document.getElementById("LoginForm");
