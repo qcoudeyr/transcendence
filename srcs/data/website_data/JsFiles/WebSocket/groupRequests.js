@@ -1,8 +1,9 @@
+import { grpRequestNotification } from "./notifications-displays.js"
 
-
-export function groupRequestRevieve(profileId)
+export function groupRequestRevieve(profileId, name)
 {
-	alert('you recieved a group invite');
+	grpRequestNotification(name);
+
 	//create a button with accept and refuse and send to server true or false
 }
 

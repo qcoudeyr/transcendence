@@ -87,7 +87,7 @@ function openWebsocket(socketurl){
 			}
 			if(content.type === 'group_request')
 			{
-				groupRequestRevieve(content.profile_id);
+				groupRequestRevieve(content.profile_id, content.name);
 			}
 		}
 	}
