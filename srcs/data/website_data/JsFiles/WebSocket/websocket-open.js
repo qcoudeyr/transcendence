@@ -1,6 +1,6 @@
 import { displayChatMessage } from "./chatDisplay.js";
 import { friendRequestReceive, friendRequestRemoveDiv } from "./friendRequests.js"
-import { displayFriendList, removeFriend } from "./friendDisplay.js";
+import { displayFriendList, removeReceivedFriend } from "./friendDisplay.js";
 import { displayPrivateMessage } from "./chatSend.js";
 import { friendRequestNotification } from "./notifications-displays.js";
 
@@ -79,7 +79,7 @@ function openWebsocket(socketurl){
 			}
 			if (content.type === 'friend_remove')
 			{
-				removeFriend(content.profile_id);
+				removeReceivedFriend(content.profile_id);
 			}
 		}
 	}
