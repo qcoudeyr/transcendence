@@ -121,7 +121,6 @@ export function removeFriend(profile_id) {
 
 export function removeReceivedFriend(profile_id)
 {
-	console.log(`Removing friend with profile_id: ${profile_id}`);
     const friendElement = document.getElementById('friend_' + profile_id);
     if (friendElement) {
         friendElement.remove(); // Remove friend element from the DOM

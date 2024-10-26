@@ -43,7 +43,7 @@ function openWebsocket(socketurl){
 	console.log('\x1b[33mWebsocket connecting..\x1b[0m');
 	socket = new WebSocket(socketurl);
 	socket.onopen = function(e) {
-		console.info("[WebSocket] Connection established !");
+		console.log("\x1b[34m [WebSocket] Connection established !\x1b[0m");
 		socket.send(JSON.stringify({
             'type': 'friend_list',
         }));
