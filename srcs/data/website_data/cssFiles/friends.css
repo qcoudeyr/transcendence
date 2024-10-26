@@ -1,6 +1,6 @@
 .leaveGroup-button {
 	background-color: #ffffff0a;
-    border-radius: 25%;
+    border-radius: 4px;
     box-shadow: rgba(0, 0, 0, .1) 0 2px 4px 0;
     box-sizing: border-box;
     color: #fff;
@@ -10,6 +10,7 @@
 	font-size: small;
     padding: 2.5px 5px;
     text-align: center;
+    margin: 2.5px; /* Space above the button */
     transition: transform 150ms, box-shadow 150ms;
 	right: 0px;
 	margin-left: 50px;
