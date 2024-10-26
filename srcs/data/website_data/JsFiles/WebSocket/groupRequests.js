@@ -42,6 +42,7 @@ function showLeaveButtonIfMultipleFriends() {
     const groupListContainer = document.getElementById("grp-list");
     const friends = groupListContainer.getElementsByClassName("friend");
     let leaveButton = document.getElementById("leave-btn");
+	let socket = getWebsocket();
 
     // Create the leave button if more than one friend is present
     if (friends.length > 1) {
