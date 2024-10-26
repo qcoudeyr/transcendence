@@ -11,6 +11,14 @@ export function displayGroupList(name, profile_id, avatar) {
 	const nameSpan = document.createElement('span');
 	nameSpan.textContent = name;
 	nameSpan.classList.add('friend-name');
+
+	const avatarImg = document.createElement('img');
+    avatarImg.alt = name + "'s Avatar";
+    avatarImg.classList.add('avatar');
+
+    // Append avatar and load its URL
+    friend.appendChild(avatarImg);
+    getFriendsAvatar(avatar)
 	friend.appendChild(nameSpan);
 	groupListContainer.appendChild(friend);
 }
