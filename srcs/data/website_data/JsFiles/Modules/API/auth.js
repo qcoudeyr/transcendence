@@ -1,23 +1,23 @@
-export function checkToken()
-{
-		fetch("/api/media/auth/", {
-		method: "POST",
-		headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('accessToken') // Authentication token
-        },
-		body: null
-	  })
-		.then((response) => response.ok ? response.json() : Promise.reject(response))
-		.then((data) => {
-			console.log('Token is valid proceding.');
-		})
-		.catch((error) => {
-			alert('Login no longer valid reloading..');
-		  	localStorage.clear();
-		  	document.reload();
-		});
+// export function checkToken()
+// {
+// 		fetch("/api/media/auth/", {
+// 		method: "POST",
+// 		headers: {
+//             'Authorization': 'Bearer ' + localStorage.getItem('accessToken') // Authentication token
+//         },
+// 		body: null
+// 	  })
+// 		.then((response) => response.ok ? response.json() : Promise.reject(response))
+// 		.then((data) => {
+// 			console.log('Token is valid proceding.');
+// 		})
+// 		.catch((error) => {
+// 			alert('Login no longer valid reloading..');
+// 		  	localStorage.clear();
+// 		  	document.reload();
+// 		});
 	
-}
+// }
 
 export function setupLogin() {
 	const LoginForm = document.getElementById("LoginForm");

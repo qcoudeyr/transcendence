@@ -97,7 +97,7 @@ fclean: clean-data clean-sensitive-data
 	@docker exec tr_django remove_migrations.sh || true
 	@docker exec tr_channels remove_migrations.sh || true
 	@echo "Stopping and removing all Docker containers..."
-	@cd ./srcs &&  docker-compose down --volumes --remove-orphans || true
+	@cd ./srcs &&  docker compose down --volumes --remove-orphans || true
 	@docker stop $$(docker ps -q) || true
 	@docker rm $$(docker ps -a -q) || true
 	@echo "Removing all Docker images..."

@@ -89,7 +89,7 @@ export function displayFriendList(name, profile_id, avatar, status) {
     friend.appendChild(actionsDiv);
 
     // Append or prepend the friend container based on the status
-    if (status === "ON") {
+    if (status === "Online") {
         // Prepend online friends to the top
         friend_list.prepend(friend);
     } else {
@@ -98,28 +98,31 @@ export function displayFriendList(name, profile_id, avatar, status) {
     }
 }
 
-
-
-
-
-
 // Function to invite a friend to a group
 function inviteToGroup(profile_id) {
-    console.log(`Inviting friend with profile_id: ${profile_id} to a group.`);
+	let socket = getWebsocket();
+	socket.send(JSON.stringify(
+	{
+		'type': 'group_request',
+		'profile_id': profile_id
+	}));
     // Add your invite logic here (e.g., open group invite dialog, send invite, etc.)
 }
 
 // Function to remove a friend
 export function removeFriend(profile_id) {
-    console.log(`Removing friend with profile_id: ${profile_id}`);
-    const friendElement = document.getElementById('friend_' + profile_id);
-    if (friendElement) {
-        friendElement.remove(); // Remove friend element from the DOM
-    }
 	let socket = getWebsocket();
 	socket.send(JSON.stringify(
 	{
 		'type': 'friend_remove',
 		'profile_id': profile_id
 	}));
+}
+
+export function removeReceivedFriend(profile_id)
+{
+    const friendElement = document.getElementById('friend_' + profile_id);
+    if (friendElement) {
+        friendElement.remove(); // Remove friend element from the DOM
+    }
 }

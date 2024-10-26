@@ -30,7 +30,7 @@ function friendRequestSend() {
 
 export function getFriendsAvatar(avatarUrl) {
     return new Promise((resolve, reject) => {
-        let completeAvatarUrl = 'http://localhost' + avatarUrl;
+        let completeAvatarUrl = "http://" + window.location.host + avatarUrl;
 
         fetch(completeAvatarUrl, {
             method: 'GET',
@@ -128,7 +128,6 @@ function handleFriendRequestResponse(request_id, isAccepted) {
         'request_id': request_id
     }));
 
-    friendRequestRemoveDiv(request_id);
 
     console.log(`Friend request ${isAccepted ? 'accepted' : 'rejected'} for request_id: ${request_id}`);
 }
