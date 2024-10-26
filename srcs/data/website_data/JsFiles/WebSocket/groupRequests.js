@@ -141,7 +141,7 @@ function handleGrpRequestResponse(isAccepted)
 		}));
 	
 	
-		console.log(`Group request ${isAccepted ? 'accepted' : 'rejected'} for request_id: ${request_id}`);
+		console.log(`Group request ${isAccepted ? 'accepted' : 'rejected'}`);
 }
 
 export function groupRequestRevieve(profileId, name, avatar)
