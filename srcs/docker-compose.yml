@@ -102,6 +102,7 @@ services:
     volumes:
       - ./data/channels_data:/app
       - ./data/django_data/transcendence/profiles:/app/transcendence/profiles
+      - ./data/django_data/transcendence/game:/app/transcendence/game
       - ./data/credentials/channels_approle.env:/vault/config/channels_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
     expose:

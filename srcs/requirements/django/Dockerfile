@@ -1,7 +1,7 @@
 FROM python:3.10
 
 # Set environment variables
-ENV APPS "users profiles"
+ENV APPS "users profiles game"
 
 # Set work directory
 WORKDIR /app/transcendence
