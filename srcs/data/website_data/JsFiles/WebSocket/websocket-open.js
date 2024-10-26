@@ -87,7 +87,7 @@ function openWebsocket(socketurl){
 			}
 			if(content.type === 'group_request')
 			{
-				groupRequestRevieve(content.profile_id, content.name);
+				groupRequestRevieve(content.profile_id, content.name, content.avatar);
 			}
 			if(content.type === 'group_member')
 			{

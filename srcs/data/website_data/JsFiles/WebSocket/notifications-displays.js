@@ -25,7 +25,7 @@ export function grpRequestNotification(requestName) {
     bellImg.src = "./images/colored-bell.svg"; // Replace with the correct image path
 
     // Change the notification text and style
-    notificationText.textContent = `${requestName} invited you to a groupe.`; // Example text
+    notificationText.textContent = `${requestName} invited you to a group.`; // Example text
     notificationText.style.color = "#0ef3f3";
 	notificationText.style.textShadow = "0 0 10px rgba(14, 243, 243, 0.8)"
     
