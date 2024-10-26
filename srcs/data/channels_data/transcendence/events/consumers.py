@@ -297,21 +297,16 @@ class EventConsumer(AsyncWebsocketConsumer):
                 }
             )
             group_request = await get_profile_group_request(self.profile)
-            await self.send(json.dumps({'type': 'debug', 'balise': 0}))
             if group_request is None:
                 return
-            await self.send(json.dumps({'type': 'debug', 'balise': 1}))
             group = await get_group_request_group(group_request)
             await delete_profile_group_request_received(self.profile)
             if group is None or not content['answer']:
                 return
-            await self.send(json.dumps({'type': 'debug', 'balise': 2}))
+            await self.group_leave({})
             await update_profile_group(profile=self.profile, new_group=group)
-            await self.send(json.dumps({'type': 'debug', 'balise': 3}))
             await self.group_list({})
-            await self.send(json.dumps({'type': 'debug', 'balise': 4}))
             group_members = await get_profile_group_members(self.profile)
-            await self.send(json.dumps({'type': 'debug', 'balise': 5}))
             for group_member in group_members:
                 await self.channel_layer.group_send(
                     "notifications_" + str(group_member.pk),
