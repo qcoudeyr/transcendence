@@ -109,13 +109,13 @@ function grpRequestDisplay(name, request_id, avatar)
     const acceptButton = document.createElement('button');
     acceptButton.textContent = 'Accept';
     acceptButton.classList.add('message-friend-button');
-    acceptButton.onclick = () => handleGrpRequestResponse(request_id, true);
+    acceptButton.onclick = () => handleGrpRequestResponse(true);
 
     // Create "Reject" button
     const rejectButton = document.createElement('button');
     rejectButton.textContent = 'Reject';
     rejectButton.classList.add('message-friend-button');
-    rejectButton.onclick = () => handleGrpRequestResponse(request_id, false);
+    rejectButton.onclick = () => handleGrpRequestResponse(false);
 
     // Append buttons to actions div
     actionsDiv.appendChild(acceptButton);
@@ -130,15 +130,14 @@ function grpRequestDisplay(name, request_id, avatar)
 }
 
 
-function handleGrpRequestResponse(request_id, isAccepted)
+function handleGrpRequestResponse(isAccepted)
 {
 		const socket = getWebsocket();
 		notificationReset();
 	
 		socket.send(JSON.stringify({
-			"type": "friend_request_answer",
+			"type": "group_request_answer",
 			'answer': isAccepted ? true : false,
-			'request_id': request_id
 		}));
 	
 	
