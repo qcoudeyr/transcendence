@@ -30,7 +30,7 @@ export function websocketConnect()
 		return response.json(); // Parse the JSON from the response
 	})
 	.then(data => {
-		let socketurl = "ws://localhost/ws/events/?uuid=" + data.uuid;
+		let socketurl = "ws://" + window.location.host + "/ws/events/?uuid=" + data.uuid;
 		openWebsocket(socketurl);
 	})
 	.catch(error => {
