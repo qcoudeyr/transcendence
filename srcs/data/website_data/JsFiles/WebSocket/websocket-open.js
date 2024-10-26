@@ -43,15 +43,15 @@ function openWebsocket(socketurl){
 	socket = new WebSocket(socketurl);
 	socket.onopen = function(e) {
 		console.log("[WebSocket] Connection established !");
-		// socket.send(JSON.stringify({
-        //     'type': 'friend_list',
-        // }));
-		// socket.send(JSON.stringify({
-        //     'type': 'friend_request_list',
-        // }));
-		// socket.send(JSON.stringify({
-        //     'type': 'group_list',
-        // }));
+		socket.send(JSON.stringify({
+            'type': 'friend_list',
+        }));
+		socket.send(JSON.stringify({
+            'type': 'friend_request_list',
+        }));
+		socket.send(JSON.stringify({
+            'type': 'group_list',
+        }));
 	};
 	socket.onmessage = function(event) {
 		// alert(`[message] Data received from server: ${event.data}`);
