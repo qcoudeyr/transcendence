@@ -139,13 +139,12 @@ function handleGrpRequestResponse(isAccepted)
 			"type": "group_request_answer",
 			'answer': isAccepted ? true : false,
 		}));
-		if (isAccepted === true)
-			{
-				socket.send(JSON.stringify({
-					"type": "group_request_remove",
-					'answer': isAccepted ? true : false,
-				}));
-			}
+		// if (isAccepted === true)
+		// 	{
+		// 		socket.send(JSON.stringify({
+		// 			"type": "group_request_remove",
+		// 		}));
+		// 	}
 	
 		console.log(`Group request ${isAccepted ? 'accepted' : 'rejected'}`);
 }
