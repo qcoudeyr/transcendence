@@ -3,6 +3,7 @@ import { friendRequestReceive, friendRequestRemoveDiv } from "./friendRequests.j
 import { displayFriendList, removeReceivedFriend } from "./friendDisplay.js";
 import { displayPrivateMessage } from "./chatSend.js";
 import { friendRequestNotification } from "./notifications-displays.js";
+import { groupRequestRevieve } from "./groupRequests.js";
 
 let socket;
 
