@@ -1,4 +1,4 @@
-import { grpRequestNotification } from "./notifications-displays.js"
+import { grpRequestNotification, notificationReset } from "./notifications-displays.js"
 import { getFriendsAvatar } from "./friendRequests.js";
 
 
@@ -127,6 +127,7 @@ function grpRequestDisplay(name, request_id, avatar)
     // Append the friend request div to the request list container
     requestListDiv.appendChild(friendRequestDiv);
 }
+
 
 function handleGrpRequestResponse(request_id, isAccepted)
 {
