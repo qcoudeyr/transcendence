@@ -159,47 +159,54 @@ REST_FRAMEWORK = {
 # Media config
 MEDIA_URL = '/media/'
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-        },
-    },
-    'handlers': {
-        'elasticapm': {
-            'level': 'WARNING',
-            'class': 'elasticapm.contrib.django.handlers.LoggingHandler',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        }
-    },
-    'loggers': {
-        'django.db.backends': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'mysite': {
-            'level': 'WARNING',
-            'handlers': ['elasticapm'],
-            'propagate': False,
-        },
-        # Log errors from the Elastic APM module to the console (recommended)
-        'elasticapm.errors': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-    },
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': True,
+#     'formatters': {
+#         'verbose': {
+#             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+#         },
+#     },
+#     'handlers': {
+#         'elasticapm': {
+#             'level': 'WARNING',
+#             'class': 'elasticapm.contrib.django.handlers.LoggingHandler',
+#         },
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'verbose'
+#         }
+#     },
+#     'loggers': {
+#         'django.db.backends': {
+#             'level': 'ERROR',
+#             'handlers': ['console'],
+#             'propagate': False,
+#         },
+#         'mysite': {
+#             'level': 'WARNING',
+#             'handlers': ['elasticapm'],
+#             'propagate': False,
+#         },
+#         # Log errors from the Elastic APM module to the console (recommended)
+#         'elasticapm.errors': {
+#             'level': 'ERROR',
+#             'handlers': ['console'],
+#             'propagate': False,
+#         },
+#     },
+# }
 
 ELASTIC_APM = {
 	'SERVICE_NAME': 'channel',
 	'SECRET_TOKEN': '',
 	'SERVER_URL': 'http://apm-server:8200'
 }
+
+# Celery config
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
