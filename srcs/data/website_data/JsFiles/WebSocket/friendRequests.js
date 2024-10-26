@@ -30,7 +30,7 @@ function friendRequestSend() {
 
 export function getFriendsAvatar(avatarUrl) {
     return new Promise((resolve, reject) => {
-        let completeAvatarUrl = 'http://localhost' + avatarUrl;
+        let completeAvatarUrl = "http://" + window.location.host + avatarUrl;
 
         fetch(completeAvatarUrl, {
             method: 'GET',
