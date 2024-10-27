@@ -25,7 +25,7 @@ export function getBall()
 	return ball;
 }
 
-function initScene() {
+export function initScene() {
   // Initialize the camera
   camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(-2.82, 1.11, 15.26);
