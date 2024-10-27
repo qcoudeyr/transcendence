@@ -8,7 +8,7 @@ from profiles.models import Profile
 BALL_RADIUS = 0.1
 PAD_LENGTH = 0.3
 GAME_HEIGHT = 0.15
-MAP_LENGTH = 8
+MAP_LENGTH = 10
 MAP_WIDTH = 2.5
 
 channel_layer = get_channel_layer()
@@ -26,7 +26,7 @@ class Ball(GameObject):
 
     def set_default(self):
         self.x = 0
-        self.y = 0
+        self.y = GAME_HEIGHT
         self.z = 0
 
 class Pad(GameObject):
@@ -126,7 +126,7 @@ def classic_game(player_ids):
             players_send_object(player_ids, pad_0, 'PAD_0')
             players_send_object(player_ids, pad_1, 'PAD_1')
 
-            sleep(0.05)
+            sleep(0.001)
 
     # Send game results (as frame message ?)
     # Update profiles status and player things (is_game_ready, movement...)
