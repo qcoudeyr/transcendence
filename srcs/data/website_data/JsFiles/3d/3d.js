@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { isUnloaded } from '../Modules/navigation.js';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
 let scene, camera, renderer, controls, animationId;
 const geometry = new THREE.SphereGeometry(0.1, 32, 32);
@@ -102,9 +103,9 @@ export function initScene() {
     );
 
     // HDR Environment Map (use an appropriate HDR texture)
-    const hdrLoader = new THREE.RGBELoader();
+    const hdrLoader = new RGBELoader();
     hdrLoader.load('../test.hdr', (texture) => {
-        texture.mapping = THREE.EquirectangularRefractionMapping;
+        texture.mapping = THREE.EquirectangularReflectionMapping; // Use reflection mapping
         scene.background = texture; // Set background to HDR texture
         scene.environment = texture; // Set environment for realistic reflections
     });
@@ -114,7 +115,9 @@ export function initScene() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
     document.getElementById('splineContainer').appendChild(renderer.domElement);
-    scene.background = new THREE.Color('#22202e');
+    
+    // Remove the line below to keep the HDR background
+    // scene.background = new THREE.Color('#22202e'); // Remove or comment this line
 
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -130,6 +133,8 @@ export function initScene() {
     sceneLoaded = true;
     console.log("Scene loaded");
 }
+
+// ... rest of your code remains the same
 
 function onWindowResize() {
   if (!document.getElementById('splineContainer').classList.contains('small') &&
