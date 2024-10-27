@@ -2,16 +2,24 @@ import { initScene } from "../3d/3d.js";
 
 export function navigateToSection(sections, links = null) {
 	function navigate(sectionId) {
-	  sections.forEach((section) => {
-		section.style.display = section.id === sectionId ? 'block' : 'none';
-	  });
+	  if (Array.isArray(sections)) {
+		// Hide/show sections based on array of elements
+		sections.forEach((section) => {
+		  section.style.display = section.id === sectionId ? 'block' : 'none';
+		});
+	  } else {
+		// Assume `sections` is a single section ID
+		document.querySelectorAll("section").forEach((section) => {
+		  section.style.display = section.id === sections ? "block" : "none";
+		});
+	  }
 	}
-  
+
 	window.addEventListener("popstate", function (event) {
 	  const section = event.state?.section || "home";
 	  navigate(section);
 	});
-  
+
 	// Check if a section ID is provided in the URL hash, else navigate to "home"
 	if (window.location.hash) {
 	  const sectionId = window.location.hash.replace("#", "");
@@ -21,7 +29,7 @@ export function navigateToSection(sections, links = null) {
 	  history.replaceState({ section: "home" }, "", "#home");
 	  navigate("home");
 	}
-  }
+}
   
   export function changePages(sections, links, clickSound) {
 	links.forEach((link) => {
@@ -87,12 +95,12 @@ export function navigateToSection(sections, links = null) {
   }
   
   let isInitialized = false; // Flag to prevent multiple initializations
-  
+
   export function playButtonSetup(clickSound) {
 	if (isInitialized) return; // Prevent further calls
 	isInitialized = true; // Set the flag to true
   
-	// Directly navigate to the "playing" section
+	// Directly navigate to the "playing" section by section ID
 	navigateToSection("playing");
   
 	clickSound.play(); // Play the click sound if desired
