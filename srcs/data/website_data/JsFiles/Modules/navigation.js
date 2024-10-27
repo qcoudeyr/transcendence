@@ -96,9 +96,10 @@ export function isUnloaded()
   
   export function playButtonSetup(clickSound) {
 	const button = document.getElementById("playbuttontext");
+	let socket = getWebsocket();
 	if (button.textContent === "PLAY")
 	{
-		socket = getWebsocket();
+		
 		socket.send(JSON.stringify({
 			'type': 'game_join_queue',
 			'mode': 'CLASSIC'
