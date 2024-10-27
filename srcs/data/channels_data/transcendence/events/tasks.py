@@ -116,10 +116,8 @@ def classic_game(player_ids):
             # pad_1.set_position()
 
             # Apply physic (set new positions)
-            if ball.x >= MAP_LENGTH / 2:
-                direction = -1
-            else:
-                direction = 1
+            if ball.x >= MAP_LENGTH / 2 or ball.x <= -MAP_LENGTH / 2:
+                direction *= -1
             ball.x += direction * 0.01
 
             # Send objects position
