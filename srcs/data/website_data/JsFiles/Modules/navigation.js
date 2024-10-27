@@ -101,6 +101,7 @@ export function navigateToSection(sections, links) {
 	}
   
 	showPlayingSection(); // Call the function to display "playing" section
+	document.querySelector('nav').style.display = 'none';
   
 	clickSound.play(); // Play the click sound if desired
 	initScene(); // Initialize the scene

@@ -79,22 +79,18 @@ export function initScene() {
   );
 
   // Set up the renderer
-  console.log("1");
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   document.getElementById('splineContainer').appendChild(renderer.domElement);
-  console.log("2");
   // Set the background color of the scene
   scene.background = new THREE.Color('#22202e');
 
   // Set up orbit controls
-  console.log("3");
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.125;
-  console.log("4");
 
   // Resize handler to adjust the scene on window resize
 
@@ -105,7 +101,6 @@ export function initScene() {
     renderer.render(scene, camera);
   }
   animate();
-  console.log("5");
 
   sceneLoaded = true;
   console.log("Scene loaded");
@@ -124,7 +119,7 @@ function unloadScene() {
   if (scene) {
     // Remove all objects from the scene
     while(scene.children.length > 0) { 
-      scene.remove(scene.children[0]); 
+      scene.remove(scene.children[0]);
     }
 
     // Dispose of geometries and materials
