@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from os.path import splitext
 
+# from game.models import PartyQueue
+
 # Default profile values
 DEFAULT_NAME = 'Recruit'
 DEFAULT_AVATAR = 'default/avatar/sen.png'
@@ -29,6 +31,12 @@ class Group(models.Model):
         "Profile",
         on_delete=models.PROTECT,
         related_name="group_chief",
+    )
+    party_queue = models.ForeignKey(
+        "game.PartyQueue",
+        on_delete=models.PROTECT,
+        related_name="groups",
+        null=True,
     )
 
 class GroupRequest(models.Model):
@@ -91,3 +99,7 @@ class Profile(models.Model):
         related_name="members",
         null=True
     )
+    is_game_ready = models.BooleanField(default=False)
+    pad_x = models.FloatField(default=0.0)
+    pad_y = models.FloatField(default=0.0)
+    pad_z = models.FloatField(default=0.0)

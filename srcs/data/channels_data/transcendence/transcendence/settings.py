@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'daphne',
     'events',
     'profiles',
+    'game',
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.admin',
