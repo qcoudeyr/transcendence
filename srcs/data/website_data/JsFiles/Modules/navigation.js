@@ -1,26 +1,18 @@
 import { initScene } from "../3d/3d.js";
 
-export function navigateToSection(sections, links = null) {
+export function navigateToSection(sections, links) {
 	function navigate(sectionId) {
-	  if (Array.isArray(sections)) {
-		// Hide/show sections based on array of elements
-		sections.forEach((section) => {
-		  section.style.display = section.id === sectionId ? 'block' : 'none';
-		});
-	  } else {
-		// Assume `sections` is a single section ID
-		document.querySelectorAll("section").forEach((section) => {
-		  section.style.display = section.id === sections ? "block" : "none";
-		});
-	  }
+	  sections.forEach((section) => {
+		section.style.display = section.id === sectionId ? 'block' : 'none';
+	  });
 	}
-
+  
 	window.addEventListener("popstate", function (event) {
 	  const section = event.state?.section || "home";
 	  navigate(section);
+	//   highlightLink(links, section);
 	});
-
-	// Check if a section ID is provided in the URL hash, else navigate to "home"
+  
 	if (window.location.hash) {
 	  const sectionId = window.location.hash.replace("#", "");
 	  history.replaceState({ section: sectionId }, "", `#${sectionId}`);
@@ -29,7 +21,7 @@ export function navigateToSection(sections, links = null) {
 	  history.replaceState({ section: "home" }, "", "#home");
 	  navigate("home");
 	}
-}
+  }
   
   export function changePages(sections, links, clickSound) {
 	links.forEach((link) => {
@@ -95,13 +87,20 @@ export function navigateToSection(sections, links = null) {
   }
   
   let isInitialized = false; // Flag to prevent multiple initializations
-
+  
   export function playButtonSetup(clickSound) {
 	if (isInitialized) return; // Prevent further calls
 	isInitialized = true; // Set the flag to true
   
-	// Directly navigate to the "playing" section by section ID
-	navigateToSection("playing");
+	// Directly navigate to the "playing" section
+	function showPlayingSection() {
+	  const sections = document.querySelectorAll("section"); // Select all sections
+	  sections.forEach((section) => {
+		section.style.display = section.id === "playing" ? "block" : "none";
+	  });
+	}
+  
+	showPlayingSection(); // Call the function to display "playing" section
   
 	clickSound.play(); // Play the click sound if desired
 	initScene(); // Initialize the scene
