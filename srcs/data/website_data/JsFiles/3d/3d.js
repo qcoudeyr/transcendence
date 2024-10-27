@@ -47,10 +47,10 @@ export function initScene() {
     pad2.position.set(-4, 0.15, 0);
     pad2.rotation.set(Math.PI / 2, 0, 135 * (Math.PI / 180)); 
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Increased intensity
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Increased intensity
     scene.add(ambientLight);
 
-    const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.2); // Cooler light
+    const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 1); // Cooler light
     directionalLight2.position.set(-5, 10, -7);
     directionalLight2.castShadow = true;
     directionalLight2.shadow.mapSize.width = 2048;
