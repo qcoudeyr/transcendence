@@ -95,9 +95,10 @@ export function isUnloaded()
 }
   
   export function playButtonSetup(clickSound) {
+	const bool = 1;
 	const button = document.getElementById("playbuttontext");
 	let socket = getWebsocket();
-	if (button.textContent === "PLAY")
+	if (button.textContent === "PLAY" && bool === 1)
 	{
 		
 		socket.send(JSON.stringify({
@@ -106,8 +107,9 @@ export function isUnloaded()
 		}));
 		button.textContent = "EXIT";
 		console.log("im here in the play");
+		bool = 0;
 	}
-	else if(button.textContent === "EXIT")
+	else if(button.textContent === "EXIT" && bool === 1)
 	{
 		socket = getWebsocket();
 		socket.send(JSON.stringify({
@@ -115,6 +117,7 @@ export function isUnloaded()
 		}));
 		button.textContent = "PLAY";
 		console.log("im here in the exit");
+		bool = 0;
 	}
 	
 	// Directly navigate to the "playing" section
