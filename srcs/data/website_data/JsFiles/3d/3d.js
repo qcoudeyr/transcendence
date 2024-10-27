@@ -2,170 +2,133 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { isUnloaded } from '../Modules/navigation.js';
-// main.js
 
 let scene, camera, renderer, controls, animationId;
 const geometry = new THREE.SphereGeometry(0.1, 32, 32);
 
-	// Create a material for the ball
-	const material = new THREE.MeshStandardMaterial({
-		color: 0xFB00BE, // Color of the ball
-		roughness: 0.4,  // Adjust for a bit of glossiness
-		metalness: 0.1,  // Slightly metallic
-	});
+// Create a material for the ball with realistic properties
+const material = new THREE.MeshStandardMaterial({
+    color: 0xFB00BE,
+    roughness: 0.3,  // Adjust for a bit of glossiness
+    metalness: 0.5,  // Increased metallic property
+});
 const ball = new THREE.Mesh(geometry, material);
 
-const radius = 0.1;          // Radius of the capsule ends
-const length = 0.3;          // Length of the capsule body
-const radialSegments = 2; // Number of segments around the radius
+const radius = 0.1;          
+const length = 0.3;          
+const radialSegments = 2; 
 
-// Create the capsule geometry
 const capsuleGeometry = new THREE.CapsuleGeometry(radius, length, radialSegments);
-
-// Create a material for the capsule
 const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
 
-// Create a mesh combining the geometry and material
 const pad1 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 const pad2 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 
 let sceneLoaded = false;
 
-
-export function getScene()
-{
-	return scene;
+export function getScene() {
+    return scene;
 }
 
-export function getBall()
-{
-	return ball;
+export function getBall() {
+    return ball;
 }
 
 export function initScene() {
-	
-  // Initialize the camera
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(-2.82, 1.11, 15.26);
+    camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
 
-  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(-2.82, 1.11, 15.26);
-  camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
+    scene = new THREE.Scene();
+    ball.position.y = 0.15;
+    pad1.position.set(4, 0.15, 0);
+    pad1.rotation.set(Math.PI / 2, 0, 135 * (Math.PI / 180)); 
+    pad2.position.set(-4, 0.15, 0);
+    pad2.rotation.set(Math.PI / 2, 0, 135 * (Math.PI / 180)); 
 
-  // Create the scene
-	scene = new THREE.Scene();
-  	ball.position.y = 0.15;
-	  pad1.position.y = 0.15;
-	  pad1.position.x = 4;
-	pad1.rotation.z = 135; 
-	pad1.rotation.x = Math.PI / 2; 
-	pad2.position.y = 0.15;
-	  pad2.position.x = -4;
-	pad2.rotation.z = 135; 
-	pad2.rotation.x = Math.PI / 2; 
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Increased intensity
+    scene.add(ambientLight);
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
-	scene.add(ambientLight);
+    const directionalLight1 = new THREE.DirectionalLight(0xc4610f, 1); // Bright light
+    directionalLight1.position.set(5, 10, 7);
+    directionalLight1.castShadow = true; 
+    directionalLight1.shadow.mapSize.width = 2048;
+    directionalLight1.shadow.mapSize.height = 2048;
+    scene.add(directionalLight1);
 
-// 	const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4); // White light, intensity 1
-//   directionalLight.position.set(0, 0.5, 0.6); // Position the light above the scene
-//   directionalLight.castShadow = true; // Enable shadows
-//   directionalLight.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
-//   directionalLight.shadow.mapSize.height = 2048;
-//   directionalLight.shadow.camera.near = 0.5; // Camera near clipping distance
-//   directionalLight.shadow.camera.far = 500; // Camera far clipping distance
-//   scene.add(directionalLight);
+    const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.6); // Cooler light
+    directionalLight2.position.set(-5, 10, -7);
+    directionalLight2.castShadow = true;
+    directionalLight2.shadow.mapSize.width = 2048;
+    directionalLight2.shadow.mapSize.height = 2048;
+    scene.add(directionalLight2);
 
-  const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.4); // White light, intensity 1
-  directionalLight2.position.set(0, 0.5, -0.6); // Position the light above the scene
-  directionalLight2.castShadow = true; // Enable shadows
-  directionalLight2.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
-  directionalLight2.shadow.mapSize.height = 2048;
-  directionalLight2.shadow.camera.near = 0.5; // Camera near clipping distance
-  directionalLight2.shadow.camera.far = 500; // Camera far clipping distance
-  scene.add(directionalLight2);
+    scene.add(ball);
+    scene.add(pad1);
+    scene.add(pad2);
 
-	scene.add(ball);
-	scene.add(pad1);
-	scene.add(pad2);
-	
+    // Load GLTF model
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load(
+        '../Cyberpunkv2.glb',
+        (gltf) => {
+            scene.add(gltf.scene);
+            gltf.scene.position.set(0, 0, 0);
+            gltf.scene.scale.set(0.1, 0.1, 0.1);
 
-  // Load GLTF model
-  const gltfLoader = new GLTFLoader();
-gltfLoader.load(
-    '../Cyberpunkv2.glb',
-    (gltf) => {
-        // Add the loaded model to the scene
-        scene.add(gltf.scene);
-        gltf.scene.position.set(0, 0, 0);
-        gltf.scene.scale.set(0.1, 0.1, 0.1);
-
-        // Enable shadows for the entire model
-        gltf.scene.traverse((child) => {
-            if (child.isMesh) {
-                child.castShadow = true;  // Enable shadow casting
-                child.receiveShadow = true; // Enable shadow receiving
-            }
-        });
-
-        // Traverse to find specific meshes and set their emission properties
-        gltf.scene.traverse((child) => {
-            if (child.isMesh) {
-                // Check if the mesh name matches specific names you want to make emissive
-                if (child.name === "YourEmissivePartName") { // Replace with the actual name
-                    child.material.emissive = new THREE.Color(0xFF0000); // Set the emissive color (e.g., red)
-                    child.material.emissiveIntensity = 1.0; // Set emissive intensity
+            gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;  
+                    child.receiveShadow = true;
                 }
-                // You can add more conditions for other parts if needed
-                else if (child.name === "AnotherEmissivePartName") { // Another part to make emissive
-                    child.material.emissive = new THREE.Color(0x00FF00); // Green
-                    child.material.emissiveIntensity = 1.5; // Different intensity
+            });
+
+            // Example of setting emissive properties
+            gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                    if (child.name === "YourEmissivePartName") {
+                        child.material.emissive = new THREE.Color(0xFF0000); 
+                        child.material.emissiveIntensity = 1.0; 
+                    }
                 }
-            }
-        });
-    },
-    (xhr) => {
-        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    },
-    (error) => {
-        console.error('An error happened during GLTF loading:', error);
+            });
+        },
+        (xhr) => {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        (error) => {
+            console.error('An error happened during GLTF loading:', error);
+        }
+    );
+
+    // HDR Environment Map (use an appropriate HDR texture)
+    const hdrLoader = new THREE.RGBELoader();
+    hdrLoader.load('../test.hdr', (texture) => {
+        texture.mapping = THREE.EquirectangularRefractionMapping;
+        scene.background = texture; // Set background to HDR texture
+        scene.environment = texture; // Set environment for realistic reflections
+    });
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
+    document.getElementById('splineContainer').appendChild(renderer.domElement);
+    scene.background = new THREE.Color('#22202e');
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.125;
+
+    function animate() {
+        animationId = requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
     }
-);
+    animate();
 
-// Configure the directional light for shadows
-const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4);
-directionalLight.position.set(0, 0.5, 0.6);
-directionalLight.castShadow = true; // Enable shadows
-directionalLight.shadow.mapSize.width = 2048; // Size of the shadow map
-directionalLight.shadow.mapSize.height = 2048;
-directionalLight.shadow.camera.near = 0.5; // Near clipping distance for the shadow camera
-directionalLight.shadow.camera.far = 500; // Far clipping distance for the shadow camera
-scene.add(directionalLight);
-
-  // Set up the renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
-  document.getElementById('splineContainer').appendChild(renderer.domElement);
-  // Set the background color of the scene
-  scene.background = new THREE.Color('#22202e');
-
-  // Set up orbit controls
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.125;
-
-  // Resize handler to adjust the scene on window resize
-
-  // Animation loop to render the scene
-  function animate() {
-    animationId = requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  sceneLoaded = true;
-  console.log("Scene loaded");
+    sceneLoaded = true;
+    console.log("Scene loaded");
 }
 
 function onWindowResize() {
