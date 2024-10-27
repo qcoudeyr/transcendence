@@ -92,7 +92,6 @@ export function initScene() {
   controls.dampingFactor = 0.125;
 
   // Resize handler to adjust the scene on window resize
-  window.addEventListener('resize', onWindowResize);
 
   // Animation loop to render the scene
   function animate() {
