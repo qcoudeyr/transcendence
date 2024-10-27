@@ -95,7 +95,7 @@ export function isUnloaded()
 }
   
   export function playButtonSetup(clickSound) {
-	const bool = 1;
+	let bool = 1;
 	const button = document.getElementById("playbuttontext");
 	let socket = getWebsocket();
 	if (button.textContent === "PLAY" && bool === 1)
