@@ -7,14 +7,12 @@
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    z-index: 9999999;
     background-color: rgba(255, 0, 0, 0.5); /* Visible background */
 }
 
 
 canvas {
     border: 1px solid #000; /* Ensure canvas has a border for visibility */
-	z-index: 938475983478957349857;
 }
   
   .playing-section {
