@@ -743,6 +743,8 @@ def create_classic_party(new_group_id, new_group_size):
     if player_quantity == 2:
         for group_id in group_sizes:
             group = Group.objects.get(pk=group_id)
+            group.party_queue = None
+            group.save(update_fields=['party_queue'])
             for member in list(group.members.all()):
                 player_ids.append(member.pk)
                 member.status = 'IG'
