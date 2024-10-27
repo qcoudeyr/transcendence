@@ -110,6 +110,7 @@ def classic_game(player_ids):
         # players_broadcast(player_ids, {'type': 'send.frame.message', 'message': 'Fight !'})
 
         round_continue = True
+        direction = 1
         while (round_continue):
             # Set pads positions
             # pad_0.set_position()
