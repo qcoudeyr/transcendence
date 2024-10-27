@@ -28,7 +28,17 @@ document.addEventListener("DOMContentLoaded", function () {
 	// }
 	const playButton = document.getElementById("playButton");
     playButton.addEventListener("click", function () {
-        playButtonSetup(clickSound); // Pass clickSound if necessary
+		const button = document.getElementById("playbuttontext");
+		if (bool === 1) {
+			if (button.textContent === "PLAY") {
+				playAction();
+			} else if (button.textContent === "EXIT") {
+				exitAction();
+			}
+			
+			// Reset `bool` after a small delay to avoid re-entering both conditions
+			setTimeout(() => { bool = 1; }, 100); 
+		}
     });
 	updateNavbar();
 	// Set up auth forms

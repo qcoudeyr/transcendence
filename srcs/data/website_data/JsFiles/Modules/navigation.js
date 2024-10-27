@@ -94,39 +94,31 @@ export function isUnloaded()
 	isInitialized = false;
 }
   
-  export function playButtonSetup(clickSound) {
-	let bool = 1;
-	const button = document.getElementById("playbuttontext");
-	let socket = getWebsocket();
-	if (button.textContent === "PLAY" && bool === 1)
-	{
-		
-		socket.send(JSON.stringify({
-			'type': 'game_join_queue',
-			'mode': 'CLASSIC'
-		}));
-		button.textContent = "EXIT";
-		console.log("im here in the play");
-		bool = 0;
-	}
-	else if(button.textContent === "EXIT" && bool === 1)
-	{
-		socket = getWebsocket();
-		socket.send(JSON.stringify({
-			'type': 'game_leave_queue',
-		}));
-		button.textContent = "PLAY";
-		console.log("im here in the exit");
-		bool = 0;
-	}
-	
-	// Directly navigate to the "playing" section
-	
   
- // Call the function to display "playing" section
+export function playAction(clickSound) {
+	let socket = getWebsocket();
+	const button = document.getElementById("playbuttontext");
+	socket.send(JSON.stringify({
+		'type': 'game_join_queue',
+		'mode': 'CLASSIC'
+	}));
+	button.textContent = "EXIT";
+	console.log("I'm here in the play");
+	bool = 0; // Set to 0 to prevent further actions until reset
 	clickSound.play(); // Play the click sound if desired
-	 // Initialize the scene
-  }
+}
+
+export function exitAction(clickSound) {
+	let socket = getWebsocket();
+	const button = document.getElementById("playbuttontext");
+	socket.send(JSON.stringify({
+		'type': 'game_leave_queue'
+	}));
+	button.textContent = "PLAY";
+	console.log("I'm here in the exit");
+	bool = 0; // Set to 0 to prevent further actions until reset
+	clickSound.play(); // Play the click sound if desired
+}
   
   export function showPlayingSection() {
 	if (isInitialized) return; // Prevent further calls
