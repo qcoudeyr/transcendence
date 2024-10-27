@@ -93,7 +93,7 @@ export function navigateToSection(sections, links) {
 	isInitialized = true; // Set the flag to true
   
 	// Call changePages with the link that should trigger "playing" section
-	changePages("playing", [linkElement], clickSound);
+	navigateToSection("playing", "");
   
 	initScene();
   }
