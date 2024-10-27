@@ -33,7 +33,7 @@ function initScene() {
 
   // Create the scene
   scene = new THREE.Scene();
-  ball.position.y = 0.1;
+  ball.position.y = 0.15;
 
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
