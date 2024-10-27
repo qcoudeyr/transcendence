@@ -1,4 +1,4 @@
-import { navigateToSection, changePages, switchProfileSection, playButtonSetup, updateNavbar, hidePreloaderAfterLoad } from './Modules/navigation.js';
+import { navigateToSection, changePages, switchProfileSection, exitAction, playAction, updateNavbar, hidePreloaderAfterLoad } from './Modules/navigation.js';
 import { setupLogin, setupRegister } from './Modules/API/auth.js';
 import { getMailAndUsername, getNameBioAndAvatar } from './Modules/API/getProfileInfo.js';
 import { websocketConnect } from './WebSocket/websocket-open.js';
