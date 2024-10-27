@@ -25,37 +25,37 @@ export function getBall()
 	return ball;
 }
 
-function initScene() {
+export function initScene() {
   // Initialize the camera
-  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(-2.82, 1.11, 15.26);
-  camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
+	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+	camera.position.set(-2.82, 1.11, 15.26);
+	camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
 
-  // Create the scene
-  scene = new THREE.Scene();
-  ball.position.y = 0.15;
+	// Create the scene
+	scene = new THREE.Scene();
+	ball.position.y = 0.15;
 
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
+	const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
 	scene.add(ambientLight);
 
 	const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4); // White light, intensity 1
-  directionalLight.position.set(0, 0.5, 0.6); // Position the light above the scene
-  directionalLight.castShadow = true; // Enable shadows
-  directionalLight.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
-  directionalLight.shadow.mapSize.height = 2048;
-  directionalLight.shadow.camera.near = 0.5; // Camera near clipping distance
-  directionalLight.shadow.camera.far = 500; // Camera far clipping distance
-  scene.add(directionalLight);
+	directionalLight.position.set(0, 0.5, 0.6); // Position the light above the scene
+	directionalLight.castShadow = true; // Enable shadows
+	directionalLight.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
+	directionalLight.shadow.mapSize.height = 2048;
+	directionalLight.shadow.camera.near = 0.5; // Camera near clipping distance
+	directionalLight.shadow.camera.far = 500; // Camera far clipping distance
+	scene.add(directionalLight);
 
-  const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.4); // White light, intensity 1
-  directionalLight2.position.set(0, 0.5, -0.6); // Position the light above the scene
-  directionalLight2.castShadow = true; // Enable shadows
-  directionalLight2.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
-  directionalLight2.shadow.mapSize.height = 2048;
-  directionalLight2.shadow.camera.near = 0.5; // Camera near clipping distance
-  directionalLight2.shadow.camera.far = 500; // Camera far clipping distance
-  scene.add(directionalLight2);
+	const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.4); // White light, intensity 1
+	directionalLight2.position.set(0, 0.5, -0.6); // Position the light above the scene
+	directionalLight2.castShadow = true; // Enable shadows
+	directionalLight2.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
+	directionalLight2.shadow.mapSize.height = 2048;
+	directionalLight2.shadow.camera.near = 0.5; // Camera near clipping distance
+	directionalLight2.shadow.camera.far = 500; // Camera far clipping distance
+	scene.add(directionalLight2);
 
 	scene.add(ball);
 

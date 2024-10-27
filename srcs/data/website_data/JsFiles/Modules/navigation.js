@@ -1,3 +1,5 @@
+import { initScene } from "../3d/3d,js";
+
 export function navigateToSection(sections, links) {
 	function navigate(sectionId) {
 	  sections.forEach((section) => {
@@ -89,7 +91,7 @@ export function navigateToSection(sections, links) {
 	playButton.addEventListener("click", function () {
 		window.location.hash = "#playing";
 	  	// clickSound.play();
-	  	location.reload();
+		initScene();
 	});
   }
   
