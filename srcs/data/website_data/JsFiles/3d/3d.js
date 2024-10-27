@@ -26,6 +26,8 @@ export function getBall()
 }
 
 export function initScene() {
+	const splineContainer = document.getElementById("splineContainer");
+    splineContainer.classList.add("visible"); // Make the container visible
   // Initialize the camera
   camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(-2.82, 1.11, 15.26);
@@ -177,6 +179,7 @@ function checkHash() {
 	}
     if (window.location.hash === '#playing') {
         if (!isSceneLoaded()) {
+            initScene();
 			disableNavBar();
         }
     } 
