@@ -112,8 +112,9 @@ def classic_game(player_ids):
         round_continue = True
         direction = 1
         speed = 5
-        time_delta = time.time()
+        time_start = time.time()
         while (round_continue):
+            time_end = time.time()
             # Set pads positions
             # pad_0.set_position()
             # pad_1.set_position()
@@ -121,7 +122,8 @@ def classic_game(player_ids):
             # Apply physic (set new positions)
             if ball.x >= MAP_LENGTH / 2 or ball.x <= -MAP_LENGTH / 2:
                 direction *= -1
-            time_delta = time.time() - time_delta
+            time_delta = time_end - time_start
+            time_start = time.time()
             ball.x += direction * speed * time_delta
 
             # Send objects position
