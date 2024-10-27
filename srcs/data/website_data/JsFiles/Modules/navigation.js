@@ -103,20 +103,33 @@ export function playButtonSetup(clickSound) {
     // Toggle the queue status
     isInQueue = !isInQueue;
 
-    if (isInQueue) {
-        socket.send(JSON.stringify({
-            'type': 'game_join_queue',
-            'mode': 'CLASSIC'
-        }));
-        console.log("Joining the queue");
-        button.textContent = "EXIT";
-    } else {
-        socket.send(JSON.stringify({
-            'type': 'game_leave_queue',
-        }));
-        console.log("Leaving the queue");
-        button.textContent = "PLAY";
-    }
+    // Use an object to map states to actions
+    const actions = {
+        true: {
+            type: 'game_join_queue',
+            mode: 'CLASSIC',
+            buttonText: 'EXIT',
+            logMessage: "Joining the queue"
+        },
+        false: {
+            type: 'game_leave_queue',
+            buttonText: 'PLAY',
+            logMessage: "Leaving the queue"
+        }
+    };
+
+    // Get the current action based on isInQueue
+    const currentAction = actions[isInQueue];
+
+    // Send the appropriate message
+    socket.send(JSON.stringify({
+        type: currentAction.type,
+        ...(currentAction.mode && { mode: currentAction.mode })
+    }));
+
+    // Update button text and log message
+    button.textContent = currentAction.buttonText;
+    console.log(currentAction.logMessage);
 
     clickSound.play();
 }
