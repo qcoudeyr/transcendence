@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // main.js
 
 let scene, camera, renderer, controls, animationId;
-const geometry = new THREE.SphereGeometry(1, 32, 32);
+const geometry = new THREE.SphereGeometry(0.2, 32, 32);
 
 	// Create a material for the ball
 	const material = new THREE.MeshStandardMaterial({
