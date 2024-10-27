@@ -105,6 +105,7 @@ export function isUnloaded()
 			'mode': 'CLASSIC'
 		}));
 		button.textContent = "EXIT";
+		console.log("im here in the play");
 	}
 	else if(button.textContent === "EXIT")
 	{
@@ -113,6 +114,7 @@ export function isUnloaded()
 			'type': 'game_leave_queue',
 		}));
 		button.textContent = "PLAY";
+		console.log("im here in the exit");
 	}
 	
 	// Directly navigate to the "playing" section
