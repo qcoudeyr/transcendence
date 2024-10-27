@@ -54,7 +54,7 @@ export function initScene() {
   	ball.position.y = 0.15;
 	capsule.position.y = 0.15;
 	capsule.position.x = 1;
-	capsule.rotation.z = 90; 
+	capsule.rotation.z = 180; 
 	capsule.rotation.x = Math.PI / 2; 
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
