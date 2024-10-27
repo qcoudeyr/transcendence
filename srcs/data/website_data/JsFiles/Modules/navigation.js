@@ -86,10 +86,16 @@ export function navigateToSection(sections, links) {
 	window.addEventListener("storage", update);
   }
   
-export function playButtonSetup() {
-		window.location.hash = "#playing";
-		initScene();
-}
+  let isInitialized = false; // Flag to prevent multiple initializations
+
+  export function playButtonSetup(clickSound) {
+	  if (isInitialized) return; // Prevent further calls
+	  isInitialized = true; // Set the flag to true
+  
+	  window.location.hash = "#playing";
+	  // clickSound.play();
+	  initScene();
+  }
   
   export function hidePreloaderAfterLoad() {
         const preloader = document.getElementById('preloader');
