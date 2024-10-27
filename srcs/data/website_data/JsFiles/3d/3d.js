@@ -47,9 +47,9 @@ export function initScene() {
     pad3.rotationZ =  Math.PI / 2;
 	pad3.rotationX = 135;
     pad1.position.set(5, 0.15, 0);
-    pad1.rotation.set(Math.PI / 2, 0, 135); 
+    pad1.rotation.set(Math.PI / 2, 0, 90); 
     pad2.position.set(-5, 0.15, 0);
-    pad2.rotation.set(Math.PI / 2, 0, 135); 
+    pad2.rotation.set(Math.PI / 2, 0, 90); 
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Increased intensity
     scene.add(ambientLight);
