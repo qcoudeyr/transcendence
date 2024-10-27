@@ -177,25 +177,25 @@ function enableNavBar() {
 	document.querySelector('nav').style.display = 'block';
 }
 
-function checkHash() {
-	if (window.location.hash === '#goodbye') {
-		disableNavBar();
-	}
-    if (window.location.hash === '#playing') {
-        if (!isSceneLoaded()) {
-            initScene();
-			disableNavBar();
-        }
-    } 
-	else {
-        if (isSceneLoaded()) {
-            unloadScene();
-        }
-    }
-}
+// function checkHash() {
+// 	if (window.location.hash === '#goodbye') {
+// 		disableNavBar();
+// 	}
+//     if (window.location.hash === '#playing') {
+//         if (!isSceneLoaded()) {
+//             initScene();
+// 			disableNavBar();
+//         }
+//     } 
+// 	else {
+//         if (isSceneLoaded()) {
+//             unloadScene();
+//         }
+//     }
+// }
 
-window.addEventListener('load', checkHash);
-window.addEventListener('hashchange', checkHash);
+// window.addEventListener('load', checkHash);
+// window.addEventListener('hashchange', checkHash);
 
 
 // Function to navigate to the home section
