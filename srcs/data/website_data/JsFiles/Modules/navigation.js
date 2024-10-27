@@ -1,3 +1,6 @@
+import { initScene } from "../3d/3d.js";
+import { getWebsocket } from "../WebSocket/websocket-open.js";
+
 export function navigateToSection(sections, links) {
 	function navigate(sectionId) {
 	  sections.forEach((section) => {
@@ -84,15 +87,38 @@ export function navigateToSection(sections, links) {
 	window.addEventListener("storage", update);
   }
   
-  export function playButtonSetup(clickSound) {
-	const playButton = document.getElementById("playButton");
-	playButton.addEventListener("click", function () {
-		window.location.hash = "#playing";
-	  	// clickSound.play();
-	  	location.reload();
-	});
-  }
+  let isInitialized = false; // Flag to prevent multiple initializations
+
+export function isUnloaded()
+{
+	isInitialized = false;
+}
+
+export function playButtonSetup(clickSound) {
+    const button = document.getElementById("playbuttontext");
+    let socket = getWebsocket();
+
+        socket.send(JSON.stringify({
+            'type': 'game_join_queue',
+            'mode': 'CLASSIC'
+        }));
+        console.log("Joining the queue");
+        button.textContent = "EXIT";
+
+    clickSound.play();
+}
   
+  export function showPlayingSection() {
+	if (isInitialized) return; // Prevent further calls
+	isInitialized = true; // Set the flag to true
+	  const sections = document.querySelectorAll("section"); // Select all sections
+	  sections.forEach((section) => {
+		section.style.display = section.id === "playing" ? "block" : "none";
+	  });
+	  document.querySelector('nav').style.display = 'none';
+	  initScene();
+	}
+
   export function hidePreloaderAfterLoad() {
         const preloader = document.getElementById('preloader');
         // Simulate loading time

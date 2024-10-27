@@ -16,6 +16,12 @@
 	margin-left: 50px;
 	margin-bottom: 5px; /* Space above the button */
 	text-shadow: none;
+	padding-top: 2px;
+  }
+  .leaveGroup-button:hover {
+	box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
+  	transform: translateY(-2px);
+ 	 background: #ffffff0a;
   }
 
 .sidebar {
@@ -33,6 +39,8 @@
 	min-height: 70%;
 	overflow-y: scroll;
 	transition: width 0.3s ease;
+	scrollbar-width: none;
+	overflow-x: hidden
 }
 
 .friend-container {
