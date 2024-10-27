@@ -28,22 +28,23 @@ export function getBall()
 // Store references outside of function scope
 
 export function initScene() {
+	// Cancel any ongoing animation
 	if (animationId) cancelAnimationFrame(animationId);
+  
+	// Clear the previous scene if it exists
 	if (scene) {
-	  while (scene.children.length > 0) {
-		scene.remove(scene.children[0]);
-	  }
+	  unloadScene(); // This will remove all children from the scene and dispose resources
 	}
   
-	// Initialize the camera and scene
+	// Initialize the camera
 	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
 	camera.position.set(-2.82, 1.11, 15.26);
 	camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
   
+	// Create the scene
 	scene = new THREE.Scene();
-	scene.background = new THREE.Color('#22202e');
 	ball.position.y = 0.15;
-  
+	
 	// Add lights
 	const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 	scene.add(ambientLight);
@@ -69,11 +70,15 @@ export function initScene() {
 		gltf.scene.position.set(0, 0, 0);
 		gltf.scene.scale.set(0.1, 0.1, 0.1);
 	  },
-	  (xhr) => console.log(`${(xhr.loaded / xhr.total * 100)}% loaded`),
-	  (error) => console.error('GLTF loading error:', error)
+	  (xhr) => {
+		console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+	  },
+	  (error) => {
+		console.error('An error happened during GLTF loading:', error);
+	  }
 	);
   
-	// Create renderer if it doesn't already exist
+	// Set up the renderer only if it doesn't already exist
 	if (!renderer) {
 	  renderer = new THREE.WebGLRenderer({ antialias: true });
 	  renderer.setSize(window.innerWidth, window.innerHeight);
@@ -82,16 +87,18 @@ export function initScene() {
 	  document.getElementById('splineContainer').appendChild(renderer.domElement);
 	}
   
-	// Set up orbit controls
-	if (controls) controls.dispose();
+	// Set the background color of the scene
+	scene.background = new THREE.Color('#22202e');
+  
+	// Set up orbit controls, or reset if they already exist
+	if (controls) {
+	  controls.dispose();
+	}
 	controls = new OrbitControls(camera, renderer.domElement);
 	controls.enableDamping = true;
 	controls.dampingFactor = 0.125;
   
-	// Resize handling
-	window.addEventListener('resize', onWindowResize);
-  
-	// Animation loop
+	// Start the animation loop
 	function animate() {
 	  animationId = requestAnimationFrame(animate);
 	  controls.update();
@@ -100,8 +107,7 @@ export function initScene() {
 	animate();
   
 	console.log("Scene loaded");
-}
-  
+  }
 
 function unloadScene() {
   if (scene) {
