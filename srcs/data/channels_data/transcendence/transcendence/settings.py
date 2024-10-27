@@ -146,8 +146,8 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("redis", 6379)],
-            "capacity": 15000000,
-            "expiry": 15,
+            "capacity": 20000,
+            "expiry": 3,
         },
     },
 }
