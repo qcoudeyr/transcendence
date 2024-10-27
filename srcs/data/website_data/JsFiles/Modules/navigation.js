@@ -98,14 +98,14 @@ export function playButtonSetup(clickSound) {
     const button = document.getElementById("playbuttontext");
     let socket = getWebsocket();
 
-    if (button.textContent === "PLAY" && bool === 1) {
+    if (button.textContent === "PLAY") {
         socket.send(JSON.stringify({
             'type': 'game_join_queue',
             'mode': 'CLASSIC'
         }));
         console.log("I'm here in the play");
         button.textContent = "EXIT"; // Update the text here
-    } else if (button.textContent === "EXIT" && bool === 1) {
+    } else if (button.textContent === "EXIT") {
         socket.send(JSON.stringify({
             'type': 'game_leave_queue',
         }));
