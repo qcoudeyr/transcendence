@@ -119,14 +119,14 @@ def classic_game(player_ids):
             # Apply physic (set new positions)
             if ball.x >= MAP_LENGTH / 2 or ball.x <= -MAP_LENGTH / 2:
                 direction *= -1
-            ball.x += direction * 0.01
+            ball.x += direction * 0.005
 
             # Send objects position
             players_send_object(player_ids, ball, 'BALL')
             players_send_object(player_ids, pad_0, 'PAD_0')
             players_send_object(player_ids, pad_1, 'PAD_1')
 
-            sleep(0.001)
+            # sleep(0.005)
 
     # Send game results (as frame message ?)
     # Update profiles status and player things (is_game_ready, movement...)
