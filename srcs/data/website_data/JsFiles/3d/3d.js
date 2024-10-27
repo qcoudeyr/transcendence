@@ -25,39 +25,45 @@ export function getBall()
 	return ball;
 }
 
+// Store references outside of function scope
+
 export function initScene() {
+  // If the scene has already been loaded, clear the previous scene and stop animation
+  if (animationId) cancelAnimationFrame(animationId);
+  if (scene) {
+    while (scene.children.length > 0) {
+      scene.remove(scene.children[0]);
+    }
+  }
+
   // Initialize the camera
-	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-	camera.position.set(-2.82, 1.11, 15.26);
-	camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
+  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(-2.82, 1.11, 15.26);
+  camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
 
-	// Create the scene
-	scene = new THREE.Scene();
-	ball.position.y = 0.15;
+  // Create the scene
+  scene = new THREE.Scene();
+  ball.position.y = 0.15;
 
+  // Add lights
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+  scene.add(ambientLight);
 
-	const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
-	scene.add(ambientLight);
+  const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4);
+  directionalLight.position.set(0, 0.5, 0.6);
+  directionalLight.castShadow = true;
+  directionalLight.shadow.mapSize.width = 2048;
+  directionalLight.shadow.mapSize.height = 2048;
+  scene.add(directionalLight);
 
-	const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4); // White light, intensity 1
-	directionalLight.position.set(0, 0.5, 0.6); // Position the light above the scene
-	directionalLight.castShadow = true; // Enable shadows
-	directionalLight.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
-	directionalLight.shadow.mapSize.height = 2048;
-	directionalLight.shadow.camera.near = 0.5; // Camera near clipping distance
-	directionalLight.shadow.camera.far = 500; // Camera far clipping distance
-	scene.add(directionalLight);
+  const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.4);
+  directionalLight2.position.set(0, 0.5, -0.6);
+  directionalLight2.castShadow = true;
+  directionalLight2.shadow.mapSize.width = 2048;
+  directionalLight2.shadow.mapSize.height = 2048;
+  scene.add(directionalLight2);
 
-	const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.4); // White light, intensity 1
-	directionalLight2.position.set(0, 0.5, -0.6); // Position the light above the scene
-	directionalLight2.castShadow = true; // Enable shadows
-	directionalLight2.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
-	directionalLight2.shadow.mapSize.height = 2048;
-	directionalLight2.shadow.camera.near = 0.5; // Camera near clipping distance
-	directionalLight2.shadow.camera.far = 500; // Camera far clipping distance
-	scene.add(directionalLight2);
-
-	scene.add(ball);
+  scene.add(ball);
 
   // Load GLTF model
   const gltfLoader = new GLTFLoader();
@@ -76,17 +82,22 @@ export function initScene() {
     }
   );
 
-  // Set up the renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
-  document.getElementById('splineContainer').appendChild(renderer.domElement);
+  // Set up the renderer only if it doesn't already exist
+  if (!renderer) {
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
+    document.getElementById('splineContainer').appendChild(renderer.domElement);
+  }
 
   // Set the background color of the scene
   scene.background = new THREE.Color('#22202e');
 
-  // Set up orbit controls
+  // Set up orbit controls, or reset if they already exist
+  if (controls) {
+    controls.dispose();
+  }
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.125;
@@ -102,7 +113,6 @@ export function initScene() {
   }
   animate();
 
-  sceneLoaded = true;
   console.log("Scene loaded");
 }
 
