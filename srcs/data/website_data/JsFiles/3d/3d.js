@@ -43,7 +43,7 @@ export function initScene() {
 
     scene = new THREE.Scene();
     ball.position.y = 0.15;
-	pad3.position.set(0, 0.15, 0.15);
+	pad3.position.set(0, 0.15, 0.3);
     pad3.rotation.set(Math.PI / 2, 0, 0); 
     pad1.position.set(5, 0.15, 0);
     pad1.rotation.set(Math.PI / 2, 0, 0); 
