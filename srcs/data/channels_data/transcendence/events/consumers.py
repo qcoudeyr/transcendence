@@ -746,7 +746,7 @@ def create_classic_party(new_group_id, new_group_size):
                 player_ids.append(member.pk)
                 member.status = 'IG'
                 member.save(update_fields=['status'])
-        classic_game.ready(player_ids)
+        classic_game.delay(player_ids)
 
     return player_ids
 
