@@ -87,12 +87,9 @@ export function navigateToSection(sections, links) {
   }
   
   export function playButtonSetup(clickSound) {
-	const playButton = document.getElementById("playButton");
-	playButton.addEventListener("click", function () {
 		window.location.hash = "#playing";
 	  	// clickSound.play();
 		initScene();
-	});
   }
   
   export function hidePreloaderAfterLoad() {
