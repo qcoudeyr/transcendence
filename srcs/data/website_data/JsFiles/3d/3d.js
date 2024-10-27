@@ -16,7 +16,7 @@ const material = new THREE.MeshStandardMaterial({
 const ball = new THREE.Mesh(geometry, material);
 
 const radius = 0.1;          
-const length = 2.5;          
+const length = 0.3;          
 const radialSegments = 2; 
 
 const capsuleGeometry = new THREE.CapsuleGeometry(radius, length, radialSegments);
@@ -43,9 +43,8 @@ export function initScene() {
 
     scene = new THREE.Scene();
     ball.position.y = 0.15;
-	pad3.position.set(0, 0.15, 1);
-    pad3.rotationZ =  Math.PI / 2;
-	pad3.rotationX = 135;
+	pad3.position.set(0, 0.15, 0.15);
+    pad3.rotation.set(Math.PI / 2, 0, 0); 
     pad1.position.set(5, 0.15, 0);
     pad1.rotation.set(Math.PI / 2, 0, 0); 
     pad2.position.set(-5, 0.15, 0);
