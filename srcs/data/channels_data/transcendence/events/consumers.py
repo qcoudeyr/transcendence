@@ -26,7 +26,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             'group_list': self.group_list,
             'group_request_answer': self.group_request_answer,
             'group_leave': self.group_leave,
-            'join_game_queue': self.join_game_queue,
+            'game_join_queue': self.game_join_queue,
             'game_ready': self.game_ready,
         }
 
@@ -357,7 +357,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             }
         )
 
-    async def join_game_queue(self, content):
+    async def game_join_queue(self, content):
         if 'mode' in content and await is_group_chief(self.profile):
             mode = content['mode']
             group_size = await get_profile_group_size(self.profile)
