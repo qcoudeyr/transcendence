@@ -15,7 +15,7 @@ const material = new THREE.MeshStandardMaterial({
 });
 const ball = new THREE.Mesh(geometry, material);
 
-const radius = 0.1;          
+const radius = 0.05;          
 const length = 0.3;          
 const radialSegments = 2; 
 
@@ -196,27 +196,6 @@ function disableNavBar() {
 function enableNavBar() {
 	document.querySelector('nav').style.display = 'block';
 }
-
-// function checkHash() {
-// 	if (window.location.hash === '#goodbye') {
-// 		disableNavBar();
-// 	}
-//     if (window.location.hash === '#playing') {
-//         if (!isSceneLoaded()) {
-//             initScene();
-// 			disableNavBar();
-//         }
-//     } 
-// 	else {
-//         if (isSceneLoaded()) {
-//             unloadScene();
-//         }
-//     }
-// }
-
-// window.addEventListener('load', checkHash);
-// window.addEventListener('hashchange', checkHash);
-
 
 // Function to navigate to the home section
 function goHome() {
