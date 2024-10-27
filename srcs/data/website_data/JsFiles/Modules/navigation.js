@@ -86,11 +86,10 @@ export function navigateToSection(sections, links) {
 	window.addEventListener("storage", update);
   }
   
-  export function playButtonSetup(clickSound) {
+function playButtonSetup() {
 		window.location.hash = "#playing";
-	  	// clickSound.play();
 		initScene();
-  }
+}
   
   export function hidePreloaderAfterLoad() {
         const preloader = document.getElementById('preloader');
