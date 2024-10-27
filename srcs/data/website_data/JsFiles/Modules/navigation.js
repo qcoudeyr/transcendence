@@ -86,7 +86,7 @@ export function navigateToSection(sections, links) {
 	window.addEventListener("storage", update);
   }
   
-function playButtonSetup() {
+export function playButtonSetup() {
 		window.location.hash = "#playing";
 		initScene();
 }
