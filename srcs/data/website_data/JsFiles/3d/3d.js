@@ -17,7 +17,7 @@ const ball = new THREE.Mesh(geometry, material);
 
 const radius = 0.1;          // Radius of the capsule ends
 const length = 0.3;          // Length of the capsule body
-const radialSegments = 12; // Number of segments around the radius
+const radialSegments = 2; // Number of segments around the radius
 
 // Create the capsule geometry
 const capsuleGeometry = new THREE.CapsuleGeometry(radius, length, radialSegments);
@@ -50,8 +50,8 @@ export function initScene() {
   camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
 
   // Create the scene
-  scene = new THREE.Scene();
-  ball.position.y = 0.15;
+	scene = new THREE.Scene();
+  	ball.position.y = 0.15;
 	capsule.position.y = 0.30;
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
@@ -76,6 +76,7 @@ export function initScene() {
   scene.add(directionalLight2);
 
 	scene.add(ball);
+	scene.add(capsule);
 
   // Load GLTF model
   const gltfLoader = new GLTFLoader();
