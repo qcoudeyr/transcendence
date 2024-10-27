@@ -28,7 +28,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	// }
 	
 	updateNavbar();
-	playButtonSetup();
 	// Set up auth forms
 	setupLogin();
 	setupRegister();
