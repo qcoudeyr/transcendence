@@ -88,13 +88,14 @@ export function navigateToSection(sections, links) {
   
   let isInitialized = false; // Flag to prevent multiple initializations
 
-  export function playButtonSetup(clickSound) {
-	  if (isInitialized) return; // Prevent further calls
-	  isInitialized = true; // Set the flag to true
+  export function playButtonSetup(clickSound, linkElement) {
+	if (isInitialized) return; // Prevent further calls
+	isInitialized = true; // Set the flag to true
   
-	  changePages("playing", "#playing", clickSound);
-	  // clickSound.play();
-	  initScene();
+	// Call changePages with the link that should trigger "playing" section
+	changePages("playing", [linkElement], clickSound);
+  
+	initScene();
   }
   
   export function hidePreloaderAfterLoad() {
