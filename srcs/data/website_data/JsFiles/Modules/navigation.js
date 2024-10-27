@@ -87,6 +87,11 @@ export function navigateToSection(sections, links) {
   }
   
   let isInitialized = false; // Flag to prevent multiple initializations
+
+export function isUnloaded()
+{
+	isInitialized = false;
+}
   
   export function playButtonSetup(clickSound) {
 	if (isInitialized) return; // Prevent further calls

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { isUnloaded } from '../Modules/navigation.js';
 // main.js
 
 let scene, camera, renderer, controls, animationId;
@@ -156,7 +157,9 @@ function unloadScene() {
     animationId = null;
 
     sceneLoaded = false;
+	isUnloaded();
     console.log("Scene unloaded");
+
   }
 }
 
