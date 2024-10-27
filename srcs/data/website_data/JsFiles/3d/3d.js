@@ -91,18 +91,38 @@ export function initScene() {
   // Load GLTF model
   const gltfLoader = new GLTFLoader();
   gltfLoader.load(
-    '../Cyberpunkv2.glb',
-    (gltf) => {
-      scene.add(gltf.scene);
-      gltf.scene.position.set(0, 0, 0);
-      gltf.scene.scale.set(0.1, 0.1, 0.1);
-    },
-    (xhr) => {
-      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    },
-    (error) => {
-      console.error('An error happened during GLTF loading:', error);
-    }
+	  '../Cyberpunkv2.glb',
+	  (gltf) => {
+		  // Add the loaded model to the scene
+		  scene.add(gltf.scene);
+		  gltf.scene.position.set(0, 0, 0);
+		  gltf.scene.scale.set(0.1, 0.1, 0.1);
+  
+		  // Traverse the loaded model to find meshes and set their emission properties
+		  gltf.scene.traverse((child) => {
+			  if (child.isMesh) {
+				  // Set emissive color and intensity
+				  child.material.emissive = new THREE.Color(0xFF0000); // Example: Red emission color
+				  child.material.emissiveIntensity = 1.0; // Adjust as needed
+				  // Optional: Change the material to MeshStandardMaterial if it's not already
+				  if (!(child.material instanceof THREE.MeshStandardMaterial)) {
+					  child.material = new THREE.MeshStandardMaterial({
+						  color: child.material.color, // Keep the original color
+						  emissive: child.material.emissive, // Set emissive
+						  emissiveIntensity: child.material.emissiveIntensity, // Set emissive intensity
+						  roughness: 0.4, // Adjust roughness as needed
+						  metalness: 0.1, // Adjust metalness as needed
+					  });
+				  }
+			  }
+		  });
+	  },
+	  (xhr) => {
+		  console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+	  },
+	  (error) => {
+		  console.error('An error happened during GLTF loading:', error);
+	  }
   );
 
   // Set up the renderer
