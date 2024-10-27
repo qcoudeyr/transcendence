@@ -14,7 +14,22 @@ const geometry = new THREE.SphereGeometry(0.1, 32, 32);
 		metalness: 0.1,  // Slightly metallic
 	});
 const ball = new THREE.Mesh(geometry, material);
+
+const radius = 1;          // Radius of the capsule ends
+const length = 3;          // Length of the capsule body
+const radialSegments = 12; // Number of segments around the radius
+
+// Create the capsule geometry
+const capsuleGeometry = new THREE.CapsuleGeometry(radius, length, radialSegments);
+
+// Create a material for the capsule
+const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
+
+// Create a mesh combining the geometry and material
+const capsule = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
+
 let sceneLoaded = false;
+
 
 export function getScene()
 {
@@ -37,7 +52,7 @@ export function initScene() {
   // Create the scene
   scene = new THREE.Scene();
   ball.position.y = 0.15;
-
+	capsule.position.y = 0.30;
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
 	scene.add(ambientLight);
