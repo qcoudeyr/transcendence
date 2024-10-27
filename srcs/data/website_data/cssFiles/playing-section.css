@@ -1,15 +1,24 @@
 #splineContainer {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	overflow: hidden;
-	z-index: 9999999;
-	background-color: rgb(255, 0, 0);
-  }
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    z-index: 9999999;
+    background-color: rgba(255, 0, 0, 0.5); /* Visible background */
+    visibility: hidden; /* Start hidden */
+}
+
+#splineContainer.visible {
+    visibility: visible; /* Show when the class is added */
+}
+
+canvas {
+    border: 1px solid #000; /* Ensure canvas has a border for visibility */
+}
   
   .playing-section {
 	position: relative;
