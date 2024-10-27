@@ -63,6 +63,7 @@ export function initScene() {
     scene.add(ball);
     scene.add(pad1);
     scene.add(pad2);
+	scene.add(pad3);
 
     // Load GLTF model
     const gltfLoader = new GLTFLoader();
