@@ -15,7 +15,7 @@ const material = new THREE.MeshStandardMaterial({
 });
 const ball = new THREE.Mesh(geometry, material);
 
-const radius = 0.075;          
+const radius = 0.1;          
 const length = 0.3;          
 const radialSegments = 2; 
 
@@ -24,6 +24,7 @@ const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
 
 const pad1 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 const pad2 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
+const pad3 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 
 let sceneLoaded = false;
 
@@ -42,10 +43,12 @@ export function initScene() {
 
     scene = new THREE.Scene();
     ball.position.y = 0.15;
+	pad3.position.set(0, 0.15, 1);
+    pad3.rotation.set(Math.PI / 2, 0, 135); 
     pad1.position.set(5, 0.15, 0);
-    pad1.rotation.set(Math.PI / 2, 0, 135 * (Math.PI / 180)); 
+    pad1.rotation.set(Math.PI / 2, 0, 135); 
     pad2.position.set(-5, 0.15, 0);
-    pad2.rotation.set(Math.PI / 2, 0, 135 * (Math.PI / 180)); 
+    pad2.rotation.set(Math.PI / 2, 0, 135); 
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Increased intensity
     scene.add(ambientLight);
