@@ -26,21 +26,8 @@ export function getBall()
 }
 
 export function initScene() {
-	const splineContainer = document.getElementById("splineContainer");
-
-    // Clear previous canvases if they exist
-    while (splineContainer.firstChild) {
-        splineContainer.removeChild(splineContainer.firstChild);
-    }
-
-    // Create and append the canvas
-    const canvas = document.createElement('canvas');
-    splineContainer.appendChild(canvas); // Append the canvas to the spline container
-    console.log("Canvas created and appended:", canvas);
-
-    // Set the canvas size
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;// Initialize the camera
+	
+  // Initialize the camera
   camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(-2.82, 1.11, 15.26);
   camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
