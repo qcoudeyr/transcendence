@@ -6,7 +6,7 @@ export function mooveBall(object, x, y, z)
 	let scene = getScene();
 	const ball = getBall();
 // Create the ball mesh
-if	(object === ball)
+if	(object === "ball")
 {	
 	ball.position.x = x;
 	ball.position.y = y;

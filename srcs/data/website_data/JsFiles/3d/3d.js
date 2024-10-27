@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { isUnloaded } from '../Modules/navigation.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import { getWebsocket } from '../WebSocket/websocket-open.js';
 
 let scene, camera, renderer, controls, animationId;
 const geometry = new THREE.SphereGeometry(0.1, 32, 32);
@@ -22,9 +23,8 @@ const radialSegments = 2;
 const capsuleGeometry = new THREE.CapsuleGeometry(radius, length, radialSegments);
 const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
 
+const pad0 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 const pad1 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
-const pad2 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
-const pad3 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 
 let sceneLoaded = false;
 
@@ -43,27 +43,21 @@ export function initScene() {
 
     scene = new THREE.Scene();
     ball.position.y = 0.15;
-	pad3.position.set(0, 0.15, 0.3);
-    pad3.rotation.set(Math.PI / 2, 0, 0); 
-    pad1.position.set(5, 0.15, 0);
+    pad0.position.set(5, 0.15, 0);
+    pad0.rotation.set(Math.PI / 2, 0, 0); 
+    pad1.position.set(-5, 0.15, 0);
     pad1.rotation.set(Math.PI / 2, 0, 0); 
-    pad2.position.set(-5, 0.15, 0);
-    pad2.rotation.set(Math.PI / 2, 0, 0); 
-
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Increased intensity
     scene.add(ambientLight);
-
     const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 1); // Cooler light
     directionalLight2.position.set(-5, 10, -7);
     directionalLight2.castShadow = true;
     directionalLight2.shadow.mapSize.width = 2048;
     directionalLight2.shadow.mapSize.height = 2048;
     scene.add(directionalLight2);
-
     scene.add(ball);
     scene.add(pad1);
-    scene.add(pad2);
-	scene.add(pad3);
+    scene.add(pad0);
 
     // Load GLTF model
     const gltfLoader = new GLTFLoader();
@@ -92,7 +86,15 @@ export function initScene() {
             });
         },
         (xhr) => {
-            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            const loadPercentage = (xhr.loaded / xhr.total) * 100;
+        	console.log(loadPercentage + '% loaded');
+
+        if (loadPercentage === 100) {
+            socket = getWebsocket();
+			socket.send(JSON.stringify({
+				'type': 'game_ready',
+			}));
+        }
         },
         (error) => {
             console.error('An error happened during GLTF loading:', error);
@@ -185,7 +187,6 @@ function unloadScene() {
     sceneLoaded = false;
 	isUnloaded();
     console.log("Scene unloaded");
-
   }
 }
 
