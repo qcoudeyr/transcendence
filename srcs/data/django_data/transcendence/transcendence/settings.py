@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'users',
     'elasticapm.contrib.django',
     'profiles',
+    'game',
 ]
 
 MIDDLEWARE = [

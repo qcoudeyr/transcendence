@@ -8,7 +8,8 @@ from asgiref.sync import async_to_sync
 from django.db import transaction
 
 from profiles.models import Profile, FriendRequest, GroupRequest, Group
-from events.tasks import reply_bot
+from events.tasks import classic_game
+from game.models import PartyQueue
 
 class EventConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -25,8 +26,8 @@ class EventConsumer(AsyncWebsocketConsumer):
             'group_list': self.group_list,
             'group_request_answer': self.group_request_answer,
             'group_leave': self.group_leave,
-            'celery_test': self.celery_test,
             'join_game_queue': self.join_game_queue,
+            'game_ready': self.game_ready,
         }
 
         # Request's user
@@ -356,26 +357,16 @@ class EventConsumer(AsyncWebsocketConsumer):
             }
         )
 
-    async def celery_test(self, content):
-        reply_bot.delay(self.channel_name)
-        await self.send(json.dumps({'type': 'waiting_reply'}))
-
     async def join_game_queue(self, content):
         if 'mode' in content and await is_group_chief(self.profile):
             mode = content['mode']
             group_size = await get_profile_group_size(self.profile)
             group = await get_profile_group(self.profile)
             if mode == 'CLASSIC' and group_size <= 2:
-                party_ids = await create_classic_party(group.pk, group_size)
-                if party_ids is not None:
-                    for id in party_ids:
-                        self.channel_layer.group_send(
-                            "notifications_" + str(id),
-                            {
-                                'type': 'send.game.start'
-                            }
-                        )
-                    classic_game.ready(party_ids)
+                player_ids = await create_classic_party(group.pk, group_size)
+
+    async def game_ready(self, content):
+        await update_profile_game_ready(self.profile, True)
 
     # group_send functions here
     async def send_chat_message(self, event):
@@ -489,6 +480,22 @@ class EventConsumer(AsyncWebsocketConsumer):
     async def remove_group_request(self, event):
         await self.send(text_data=json.dumps({
             'type': 'group_request_remove',
+            })
+        )
+
+    async def send_game_start(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'game_start',
+            })
+        )
+
+    async def send_game_object(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'game_object',
+            'object': event['object'],
+            'x': event['x'],
+            'y': event['y'],
+            'z': event['z'],
             })
         )
 
@@ -707,3 +714,44 @@ def get_request_id_reverse_friend_request(request_id):
     except FriendRequest.DoesNotExist:
         reverse_request = None
     return reverse_request
+
+@database_sync_to_async
+@transaction.atomic
+def get_profile_group_size(profile):
+    size = 0
+    if profile.group is not None:
+        size = len(profile.group.members.all())
+    return size
+
+@database_sync_to_async
+@transaction.atomic
+def create_classic_party(new_group_id, new_group_size):
+    player_ids = []
+    group_sizes = {new_group_id: new_group_size}
+    queue, created = PartyQueue.objects.get_or_create(mode='CLASSIC')
+
+    if new_group_size != 2:
+        if hasattr(queue, 'groups') and len(queue.groups.all()) != 0:
+            group = queue.groups.first()
+            group_sizes[group.pk] = len(group.members.all())
+        else:
+            group.party_queue = queue
+            group.save(update_fields=['party_queue'])
+
+    player_quantity = sum(group_sizes.values())
+    if player_quantity == 2:
+        for group_id in group_sizes:
+            group = Group.objects.get(pk=group_id)
+            for member in list(group.members.all()):
+                player_ids.append(member.pk)
+                member.status = 'IG'
+                member.save(update_fields=['status'])
+        classic_game.ready(player_ids)
+
+    return player_ids
+
+@database_sync_to_async
+@transaction.atomic
+def update_profile_game_ready(profile, is_game_ready):
+    profile.is_game_ready = is_game_ready
+    profile.save(updated_fields=['is_game_ready'])
