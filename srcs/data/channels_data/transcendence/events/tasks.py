@@ -120,7 +120,7 @@ def classic_game(player_ids):
                 direction = -1
             else:
                 direction = 1
-            ball.x += direction * 0.1
+            ball.x += direction * 0.01
 
             # Send objects position
             players_send_object(player_ids, ball, 'BALL')
