@@ -1,7 +1,7 @@
 from celery import shared_task
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from time import sleep
+import time
 
 from profiles.models import Profile
 
@@ -91,7 +91,7 @@ def classic_game(player_ids):
             if not player.is_game_ready:
                 players_ready = False
 
-        sleep(0.1)
+        time.sleep(0.1)
 
     game_continue = True
     while (game_continue):
@@ -106,11 +106,13 @@ def classic_game(player_ids):
         # Send round start
         # for i in range(3, 0, -1):
         #     players_broadcast(player_ids, {'type': 'send.frame.message', 'message': str(i)})
-        #     sleep(1)
+        #     time.sleep(1)
         # players_broadcast(player_ids, {'type': 'send.frame.message', 'message': 'Fight !'})
 
         round_continue = True
         direction = 1
+        speed = 5
+        time_delta = time.time()
         while (round_continue):
             # Set pads positions
             # pad_0.set_position()
@@ -119,14 +121,15 @@ def classic_game(player_ids):
             # Apply physic (set new positions)
             if ball.x >= MAP_LENGTH / 2 or ball.x <= -MAP_LENGTH / 2:
                 direction *= -1
-            ball.x += direction * 0.005
+            time_delta = time.time() - time_delta
+            ball.x += direction * speed * time_delta
 
             # Send objects position
             players_send_object(player_ids, ball, 'BALL')
             players_send_object(player_ids, pad_0, 'PAD_0')
             players_send_object(player_ids, pad_1, 'PAD_1')
 
-            # sleep(0.005)
+            # time.sleep(0.005)
 
     # Send game results (as frame message ?)
     # Update profiles status and player things (is_game_ready, movement...)
