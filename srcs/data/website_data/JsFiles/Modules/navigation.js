@@ -1,6 +1,6 @@
 import { initScene } from "../3d/3d.js";
 
-export function navigateToSection(sections, links) {
+export function navigateToSection(sections, links = null) {
 	function navigate(sectionId) {
 	  sections.forEach((section) => {
 		section.style.display = section.id === sectionId ? 'block' : 'none';
@@ -10,9 +10,9 @@ export function navigateToSection(sections, links) {
 	window.addEventListener("popstate", function (event) {
 	  const section = event.state?.section || "home";
 	  navigate(section);
-	//   highlightLink(links, section);
 	});
   
+	// Check if a section ID is provided in the URL hash, else navigate to "home"
 	if (window.location.hash) {
 	  const sectionId = window.location.hash.replace("#", "");
 	  history.replaceState({ section: sectionId }, "", `#${sectionId}`);
@@ -87,15 +87,16 @@ export function navigateToSection(sections, links) {
   }
   
   let isInitialized = false; // Flag to prevent multiple initializations
-
-  export function playButtonSetup(clickSound, linkElement) {
+  
+  export function playButtonSetup(clickSound) {
 	if (isInitialized) return; // Prevent further calls
 	isInitialized = true; // Set the flag to true
   
-	// Call changePages with the link that should trigger "playing" section
-	navigateToSection("playing", "");
+	// Directly navigate to the "playing" section
+	navigateToSection("playing");
   
-	initScene();
+	clickSound.play(); // Play the click sound if desired
+	initScene(); // Initialize the scene
   }
   
   export function hidePreloaderAfterLoad() {
