@@ -26,7 +26,8 @@ const capsuleGeometry = new THREE.CapsuleGeometry(radius, length, radialSegments
 const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
 
 // Create a mesh combining the geometry and material
-const capsule = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
+const pad1 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
+const pad2 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 
 let sceneLoaded = false;
 
@@ -52,10 +53,14 @@ export function initScene() {
   // Create the scene
 	scene = new THREE.Scene();
   	ball.position.y = 0.15;
-	capsule.position.y = 0.15;
-	capsule.position.x = 1;
-	capsule.rotation.z = 135; 
-	capsule.rotation.x = Math.PI / 2; 
+	  pad1.position.y = 0.15;
+	  pad1.position.x = 4;
+	pad1.rotation.z = 135; 
+	pad1.rotation.x = Math.PI / 2; 
+	pad2.position.y = 0.15;
+	  pad2.position.x = -4;
+	pad2.rotation.z = 135; 
+	pad2.rotation.x = Math.PI / 2; 
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
 	scene.add(ambientLight);
@@ -79,7 +84,9 @@ export function initScene() {
   scene.add(directionalLight2);
 
 	scene.add(ball);
-	scene.add(capsule);
+	scene.add(pad1);
+	scene.add(pad2);
+	
 
   // Load GLTF model
   const gltfLoader = new GLTFLoader();
