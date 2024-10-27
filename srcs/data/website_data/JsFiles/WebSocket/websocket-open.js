@@ -4,6 +4,8 @@ import { displayFriendList, removeReceivedFriend } from "./friendDisplay.js";
 import { displayPrivateMessage } from "./chatSend.js";
 import { friendRequestNotification } from "./notifications-displays.js";
 import { removeFriendFromGroup, removeGroupRequest, groupRequestRevieve, displayGroupList } from "./groupRequests.js";
+import { gameStart, gameEnd } from "./Game/gameStartAndEnd.js"
+import { mooveBall } from "./Game/ballMovement.js"
 
 let socket;
 
@@ -100,6 +102,18 @@ function openWebsocket(socketurl){
 			if(content.type === 'group_member_remove')
 			{
 				removeFriendFromGroup(content.profile_id);
+			}
+			if(content.type === 'game_start')
+			{
+				gameStart();
+			}
+			if(content.type === 'game_end')
+			{
+				gameEnd();
+			}
+			if(content.type === 'game_object')
+			{
+				mooveBall(content.object, content.x, content.y, content.z);
 			}
 		}
 	}

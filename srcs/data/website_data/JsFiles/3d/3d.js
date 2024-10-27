@@ -4,7 +4,26 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // main.js
 
 let scene, camera, renderer, controls, animationId;
+const geometry = new THREE.SphereGeometry(1, 32, 32);
+
+	// Create a material for the ball
+	const material = new THREE.MeshStandardMaterial({
+		color: 0xff4500, // Color of the ball
+		roughness: 0.4,  // Adjust for a bit of glossiness
+		metalness: 0.1,  // Slightly metallic
+	});
+const ball = new THREE.Mesh(geometry, material);
 let sceneLoaded = false;
+
+export function getScene()
+{
+	return scene;
+}
+
+export function getBall()
+{
+	return ball;
+}
 
 function initScene() {
   // Initialize the camera
@@ -14,6 +33,7 @@ function initScene() {
 
   // Create the scene
   scene = new THREE.Scene();
+
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
 	scene.add(ambientLight);
@@ -36,26 +56,7 @@ function initScene() {
   directionalLight2.shadow.camera.far = 500; // Camera far clipping distance
   scene.add(directionalLight2);
 
-  const cubed = new THREE.BoxGeometry(50, 50, 50);
-  const basic = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
-  const basicred = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-  const basicpink = new THREE.MeshBasicMaterial({ color: 0xff00f9 });
-  const cube1 = new THREE.Mesh(cubed, basic);
-  scene.add(cube1);
-
-  cube1.position.x = -3200.50;
-  cube1.position.y = 1000;
-
-  const cube3 = new THREE.Mesh(cubed, basicred);
-  const geoffrey = new THREE.Mesh(cubed, basicpink);
-  scene.add(geoffrey);
-  scene.add(cube3);
-
-  geoffrey.position.x = -320;
-  geoffrey.position.y = 100;
-
-  cube3.position.x = 0;
-  cube3.position.y = 250;
+	scene.add(ball);
 
   // Load GLTF model
   const gltfLoader = new GLTFLoader();
