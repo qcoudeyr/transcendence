@@ -42,9 +42,9 @@ export function initScene() {
 
     scene = new THREE.Scene();
     ball.position.y = 0.15;
-    pad1.position.set(4, 0.15, 0);
+    pad1.position.set(5, 0.15, 0);
     pad1.rotation.set(Math.PI / 2, 0, 135 * (Math.PI / 180)); 
-    pad2.position.set(-4, 0.15, 0);
+    pad2.position.set(-5, 0.15, 0);
     pad2.rotation.set(Math.PI / 2, 0, 135 * (Math.PI / 180)); 
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Increased intensity
