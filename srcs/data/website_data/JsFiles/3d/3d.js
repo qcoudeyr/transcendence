@@ -15,8 +15,8 @@ const geometry = new THREE.SphereGeometry(0.1, 32, 32);
 	});
 const ball = new THREE.Mesh(geometry, material);
 
-const radius = 1;          // Radius of the capsule ends
-const length = 3;          // Length of the capsule body
+const radius = 0.1;          // Radius of the capsule ends
+const length = 0.3;          // Length of the capsule body
 const radialSegments = 12; // Number of segments around the radius
 
 // Create the capsule geometry
