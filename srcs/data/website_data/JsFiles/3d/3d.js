@@ -65,14 +65,14 @@ export function initScene() {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Bright white light, intensity 1.5
 	scene.add(ambientLight);
 
-	const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4); // White light, intensity 1
-  directionalLight.position.set(0, 0.5, 0.6); // Position the light above the scene
-  directionalLight.castShadow = true; // Enable shadows
-  directionalLight.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
-  directionalLight.shadow.mapSize.height = 2048;
-  directionalLight.shadow.camera.near = 0.5; // Camera near clipping distance
-  directionalLight.shadow.camera.far = 500; // Camera far clipping distance
-  scene.add(directionalLight);
+// 	const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4); // White light, intensity 1
+//   directionalLight.position.set(0, 0.5, 0.6); // Position the light above the scene
+//   directionalLight.castShadow = true; // Enable shadows
+//   directionalLight.shadow.mapSize.width = 2048; // Shadow map size (higher for better quality)
+//   directionalLight.shadow.mapSize.height = 2048;
+//   directionalLight.shadow.camera.near = 0.5; // Camera near clipping distance
+//   directionalLight.shadow.camera.far = 500; // Camera far clipping distance
+//   scene.add(directionalLight);
 
   const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.4); // White light, intensity 1
   directionalLight2.position.set(0, 0.5, -0.6); // Position the light above the scene
@@ -90,40 +90,55 @@ export function initScene() {
 
   // Load GLTF model
   const gltfLoader = new GLTFLoader();
-  gltfLoader.load(
-	  '../Cyberpunkv2.glb',
-	  (gltf) => {
-		  // Add the loaded model to the scene
-		  scene.add(gltf.scene);
-		  gltf.scene.position.set(0, 0, 0);
-		  gltf.scene.scale.set(0.1, 0.1, 0.1);
-  
-		  // Traverse the loaded model to find meshes and set their emission properties
-		  gltf.scene.traverse((child) => {
-			  if (child.isMesh) {
-				  // Set emissive color and intensity
-				  child.material.emissive = new THREE.Color(0xFF0000); // Example: Red emission color
-				  child.material.emissiveIntensity = 1.0; // Adjust as needed
-				  // Optional: Change the material to MeshStandardMaterial if it's not already
-				  if (!(child.material instanceof THREE.MeshStandardMaterial)) {
-					  child.material = new THREE.MeshStandardMaterial({
-						  color: child.material.color, // Keep the original color
-						  emissive: child.material.emissive, // Set emissive
-						  emissiveIntensity: child.material.emissiveIntensity, // Set emissive intensity
-						  roughness: 0.4, // Adjust roughness as needed
-						  metalness: 0.1, // Adjust metalness as needed
-					  });
-				  }
-			  }
-		  });
-	  },
-	  (xhr) => {
-		  console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-	  },
-	  (error) => {
-		  console.error('An error happened during GLTF loading:', error);
-	  }
-  );
+gltfLoader.load(
+    '../Cyberpunkv2.glb',
+    (gltf) => {
+        // Add the loaded model to the scene
+        scene.add(gltf.scene);
+        gltf.scene.position.set(0, 0, 0);
+        gltf.scene.scale.set(0.1, 0.1, 0.1);
+
+        // Enable shadows for the entire model
+        gltf.scene.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;  // Enable shadow casting
+                child.receiveShadow = true; // Enable shadow receiving
+            }
+        });
+
+        // Traverse to find specific meshes and set their emission properties
+        gltf.scene.traverse((child) => {
+            if (child.isMesh) {
+                // Check if the mesh name matches specific names you want to make emissive
+                if (child.name === "YourEmissivePartName") { // Replace with the actual name
+                    child.material.emissive = new THREE.Color(0xFF0000); // Set the emissive color (e.g., red)
+                    child.material.emissiveIntensity = 1.0; // Set emissive intensity
+                }
+                // You can add more conditions for other parts if needed
+                else if (child.name === "AnotherEmissivePartName") { // Another part to make emissive
+                    child.material.emissive = new THREE.Color(0x00FF00); // Green
+                    child.material.emissiveIntensity = 1.5; // Different intensity
+                }
+            }
+        });
+    },
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    },
+    (error) => {
+        console.error('An error happened during GLTF loading:', error);
+    }
+);
+
+// Configure the directional light for shadows
+const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4);
+directionalLight.position.set(0, 0.5, 0.6);
+directionalLight.castShadow = true; // Enable shadows
+directionalLight.shadow.mapSize.width = 2048; // Size of the shadow map
+directionalLight.shadow.mapSize.height = 2048;
+directionalLight.shadow.camera.near = 0.5; // Near clipping distance for the shadow camera
+directionalLight.shadow.camera.far = 500; // Far clipping distance for the shadow camera
+scene.add(directionalLight);
 
   // Set up the renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
