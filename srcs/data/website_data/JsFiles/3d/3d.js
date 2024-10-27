@@ -177,7 +177,6 @@ function checkHash() {
 	}
     if (window.location.hash === '#playing') {
         if (!isSceneLoaded()) {
-            initScene();
 			disableNavBar();
         }
     } 
