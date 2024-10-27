@@ -112,7 +112,7 @@ export function isUnloaded()
 		socket.send(JSON.stringify({
 			'type': 'game_leave_queue',
 		}));
-		button.textContent = "EXIT";
+		button.textContent = "PLAY";
 	}
 	
 	// Directly navigate to the "playing" section
