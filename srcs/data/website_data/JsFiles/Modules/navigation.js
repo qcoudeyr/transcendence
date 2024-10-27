@@ -92,7 +92,7 @@ export function navigateToSection(sections, links) {
 	  if (isInitialized) return; // Prevent further calls
 	  isInitialized = true; // Set the flag to true
   
-	  window.location.hash = "#playing";
+	  changePages("playing", links, clickSound);
 	  // clickSound.play();
 	  initScene();
   }
