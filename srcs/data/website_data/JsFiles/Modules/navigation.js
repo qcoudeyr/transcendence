@@ -92,7 +92,7 @@ export function navigateToSection(sections, links) {
 	  if (isInitialized) return; // Prevent further calls
 	  isInitialized = true; // Set the flag to true
   
-	  changePages("playing", links, clickSound);
+	  changePages("playing", "#playing", clickSound);
 	  // clickSound.play();
 	  initScene();
   }
