@@ -37,7 +37,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			
 			// Reset `bool` after a small delay to avoid re-entering both conditions
 			setTimeout(() => { bool = 1; }, 100); 
-		}
     });
 	updateNavbar();
 	// Set up auth forms
