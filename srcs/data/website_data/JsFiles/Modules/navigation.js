@@ -94,28 +94,31 @@ export function isUnloaded()
 	isInitialized = false;
 }
 
+let isInQueue = false; // Global variable to track queue status
+
 export function playButtonSetup(clickSound) {
     const button = document.getElementById("playbuttontext");
     let socket = getWebsocket();
 
-    if (button.textContent === "PLAY") {
+    // Toggle the queue status
+    isInQueue = !isInQueue;
+
+    if (isInQueue) {
         socket.send(JSON.stringify({
             'type': 'game_join_queue',
             'mode': 'CLASSIC'
         }));
-        console.log("I'm here in the play");
-        button.textContent = "EXIT"; // Update the text here
-    } else if (button.textContent === "EXIT") {
+        console.log("Joining the queue");
+        button.textContent = "EXIT";
+    } else {
         socket.send(JSON.stringify({
             'type': 'game_leave_queue',
         }));
-        console.log("I'm here in the exit");
-        button.textContent = "PLAY"; // Update the text here
+        console.log("Leaving the queue");
+        button.textContent = "PLAY";
     }
 
-    // Directly navigate to the "playing" section if needed
-
-    clickSound.play(); // Play the click sound if desired
+    clickSound.play();
 }
   
   export function showPlayingSection() {
