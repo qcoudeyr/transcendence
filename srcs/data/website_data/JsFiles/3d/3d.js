@@ -28,102 +28,100 @@ export function getBall()
 // Store references outside of function scope
 
 export function initScene() {
-  // If the scene has already been loaded, clear the previous scene and stop animation
-  if (animationId) cancelAnimationFrame(animationId);
-  if (scene) {
-    while (scene.children.length > 0) {
-      scene.remove(scene.children[0]);
-    }
+	// Cancel any previous animation frames to avoid memory leaks
+	if (animationId) cancelAnimationFrame(animationId);
+	
+	// Remove and dispose of the previous renderer if it exists
+	if (renderer) {
+	  renderer.dispose();
+	  document.getElementById('splineContainer').removeChild(renderer.domElement);
+	  renderer = null;
+	}
+  
+	// Initialize the camera
+	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+	camera.position.set(-2.82, 1.11, 15.26);
+	camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
+  
+	// Create the scene
+	scene = new THREE.Scene();
+	ball.position.y = 0.15;
+  
+	// Add lights to the scene
+	const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+	scene.add(ambientLight);
+  
+	const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4);
+	directionalLight.position.set(0, 0.5, 0.6);
+	directionalLight.castShadow = true;
+	directionalLight.shadow.mapSize.width = 2048;
+	directionalLight.shadow.mapSize.height = 2048;
+	scene.add(directionalLight);
+  
+	const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.4);
+	directionalLight2.position.set(0, 0.5, -0.6);
+	directionalLight2.castShadow = true;
+	directionalLight2.shadow.mapSize.width = 2048;
+	directionalLight2.shadow.mapSize.height = 2048;
+	scene.add(directionalLight2);
+  
+	scene.add(ball);
+  
+	// Load GLTF model
+	const gltfLoader = new GLTFLoader();
+	gltfLoader.load(
+	  '../Cyberpunkv2.glb',
+	  (gltf) => {
+		scene.add(gltf.scene);
+		gltf.scene.position.set(0, 0, 0);
+		gltf.scene.scale.set(0.1, 0.1, 0.1);
+	  },
+	  (xhr) => {
+		console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+	  },
+	  (error) => {
+		console.error('An error happened during GLTF loading:', error);
+	  }
+	);
+  
+	// Initialize the renderer
+	renderer = new THREE.WebGLRenderer({ antialias: true });
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.PCFShadowMap;
+	document.getElementById('splineContainer').appendChild(renderer.domElement);
+  
+	// Set the background color of the scene
+	scene.background = new THREE.Color('#22202e');
+  
+	// Set up orbit controls, resetting if they already exist
+	if (controls) controls.dispose();
+	controls = new OrbitControls(camera, renderer.domElement);
+	controls.enableDamping = true;
+	controls.dampingFactor = 0.125;
+  
+	// Add a resize handler to keep the scene responsive
+	window.addEventListener('resize', onWindowResize);
+  
+	// Animation loop to render the scene
+	function animate() {
+	  animationId = requestAnimationFrame(animate);
+	  controls.update();
+	  renderer.render(scene, camera);
+	}
+	animate();
+  
+	console.log("Scene loaded");
   }
-
-  // Initialize the camera
-  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(-2.82, 1.11, 15.26);
-  camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
-
-  // Create the scene
-  scene = new THREE.Scene();
-  ball.position.y = 0.15;
-
-  // Add lights
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
-  scene.add(ambientLight);
-
-  const directionalLight = new THREE.DirectionalLight(0xc4610f, 0.4);
-  directionalLight.position.set(0, 0.5, 0.6);
-  directionalLight.castShadow = true;
-  directionalLight.shadow.mapSize.width = 2048;
-  directionalLight.shadow.mapSize.height = 2048;
-  scene.add(directionalLight);
-
-  const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.4);
-  directionalLight2.position.set(0, 0.5, -0.6);
-  directionalLight2.castShadow = true;
-  directionalLight2.shadow.mapSize.width = 2048;
-  directionalLight2.shadow.mapSize.height = 2048;
-  scene.add(directionalLight2);
-
-  scene.add(ball);
-
-  // Load GLTF model
-  const gltfLoader = new GLTFLoader();
-  gltfLoader.load(
-    '../Cyberpunkv2.glb',
-    (gltf) => {
-      scene.add(gltf.scene);
-      gltf.scene.position.set(0, 0, 0);
-      gltf.scene.scale.set(0.1, 0.1, 0.1);
-    },
-    (xhr) => {
-      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    },
-    (error) => {
-      console.error('An error happened during GLTF loading:', error);
-    }
-  );
-
-  // Set up the renderer only if it doesn't already exist
-  if (!renderer) {
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
-    document.getElementById('splineContainer').appendChild(renderer.domElement);
+  
+  function onWindowResize() {
+	if (camera && renderer) {
+	  camera.aspect = window.innerWidth / window.innerHeight;
+	  camera.updateProjectionMatrix();
+	  renderer.setSize(window.innerWidth, window.innerHeight);
+	  renderer.render(scene, camera); // Force re-render to handle resizing
+	}
   }
-
-  // Set the background color of the scene
-  scene.background = new THREE.Color('#22202e');
-
-  // Set up orbit controls, or reset if they already exist
-  if (controls) {
-    controls.dispose();
-  }
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.125;
-
-  // Resize handler to adjust the scene on window resize
-  window.addEventListener('resize', onWindowResize);
-
-  // Animation loop to render the scene
-  function animate() {
-    animationId = requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  console.log("Scene loaded");
-}
-
-function onWindowResize() {
-  if (!document.getElementById('splineContainer').classList.contains('small') &&
-      !document.getElementById('splineContainer').classList.contains('big')) {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-}
 
 function unloadScene() {
   if (scene) {
