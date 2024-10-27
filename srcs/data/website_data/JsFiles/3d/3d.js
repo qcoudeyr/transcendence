@@ -28,6 +28,8 @@ export function getBall()
 // Store references outside of function scope
 
 export function initScene() {
+	const splineContainer = document.getElementById('splineContainer');
+    splineContainer.style.display = 'flex'
 	// Cancel any ongoing animation
 	if (animationId) cancelAnimationFrame(animationId);
   
