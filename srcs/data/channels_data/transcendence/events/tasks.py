@@ -2,7 +2,6 @@ from celery import shared_task
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import time
-from datetime import datetime
 
 from profiles.models import Profile
 
