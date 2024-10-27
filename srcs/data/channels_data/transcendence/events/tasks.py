@@ -48,7 +48,7 @@ class Pad(GameObject):
         player.pad_x = self.x
         player.pad_y = self.y
         player.pad_z = self.z
-        player.save(updated_fields=['pad_x', 'pad_y', 'pad_z'])
+        player.save(update_fields=['pad_x', 'pad_y', 'pad_z'])
 
 def players_broadcast(player_ids, event):
     for player_id in player_ids:
