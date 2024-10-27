@@ -90,7 +90,7 @@ export function initScene() {
         	console.log(loadPercentage + '% loaded');
 
         if (loadPercentage === 100) {
-            socket = getWebsocket();
+            let socket = getWebsocket();
 			socket.send(JSON.stringify({
 				'type': 'game_ready',
 			}));
