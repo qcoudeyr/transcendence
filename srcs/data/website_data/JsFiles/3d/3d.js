@@ -50,14 +50,7 @@ export function initScene() {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Increased intensity
     scene.add(ambientLight);
 
-    const directionalLight1 = new THREE.DirectionalLight(0xc4610f, 1); // Bright light
-    directionalLight1.position.set(5, 10, 7);
-    directionalLight1.castShadow = true; 
-    directionalLight1.shadow.mapSize.width = 2048;
-    directionalLight1.shadow.mapSize.height = 2048;
-    scene.add(directionalLight1);
-
-    const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.6); // Cooler light
+    const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 0.2); // Cooler light
     directionalLight2.position.set(-5, 10, -7);
     directionalLight2.castShadow = true;
     directionalLight2.shadow.mapSize.width = 2048;
