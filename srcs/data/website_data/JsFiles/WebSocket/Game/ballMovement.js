@@ -1,4 +1,4 @@
-import { getBall, getScene } from "../../3d/3d";
+import { getBall, getScene } from "../../3d/3d.js";
 import * as THREE from 'three';
 
 export function mooveBall(object, x, y, z)
