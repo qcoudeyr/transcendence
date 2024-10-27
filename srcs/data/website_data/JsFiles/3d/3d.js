@@ -16,7 +16,7 @@ const material = new THREE.MeshStandardMaterial({
 const ball = new THREE.Mesh(geometry, material);
 
 const radius = 0.1;          
-const length = 0.3;          
+const length = 2.5;          
 const radialSegments = 2; 
 
 const capsuleGeometry = new THREE.CapsuleGeometry(radius, length, radialSegments);
