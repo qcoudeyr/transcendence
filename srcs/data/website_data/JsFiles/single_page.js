@@ -29,7 +29,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	const playButton = document.getElementById("playButton");
     playButton.addEventListener("click", function () {
 		const button = document.getElementById("playbuttontext");
-		if (bool === 1) {
 			if (button.textContent === "PLAY") {
 				playAction();
 			} else if (button.textContent === "EXIT") {
