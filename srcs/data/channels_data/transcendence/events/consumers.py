@@ -755,4 +755,4 @@ def create_classic_party(new_group_id, new_group_size):
 @transaction.atomic
 def update_profile_game_ready(profile, is_game_ready):
     profile.is_game_ready = is_game_ready
-    profile.save(updated_fields=['is_game_ready'])
+    profile.save(update_fields=['is_game_ready'])
