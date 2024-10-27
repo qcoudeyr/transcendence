@@ -735,8 +735,9 @@ def create_classic_party(new_group_id, new_group_size):
             group = queue.groups.first()
             group_sizes[group.pk] = len(group.members.all())
         else:
-            group.party_queue = queue
-            group.save(update_fields=['party_queue'])
+            new_group = Group.objects.get(new_group_id)
+            new_group.party_queue = queue
+            new_group.save(update_fields=['party_queue'])
 
     player_quantity = sum(group_sizes.values())
     if player_quantity == 2:
