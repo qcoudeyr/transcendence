@@ -1,4 +1,4 @@
-import { initScene } from "../3d/3d,js";
+import { initScene } from "../3d/3d.js";
 
 export function navigateToSection(sections, links) {
 	function navigate(sectionId) {
