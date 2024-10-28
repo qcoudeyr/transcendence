@@ -132,6 +132,7 @@ class GameConsumer(AsyncConsumer):
             tick = 0.01
             tick_count = 0
             start_time = time.time()
+            new_time = start_time
             while (round_continue):
                 # Set pads positions
                 # pad_0.set_position()
