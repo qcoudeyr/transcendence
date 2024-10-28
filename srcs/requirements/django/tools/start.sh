@@ -9,7 +9,6 @@ for i in "${apps[@]}"; do
     python manage.py makemigrations "$i"
 done
 
-python manage.py makemigrations
 python manage.py migrate
 
 python manage.py createsuperuser --noinput --username "$DJANGO_SUPERUSER_NAME" --email "$DJANGO_SUPERUSER_EMAIL"
