@@ -8,8 +8,8 @@ from asgiref.sync import async_to_sync
 from django.db import transaction
 
 from profiles.models import Profile, FriendRequest, GroupRequest, Group
-from events.tasks import classic_game
 from game.models import PartyQueue
+from events.tasks import classic_game
 
 class EventConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -358,7 +358,7 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def game_join_queue(self, content):
-        if 'mode' in content and await is_group_chief(self.profile) and self.profile.status != 'IG':
+        if 'mode' in content and await is_group_chief(self.profile):
             mode = content['mode']
             group_size = await get_profile_group_size(self.profile)
             group = await get_profile_group(self.profile)
@@ -741,13 +741,19 @@ def create_classic_party(new_group_id, new_group_size):
 
     player_quantity = sum(group_sizes.values())
     if player_quantity == 2:
+        already_ig = False
         for group_id in group_sizes:
             group = Group.objects.get(pk=group_id)
             group.party_queue = None
             group.save(update_fields=['party_queue'])
             for member in list(group.members.all()):
                 player_ids.append(member.pk)
-        classic_game.delay(player_ids)
+                if member.status == 'IG':
+                    already_ig = True
+                member.status = 'IG'
+                member.save(update_fields=['status'])
+        if not already_ig:
+            classic_game.delay(player_ids)
 
     return player_ids
 
