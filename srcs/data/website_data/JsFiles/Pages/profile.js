@@ -9,7 +9,7 @@ function switchDisplayForm(event) {
 	userForm.classList.toggle('fade-in');
 }
 
-export function switchEditProfileForm(event){
+function switchEditProfileForm(event){
 	event.preventDefault();
 	const profileForm = document.querySelector('.profile-form');
 	const editForm = document.querySelector('.edit-profile-form-text');
