@@ -72,7 +72,19 @@ async def players_send_object(player_ids, object, name):
     })
 
 class GameConsumer(AsyncConsumer):
-    async def classic_game(self, player_ids):
+    async def classic_game(self, event):
+        await channel_layer.group_send(
+            "general_chat",
+            {
+                'type': 'send.chat.message',
+                'name': '[server]',
+                'message': 'balise 5',
+            }
+        )
+        if 'player_ids' in event:
+            player_ids = event['player_ids']
+        else:
+            return
         if len(player_ids) != 2:
             return
         # Game objects
@@ -136,7 +148,7 @@ class GameConsumer(AsyncConsumer):
                 await players_send_object(player_ids, pad_0, 'PAD_0')
                 await players_send_object(player_ids, pad_1, 'PAD_1')
 
-                time.sleep(0.001)
+                await asyncio.sleep(0.005)
 
         # Send game results (as frame message ?)
         # Update profiles status and player things (is_game_ready, movement...)

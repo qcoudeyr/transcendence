@@ -358,13 +358,17 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def game_join_queue(self, content):
+        await self.chat_message({'message': 'balise 1'})
         if 'mode' in content and await is_group_chief(self.profile):
+            await self.chat_message({'message': 'balise 2'})
             mode = content['mode']
             group_size = await get_profile_group_size(self.profile)
             group = await get_profile_group(self.profile)
             if mode == 'CLASSIC' and group_size <= 2:
                 player_ids = await create_classic_party(group.pk, group_size)
+                await self.chat_message({'message': 'balise 3'})
                 if len(player_ids) == 2:
+                    await self.chat_message({'message': 'balise 4'})
                     await self.channel_layer.send(
                         'game-server',
                         {

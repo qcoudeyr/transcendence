@@ -8,7 +8,6 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 """
 
 import os
-import ssl
 
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
@@ -31,13 +30,6 @@ application = ProtocolTypeRouter(
         ),
         "channel": ChannelNameRouter({
             "game-server": GameConsumer.as_asgi(),
-        })
+        }),
     }
 )
-
-ssl_context = {
-    'cert_reqs': ssl.CERT_REQUIRED,
-    'keyfile': '/app/certs/channels.key',
-    'certfile': '/app/certs/channels.crt',
-    'ca_certs': '/app/certs/ca.crt',
-}
