@@ -52,7 +52,7 @@ export function navigateToSection(sections, links) {
 	const connexionLink = document.querySelector('a[data-section="connexion"]');
 	const profileLink = document.querySelector('a[data-section="profile"]');
 	const playlink = document.querySelector('a[data-section="play"]');
-	// const history = document.querySelector('a[data-section="distory"]');
+	const history = document.querySelector('a[data-section="history"]');
 	// const tournamentlink = document.querySelector('a[data-section="tournaments"]');
 	const statslink = document.querySelector('a[data-section="statistics"]');
 	const chatContainer = document.querySelector('.chat-container');
@@ -65,6 +65,7 @@ export function navigateToSection(sections, links) {
 		connexionLink.style.display = "none";
 		profileLink.style.display = "inline-block";
 		playlink.style.display = "inline-block";
+		history.style.display = "inline-block";
 		// tournamentlink.style.display = "inline-block";
 		statslink.style.display = "inline-block";
 		chatContainer.style.display = "fixed";
@@ -77,6 +78,7 @@ export function navigateToSection(sections, links) {
 		playlink.style.display = "none";
 		statslink.style.display = "none";
 		chatContainer.style.display = "none";
+		history.style.display = "none";
 		chatInput.style.display = "none";
 		sidebar.style.display = "none";
 		notification.style.display = "none";
