@@ -17,8 +17,6 @@
     align-items: flex-start;
     gap: 2em;
     overflow-x: auto; /* Allow horizontal scrolling if needed */
-	height: 500px;
-	width: 1000px;
 	padding: 30px;
 }
 
