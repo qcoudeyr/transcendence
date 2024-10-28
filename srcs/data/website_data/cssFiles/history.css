@@ -1,39 +1,35 @@
 /* General styling for the History Section */
+/* General styling for the History Section */
 .history-section {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    gap: 2em;
     padding: 2em;
-    gap: 2em; /* Space between the two boxes */
 }
 
 /* Styling for Match History Container */
 .match_history_container {
     background: rgba(255, 255, 255, 0.05);
-    padding: 2em;
+    padding: 1em;
     border-radius: 15px;
     border-left: 1px solid rgba(255, 255, 255, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
     text-align: center;
-    transition: all 0.2s ease-in-out;
+    width: 200px;
+    max-height: 300px; /* Controls the height */
+    overflow-y: auto; /* Adds scrolling */
 }
 
-/* Title Styling */
-.history_title h2 {
-    color: #fff;
-    font-size: 2em;
-    margin-bottom: 1em;
-}
-
-/* Individual Game Styling */
+/* Styling for Individual Games */
 .game {
     background: rgba(255, 255, 255, 0.05);
-    padding: 1em;
+    padding: 0.5em;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    margin-bottom: 1em;
+    margin-bottom: 0.5em;
     cursor: pointer;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
