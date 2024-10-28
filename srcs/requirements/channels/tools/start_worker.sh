@@ -2,4 +2,4 @@
 
 # python manage.py migrate
 
-python manage.py runworker game-server
+cd /app/transcendence && python manage.py runworker game-server -v 3
