@@ -2,10 +2,11 @@
 .history-section {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Changed from center to align tops */
     gap: 2em;
     padding: 2em;
-    flex-wrap: nowrap; /* Ensures containers stay in a row */
+    flex-wrap: nowrap;
+    min-width: 500px; /* Ensure minimum width to fit both containers */
 }
 
 /* Styling for Match History Container */
@@ -18,7 +19,7 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
     text-align: center;
-    width: 200px;
+    width: 180px; /* Slightly reduced from 200px */
     max-height: 300px;
     overflow-y: auto;
     flex-shrink: 0; /* Prevents shrinking in flex layout */
@@ -59,7 +60,7 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
     text-align: center;
-    width: 300px;
+    width: 280px; /* Slightly reduced from 300px */
     min-height: 200px;
     transition: all 0.2s ease-in-out;
     flex-shrink: 0; /* Prevents shrinking in flex layout */
@@ -73,4 +74,18 @@
 .current_match_selected_info p {
     color: #fff;
     font-size: 1.2em;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 600px) {
+    .history-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .match_history_container,
+    .current_match_selected_info {
+        width: 90%; /* Full width on small screens */
+        max-width: 300px; /* Maximum width for better readability */
+    }
 }
