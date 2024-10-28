@@ -4,4 +4,4 @@
 
 sleep 6
 
-/vault/entrypoint/entrypoint.sh python manage.py runworker game-server -v 3
+python manage.py runworker game-server -v 3
