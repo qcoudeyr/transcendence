@@ -165,7 +165,7 @@
 <script>
     const ctx = document.getElementById('hoursPlayedChart').getContext('2d');
     const hoursPlayedChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'pie',
         data: {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             datasets: [{
@@ -173,7 +173,7 @@
                 data: [20, 30, 50, 40, 60, 80, 90, 75, 85, 70, 55, 65], // Example data for each month
                 backgroundColor: 'rgba(255, 0, 255, 0.6)',
                 borderColor: '#ff00ff',
-                borderWidth: 2,
+                borderWidth: 1,
                 hoverBackgroundColor: 'rgb(0, 255, 255)', // Neon cyan on hover
                 hoverBorderColor: '#ff00ff' // Neon pink border on hover
             }]
