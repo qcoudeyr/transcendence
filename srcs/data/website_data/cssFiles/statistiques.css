@@ -18,6 +18,7 @@
     animation: fadeInUp 1.5s ease forwards;
     padding: 2em;
 	left: 50%;
+	scale: 0.8;
 }
 
 /* Varying size bento boxes */
