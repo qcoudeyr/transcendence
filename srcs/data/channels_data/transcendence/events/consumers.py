@@ -358,7 +358,7 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def game_join_queue(self, content):
-        if 'mode' in content and await is_group_chief(self.profile):
+        if 'mode' in content and await is_group_chief(self.profile) and self.profile.status != 'IG':
             mode = content['mode']
             group_size = await get_profile_group_size(self.profile)
             group = await get_profile_group(self.profile)
