@@ -7,7 +7,6 @@ export function displayFriendList(name, profile_id, avatar, status) {
 
     // Check if a friend with the same profile_id already exists
     if (document.getElementById('friend_' + profile_id)) {
-        console.log(`Friend with profile_id ${profile_id} is already added.`);
         return; // Return early if friend already exists
     }
 
