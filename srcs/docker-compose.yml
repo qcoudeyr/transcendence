@@ -139,7 +139,7 @@ services:
       - ./data/channels_data:/app
       - ./data/django_data/transcendence/profiles:/app/transcendence/profiles
       - ./data/django_data/transcendence/game:/app/transcendence/game
-      - ./data/credentials/channels_approle.env:/vault/config/channels_approle.env:ro
+      - ./data/credentials/celery_approle.env:/vault/config/celery_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
     networks:
       transcendence:
@@ -152,15 +152,13 @@ services:
       - channels
     environment:
       - VAULT_ADDR=http://vault:8300
-      - SERVICE_NAME=channels
-      - SECRET_PATH=channels
+      - SERVICE_NAME=celery
+      - SECRET_PATH=celery
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_USER=${DATABASE_USER}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
     entrypoint: ["/vault/entrypoint/entrypoint.sh"]
-    # command: "celery -A transcendence worker -l INFO"
-    # command: "python manage.py runworker game-server"
     command: "start_worker.sh"
 
 #####################
