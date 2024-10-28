@@ -1,10 +1,10 @@
 /* General styling for the History Section */
 .history-section {
     display: flex;
-    gap: 2em;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     padding: 2em;
+    gap: 2em; /* Space between the two boxes */
 }
 
 /* Styling for Match History Container */
