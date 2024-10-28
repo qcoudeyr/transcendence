@@ -1,5 +1,4 @@
 /* General styling for the History Section */
-/* General styling for the History Section */
 .history-section {
     display: flex;
     justify-content: center;
@@ -21,6 +20,7 @@
     width: 200px;
     max-height: 300px; /* Controls the height */
     overflow-y: auto; /* Adds scrolling */
+    flex-shrink: 0; /* Prevents shrinking in flex layout */
 }
 
 /* Styling for Individual Games */
@@ -41,13 +41,11 @@
 
 /* Won and Lost Match Colors */
 .game.won {
-    color: #39ff14;
-    border-color: rgba(57, 255, 20, 0.6);
+    border-color: rgb(0, 255, 255);
 }
 
 .game.lost {
-    color: #ff073a;
-    border-color: rgba(255, 7, 58, 0.6);
+    border-color: rgba(255, 0, 255, 0.6);
 }
 
 /* Styling for the Match Details Section */
@@ -63,6 +61,7 @@
     width: 300px;
     min-height: 200px;
     transition: all 0.2s ease-in-out;
+    flex-shrink: 0; /* Prevents shrinking in flex layout */
 }
 
 .current_match_selected_info h3 {
