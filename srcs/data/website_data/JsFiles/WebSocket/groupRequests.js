@@ -4,7 +4,6 @@ import { getWebsocket } from "./websocket-open.js";
 
 
 export function displayGroupList(name, profile_id, avatar) {
-	console.log('im i here at some point ????');
     const groupListContainer = document.getElementById("grp-list");
 
     const friend = document.createElement('div');
@@ -140,7 +139,6 @@ function handleGrpRequestResponse(isAccepted)
 			'answer': isAccepted ? true : false,
 		}));
 	
-		console.log(`Group request ${isAccepted ? 'accepted' : 'rejected'}`);
 }
 
 export function groupRequestRevieve(profileId, name, avatar)
@@ -162,7 +160,6 @@ export function removeFriendFromGroup(profile_id) {
     const friendElement = document.getElementById('grp-friend_' + profile_id);
     if (friendElement) {
         friendElement.remove();
-        console.log(`Friend with profile_id ${profile_id} has left the group.`);
         // Recheck if the leave button should remain
         showLeaveButtonIfMultipleFriends();
 	}
