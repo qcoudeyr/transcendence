@@ -116,6 +116,14 @@ function openWebsocket(socketurl){
 			{
 				mooveBall(content.object, content.x, content.y, content.z);
 			}
+			// if(content.type === 'game_score')
+			// {
+			// 	//scoreUpdate(content.score_1, content.score_2);
+			// }
+			// if (content.type === 'game_frame_message')
+			// {
+			// 	frameMessage(content.message);
+			// }
 		}
 	}
 	
