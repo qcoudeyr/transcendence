@@ -6,11 +6,9 @@ body {
     color: #000000;
     background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(14,4,65,1) 100%, rgba(18,4,88,1) 100%);
     font-family: 'EB Neon', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /*text font*/
