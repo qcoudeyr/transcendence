@@ -2,9 +2,10 @@
 .history-section {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     gap: 2em;
     padding: 2em;
+    flex-wrap: nowrap; /* Ensures containers stay in a row */
 }
 
 /* Styling for Match History Container */
@@ -18,8 +19,8 @@
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
     text-align: center;
     width: 200px;
-    max-height: 300px; /* Controls the height */
-    overflow-y: auto; /* Adds scrolling */
+    max-height: 300px;
+    overflow-y: auto;
     flex-shrink: 0; /* Prevents shrinking in flex layout */
 }
 
