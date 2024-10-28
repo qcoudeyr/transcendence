@@ -1,0 +1,88 @@
+/* General styling for the History Section */
+.history-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 10px;
+    background-color: #ff000000;
+}
+
+/* New wrapper for the match history and current match info */
+.history-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2em;
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
+	padding: 30px;
+}
+
+/* Styling for Match History Container */
+.match_history_container {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1em;
+    border-radius: 15px;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+    text-align: center;
+    width: 180px; /* Width of match history container */
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Styling for Individual Games */
+.game {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5em;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 0.5em;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.game:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+}
+
+/* Won and Lost Match Colors */
+.game.won {
+    border-color: rgb(0, 255, 255);
+}
+
+.game.lost {
+    border-color: rgba(255, 0, 255, 0.6);
+}
+
+/* Styling for the Match Details Section */
+.current_match_selected_info {
+	margin-top: 7%;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2em;
+    border-radius: 15px;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+    text-align: center;
+    width: 280px; /* Width of match details container */
+    min-height: 200px;
+}
+
+/* Ensure text color is visible */
+.history-section,
+.match_history_container,
+.current_match_selected_info {
+    color: #fff; /* Text color for visibility */
+}
+
+.current_match_selected_info h3 {
+    font-size: 1.5em;
+}
+
+.current_match_selected_info p {
+    font-size: 1.2em;
+}

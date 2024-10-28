@@ -112,7 +112,7 @@ export function initScene() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
+	renderer.shadowMap.type = THREE.PCFShadowMap;
     document.getElementById('splineContainer').appendChild(renderer.domElement);
     
     // Remove the line below to keep the HDR background

@@ -17,6 +17,7 @@
 	<link rel="stylesheet" type="text/css" href="cssFiles/chat.css">
 	<link rel="stylesheet" type="text/css" href="cssFiles/friends.css">
 	<link rel="stylesheet" type="text/css" href="cssFiles/notifications.css">
+	<link rel="stylesheet" type="text/css" href="cssFiles/history.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P|VT323|Nova+Square&display=swap">
 	<script type="importmap">
 		{
@@ -69,8 +70,8 @@
 	</div>
     <nav>
         <a href="#home" data-section="home" class="neonText">Home</a>
+		<a href="#history" data-section="history" class="neonText">History</a>
         <a href="#play" data-section="play" class="neonText">Play</a>
-        <!-- <a href="#tournaments" data-section="tournaments" class="neonText">Tournaments</a> -->
         <a href="#statistiques" data-section="statistics" class="neonText">Statistics</a>
         <a href="#connexion" data-section="connexion" class="neonText">Connexion</a>
 		<a href="#profile" data-section="profile" class="neonText">Account</a>
@@ -122,6 +123,38 @@
         <div id="splineContainer">
         </div>
     </section>
+	<section id="history" class="history-section">
+		<div class="history-wrapper"> <!-- New wrapper div -->
+			<div class="match_history_container">
+				<div class="history_title">
+					<h2>HISTORY</h2>
+				</div>
+				<!-- List of Old Matches -->
+				<div id="game_1" class="game lost" onclick="selectMatch('lost', '10-15')">
+					<p>Match 1</p>
+				</div>
+				<div id="game_2" class="game won" onclick="selectMatch('won', '15-5')">
+					<p>Match 2</p>
+				</div>
+				<div id="game_3" class="game lost" onclick="selectMatch('lost', '8-15')">
+					<p>Match 3</p>
+				</div>
+				<!-- Add more matches as needed -->
+			</div>
+	
+			<div class="current_match_selected_info">
+				<h3>Match Details</h3>
+				<p id="match_status">Select a match to see details.</p>
+				<p id="match_score"></p>
+			</div>
+		</div>
+		<script>
+			function selectMatch(status, score) {
+				document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
+				document.getElementById('match_score').innerText = `Score: ${score}`;
+			}
+		</script>
+	</section>
     <section id="tournaments" class="tournaments-section">
 		<h3 class="tournament_desc">Compete in the very first game ever with enhanced graphics and maybe win the Tournament !!</h3>
         <div class="bracket">
@@ -153,8 +186,8 @@
 		<div class="bento-stats-container">
             <!-- Skills section -->
 			<!-- Hours Played Section with a Neon-Styled Chart -->
-<div class="box hours-played" style="background-color: #1a1a1a; padding: 20px; border-radius: 10px;">
-    <h2 style="color: #39ff14;">Hours Played</h2>
+<div class="box hours-played">
+    <h2 style="color: #ef14ff;">Hours Played</h2>
     <canvas id="hoursPlayedChart"></canvas>
 </div>
 
