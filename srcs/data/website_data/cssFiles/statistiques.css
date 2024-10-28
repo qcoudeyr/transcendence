@@ -107,7 +107,7 @@
 
 .box.skills-mastered {
     grid-column: span 1;
-    grid-row: span 1;
+    grid-row: span 2;
 }
 
 .box.skills ul,
