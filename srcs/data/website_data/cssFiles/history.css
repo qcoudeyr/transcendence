@@ -2,11 +2,14 @@
 .history-section {
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Changed from center to align tops */
+    align-items: flex-start; /* Align tops */
     gap: 2em;
     padding: 2em;
     flex-wrap: nowrap;
-    min-width: 500px; /* Ensure minimum width to fit both containers */
+    width: 100%;
+    max-width: 800px; /* Adjust as needed */
+    margin: 0 auto;
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
 }
 
 /* Styling for Match History Container */
@@ -19,10 +22,10 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
     text-align: center;
-    width: 180px; /* Slightly reduced from 200px */
+    width: 180px; /* Width of match history container */
     max-height: 300px;
     overflow-y: auto;
-    flex-shrink: 0; /* Prevents shrinking in flex layout */
+    flex: 0 0 auto; /* Prevent shrinking and growing */
 }
 
 /* Styling for Individual Games */
@@ -60,10 +63,10 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
     text-align: center;
-    width: 280px; /* Slightly reduced from 300px */
+    width: 280px; /* Width of match details container */
     min-height: 200px;
     transition: all 0.2s ease-in-out;
-    flex-shrink: 0; /* Prevents shrinking in flex layout */
+    flex: 0 0 auto; /* Prevent shrinking and growing */
 }
 
 .current_match_selected_info h3 {
@@ -76,16 +79,4 @@
     font-size: 1.2em;
 }
 
-/* Media query for smaller screens */
-@media (max-width: 600px) {
-    .history-section {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .match_history_container,
-    .current_match_selected_info {
-        width: 90%; /* Full width on small screens */
-        max-width: 300px; /* Maximum width for better readability */
-    }
-}
+/* Media query for smaller screens - removed to force side by side */
