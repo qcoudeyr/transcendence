@@ -1,7 +1,11 @@
 /* General styling for the History Section */
 .history-section {
-    padding: 2em;
-    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 10px;
+    font-family: 'DM Sans', sans-serif;
+    background-color: #ff000000;
 }
 
 /* New wrapper for the match history and current match info */
