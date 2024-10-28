@@ -13,10 +13,11 @@ import ssl
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
-from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.routing import ProtocolTypeRouter, URLRouter, ChannelNameRouter
 from django_channels_jwt.middleware import JwtAuthMiddlewareStack
 
 from events.routing import websocket_urlpatterns
+from events.tasks import GameConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'transcendence.settings')
 
@@ -28,6 +29,9 @@ application = ProtocolTypeRouter(
         "websocket": AllowedHostsOriginValidator(
             JwtAuthMiddlewareStack(URLRouter(websocket_urlpatterns))
         ),
+        "channel": ChannelNameRouter({
+            "game-server": GameConsumer.as_asgi(),
+        })
     }
 )
 

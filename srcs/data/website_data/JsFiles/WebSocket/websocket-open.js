@@ -1,8 +1,12 @@
 import { displayChatMessage } from "./chatDisplay.js";
 import { friendRequestReceive, friendRequestRemoveDiv } from "./friendRequests.js"
-import { displayFriendList, removeFriend } from "./friendDisplay.js";
+import { displayFriendList, removeReceivedFriend } from "./friendDisplay.js";
 import { displayPrivateMessage } from "./chatSend.js";
 import { friendRequestNotification } from "./notifications-displays.js";
+import { removeFriendFromGroup, removeGroupRequest, groupRequestRevieve, displayGroupList } from "./groupRequests.js";
+import { gameEnd } from "./Game/gameStartAndEnd.js"
+import { mooveBall } from "./Game/ballMovement.js"
+import { showPlayingSection } from "../Modules/navigation.js";
 
 let socket;
 
@@ -39,15 +43,18 @@ export function websocketConnect()
 }
 
 function openWebsocket(socketurl){
-	console.log('[Websocket] Connecting...');
+	console.log('\x1b[33m[Websocket] Connecting..\x1b[0m');
 	socket = new WebSocket(socketurl);
 	socket.onopen = function(e) {
-		console.log("[WebSocket] Connection established !");
+		console.log("\x1b[34m[WebSocket] Connection established !\x1b[0m");
 		socket.send(JSON.stringify({
             'type': 'friend_list',
         }));
 		socket.send(JSON.stringify({
             'type': 'friend_request_list',
+        }));
+		socket.send(JSON.stringify({
+            'type': 'group_list',
         }));
 	};
 	socket.onmessage = function(event) {
@@ -79,7 +86,35 @@ function openWebsocket(socketurl){
 			}
 			if (content.type === 'friend_remove')
 			{
-				removeFriend(content.profile_id);
+				removeReceivedFriend(content.profile_id);
+			}
+			if(content.type === 'group_request')
+			{
+				groupRequestRevieve(content.profile_id, content.name, content.avatar);
+			}
+			if(content.type === 'group_member')
+			{
+				displayGroupList(content.name, content.profile_id, content.avatar);
+			}
+			if(content.type === 'group_request_remove')
+			{
+				removeGroupRequest(content.profile_id);
+			}
+			if(content.type === 'group_member_remove')
+			{
+				removeFriendFromGroup(content.profile_id);
+			}
+			if(content.type === 'game_start')
+			{
+				showPlayingSection();
+			}
+			if(content.type === 'game_end')
+			{
+				gameEnd();
+			}
+			if(content.type === 'game_object')
+			{
+				mooveBall(content.object, content.x, content.y, content.z);
 			}
 		}
 	}

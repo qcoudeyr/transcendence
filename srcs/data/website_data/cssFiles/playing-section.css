@@ -1,13 +1,19 @@
 #splineContainer {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	overflow: hidden;
-  }
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: rgba(255, 0, 0, 0.5); /* Visible background */
+}
+
+
+canvas {
+    border: 1px solid #000; /* Ensure canvas has a border for visibility */
+}
   
   .playing-section {
 	position: relative;
@@ -17,57 +23,7 @@
 	justify-content: center;
 	align-items: center;
   }
-  
-  #resizeButton {
-	position: fixed;
-	bottom: 10px;
-	left: 10px;
-	background: #e230b8;
-	box-shadow: 0 0 5px #e230b8, 0 0 8px #e230b8;
-	line-height: 42px;
-	padding: 0;
-	border: none;
-	z-index: 2;
-	-webkit-transition: all 0.3s linear;
-	transition: all 0.3s linear;
-	color: #ff00a0;
-  }
-  
-  #resizeButton:hover {
-	background-color: transparent;
-	color: #e230b8;
-	box-shadow: 0 5px 3px -3px #e230b8, 0 -5px 3px -3px #e230b8,
-		0 5px 3px -3px #e230b8, 0 -5px 3px -3px #e230b8;
-  }
-  
-  #resizeButton:before,
-  #resizeButton:after {
-	position: absolute;
-	content: "";
-	left: 0;
-	width: 100%;
-	height: 50%;
-	right: 0;
-	z-index: -1;
-	background: #e230b8;
-	box-shadow: 0 0 5px #e230b8;
-	transition: all 0.3s ease;
-  }
-  
-  #resizeButton:before {
-	top: 0;
-  }
-  
-  #resizeButton:after {
-	bottom: 0;
-  }
-  
-  #resizeButton:hover:before,
-  #resizeButton:hover:after {
-	height: 0;
-	background-color: #e230b8a4;
-  }
-  
+
   /* Scoreboard styling */
   
   .scoreboard {

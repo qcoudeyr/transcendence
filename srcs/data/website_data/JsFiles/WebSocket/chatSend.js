@@ -34,7 +34,6 @@ export function chatSend(profile_id) {
 }
 
 export function messageFriend(profile_id) {
-    console.log(`Messaging friend with profile_id: ${profile_id}`);
 
     // Set currentProfileId to the friend's profile_id
     currentProfileId = profile_id;

@@ -1,95 +1,139 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-// main.js
+import { isUnloaded } from '../Modules/navigation.js';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import { getWebsocket } from '../WebSocket/websocket-open.js';
 
 let scene, camera, renderer, controls, animationId;
+const geometry = new THREE.SphereGeometry(0.1, 32, 32);
+
+// Create a material for the ball with realistic properties
+const material = new THREE.MeshStandardMaterial({
+    color: 0xFB00BE,
+    roughness: 0.3,  // Adjust for a bit of glossiness
+    metalness: 0.5,  // Increased metallic property
+});
+const ball = new THREE.Mesh(geometry, material);
+
+const radius = 0.12;          
+const length = 0.3;          
+const radialSegments = 2; 
+
+const capsuleGeometry = new THREE.CapsuleGeometry(radius, length, radialSegments);
+const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
+
+const pad0 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
+const pad1 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
+
 let sceneLoaded = false;
 
-function initScene() {
-  // Initialize the camera
-  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(-2.82, 1.11, 15.26);
-  camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
-
-  // Create the scene
-  scene = new THREE.Scene();
-
-  const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Bright white light, intensity 1.5
-	scene.add(ambientLight);
-
-//   const light = new THREE.RectAreaLight(0xff0000, 1, 100, 100);
-//   light.position.set(680, 220, -200);
-//   light.rotation.x = THREE.MathUtils.degToRad(0);
-//   scene.add(light);
-
-  const cubed = new THREE.BoxGeometry(50, 50, 50);
-  const basic = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
-  const basicred = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-  const basicpink = new THREE.MeshBasicMaterial({ color: 0xff00f9 });
-  const cube1 = new THREE.Mesh(cubed, basic);
-  scene.add(cube1);
-
-  cube1.position.x = -3200.50;
-  cube1.position.y = 1000;
-
-  const cube3 = new THREE.Mesh(cubed, basicred);
-  const geoffrey = new THREE.Mesh(cubed, basicpink);
-  scene.add(geoffrey);
-  scene.add(cube3);
-
-  geoffrey.position.x = -320;
-  geoffrey.position.y = 100;
-
-  cube3.position.x = 0;
-  cube3.position.y = 250;
-
-  // Load GLTF model
-  const gltfLoader = new GLTFLoader();
-  gltfLoader.load(
-    '../Cyberpunkv2.glb',
-    (gltf) => {
-      scene.add(gltf.scene);
-      gltf.scene.position.set(0, 0, 0);
-      gltf.scene.scale.set(0.1, 0.1, 0.1);
-    },
-    (xhr) => {
-      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    },
-    (error) => {
-      console.error('An error happened during GLTF loading:', error);
-    }
-  );
-
-  // Set up the renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
-  document.getElementById('splineContainer').appendChild(renderer.domElement);
-
-  // Set the background color of the scene
-  scene.background = new THREE.Color('#22202e');
-
-  // Set up orbit controls
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.125;
-
-  // Resize handler to adjust the scene on window resize
-  window.addEventListener('resize', onWindowResize);
-
-  // Animation loop to render the scene
-  function animate() {
-    animationId = requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  sceneLoaded = true;
-  console.log("Scene loaded");
+export function getScene() {
+    return scene;
 }
+
+export function getBall() {
+    return ball;
+}
+
+export function initScene() {
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(-2.82, 1.11, 15.26);
+    camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
+
+    scene = new THREE.Scene();
+    ball.position.y = 0.15;
+    pad0.position.set(5, 0.15, 0);
+    pad0.rotation.set(Math.PI / 2, 0, 0); 
+    pad1.position.set(-5, 0.15, 0);
+    pad1.rotation.set(Math.PI / 2, 0, 0); 
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Increased intensity
+    scene.add(ambientLight);
+    const directionalLight2 = new THREE.DirectionalLight(0x0b4774, 1); // Cooler light
+    directionalLight2.position.set(-5, 10, -7);
+    directionalLight2.castShadow = true;
+    directionalLight2.shadow.mapSize.width = 2048;
+    directionalLight2.shadow.mapSize.height = 2048;
+    scene.add(directionalLight2);
+    scene.add(ball);
+    scene.add(pad1);
+    scene.add(pad0);
+
+    // Load GLTF model
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load(
+        '../Cyberpunkv2.glb',
+        (gltf) => {
+            scene.add(gltf.scene);
+            gltf.scene.position.set(0, 0, 0);
+            gltf.scene.scale.set(0.1, 0.1, 0.1);
+
+            gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;  
+                    child.receiveShadow = true;
+                }
+            });
+
+            // Example of setting emissive properties
+            gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                    if (child.name === "YourEmissivePartName") {
+                        child.material.emissive = new THREE.Color(0xFF0000); 
+                        child.material.emissiveIntensity = 1.0; 
+                    }
+                }
+            });
+        },
+        (xhr) => {
+            const loadPercentage = (xhr.loaded / xhr.total) * 100;
+        	console.log(loadPercentage + '% loaded');
+
+        if (loadPercentage === 100) {
+            let socket = getWebsocket();
+			socket.send(JSON.stringify({
+				'type': 'game_ready',
+			}));
+        }
+        },
+        (error) => {
+            console.error('An error happened during GLTF loading:', error);
+        }
+    );
+
+    // HDR Environment Map (use an appropriate HDR texture)
+    const hdrLoader = new RGBELoader();
+    hdrLoader.load('../test.hdr', (texture) => {
+        texture.mapping = THREE.EquirectangularReflectionMapping; // Use reflection mapping
+        scene.background = texture; // Set background to HDR texture
+        scene.environment = texture; // Set environment for realistic reflections
+    });
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.PCFShadowMap;
+    document.getElementById('splineContainer').appendChild(renderer.domElement);
+    
+    // Remove the line below to keep the HDR background
+    // scene.background = new THREE.Color('#22202e'); // Remove or comment this line
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.125;
+
+    function animate() {
+        animationId = requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    sceneLoaded = true;
+    console.log("Scene loaded");
+}
+
+// ... rest of your code remains the same
 
 function onWindowResize() {
   if (!document.getElementById('splineContainer').classList.contains('small') &&
@@ -104,7 +148,7 @@ function unloadScene() {
   if (scene) {
     // Remove all objects from the scene
     while(scene.children.length > 0) { 
-      scene.remove(scene.children[0]); 
+      scene.remove(scene.children[0]);
     }
 
     // Dispose of geometries and materials
@@ -141,6 +185,7 @@ function unloadScene() {
     animationId = null;
 
     sceneLoaded = false;
+	isUnloaded();
     console.log("Scene unloaded");
   }
 }
@@ -157,27 +202,6 @@ function enableNavBar() {
 	document.querySelector('nav').style.display = 'block';
 }
 
-function checkHash() {
-	if (window.location.hash === '#goodbye') {
-		disableNavBar();
-	}
-    if (window.location.hash === '#playing') {
-        if (!isSceneLoaded()) {
-            initScene();
-			disableNavBar();
-        }
-    } 
-	else {
-        if (isSceneLoaded()) {
-            unloadScene();
-        }
-    }
-}
-
-window.addEventListener('load', checkHash);
-window.addEventListener('hashchange', checkHash);
-
-
 // Function to navigate to the home section
 function goHome() {
     window.location.hash = 'home'; // Redirects to the home section
@@ -185,7 +209,6 @@ function goHome() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM fully loaded and parsed');
   const unloadButton = document.getElementById('unloadButton');
   if (unloadButton) {
     unloadButton.addEventListener('click', () => {

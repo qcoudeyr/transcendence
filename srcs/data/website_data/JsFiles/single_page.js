@@ -1,7 +1,8 @@
-import { navigateToSection, changePages, switchProfileSection, updateNavbar, playButtonSetup, hidePreloaderAfterLoad } from './Modules/navigation.js';
+import { navigateToSection, changePages, switchProfileSection, playButtonSetup, updateNavbar, hidePreloaderAfterLoad } from './Modules/navigation.js';
 import { setupLogin, setupRegister } from './Modules/API/auth.js';
 import { getMailAndUsername, getNameBioAndAvatar } from './Modules/API/getProfileInfo.js';
 import { websocketConnect } from './WebSocket/websocket-open.js';
+// import { checkToken } from './Modules/API/auth.js';
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -22,8 +23,14 @@ document.addEventListener("DOMContentLoaded", function () {
 	switchProfileSection(profileLinks, profileSections);
 
 	// Update navbar and handle play button
+	// if (localStorage.getItem()) {
+	// 	checkToken();
+	// }
+	const playButton = document.getElementById("playButton");
+    playButton.addEventListener("click", function () {
+        playButtonSetup(clickSound); // Pass clickSound if necessary
+    });
 	updateNavbar();
-	playButtonSetup();
 	// Set up auth forms
 	setupLogin();
 	setupRegister();

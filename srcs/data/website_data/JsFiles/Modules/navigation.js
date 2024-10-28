@@ -1,3 +1,6 @@
+import { initScene } from "../3d/3d.js";
+import { getWebsocket } from "../WebSocket/websocket-open.js";
+
 export function navigateToSection(sections, links) {
 	function navigate(sectionId) {
 	  sections.forEach((section) => {
@@ -49,7 +52,8 @@ export function navigateToSection(sections, links) {
 	const connexionLink = document.querySelector('a[data-section="connexion"]');
 	const profileLink = document.querySelector('a[data-section="profile"]');
 	const playlink = document.querySelector('a[data-section="play"]');
-	const tournamentlink = document.querySelector('a[data-section="tournaments"]');
+	const history = document.querySelector('a[data-section="distory"]');
+	// const tournamentlink = document.querySelector('a[data-section="tournaments"]');
 	const statslink = document.querySelector('a[data-section="statistics"]');
 	const chatContainer = document.querySelector('.chat-container');
 	const chatInput = document.querySelector('.chat-input');
@@ -61,17 +65,18 @@ export function navigateToSection(sections, links) {
 		connexionLink.style.display = "none";
 		profileLink.style.display = "inline-block";
 		playlink.style.display = "inline-block";
-		tournamentlink.style.display = "inline-block";
+		// tournamentlink.style.display = "inline-block";
 		statslink.style.display = "inline-block";
 		chatContainer.style.display = "fixed";
 		chatInput.style.display = "fixed";
 		sidebar.style.display = "fixed";
 		notification.style.opacity = "fixed";
+		history.style.display = "inline-block";
 	  } else {
 		connexionLink.style.display = "inline-block";
 		profileLink.style.display = "none";
 		playlink.style.display = "none";
-		tournamentlink.style.display = "none";
+		history.style.display = "none";
 		statslink.style.display = "none";
 		chatContainer.style.display = "none";
 		chatInput.style.display = "none";
@@ -84,15 +89,38 @@ export function navigateToSection(sections, links) {
 	window.addEventListener("storage", update);
   }
   
-  export function playButtonSetup(clickSound) {
-	const playButton = document.getElementById("playButton");
-	playButton.addEventListener("click", function () {
-		window.location.hash = "#playing";
-	  	// clickSound.play();
-	  	location.reload();
-	});
-  }
+  let isInitialized = false; // Flag to prevent multiple initializations
+
+export function isUnloaded()
+{
+	isInitialized = false;
+}
+
+export function playButtonSetup(clickSound) {
+    const button = document.getElementById("playbuttontext");
+    let socket = getWebsocket();
+
+        socket.send(JSON.stringify({
+            'type': 'game_join_queue',
+            'mode': 'CLASSIC'
+        }));
+        console.log("Joining the queue");
+        button.textContent = "EXIT";
+
+    clickSound.play();
+}
   
+  export function showPlayingSection() {
+	if (isInitialized) return; // Prevent further calls
+	isInitialized = true; // Set the flag to true
+	  const sections = document.querySelectorAll("section"); // Select all sections
+	  sections.forEach((section) => {
+		section.style.display = section.id === "playing" ? "block" : "none";
+	  });
+	  document.querySelector('nav').style.display = 'none';
+	  initScene();
+	}
+
   export function hidePreloaderAfterLoad() {
         const preloader = document.getElementById('preloader');
         // Simulate loading time

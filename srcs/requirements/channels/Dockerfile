@@ -16,6 +16,8 @@ COPY tools/remove_migrations.sh /usr/local/bin/remove_migrations.sh
 RUN chmod +x /usr/local/bin/remove_migrations.sh
 COPY tools/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
+COPY tools/start.sh /usr/local/bin/start_worker.sh
+RUN chmod +x /usr/local/bin/start_worker.sh
 
 # Run daphne
 CMD ["start.sh"]

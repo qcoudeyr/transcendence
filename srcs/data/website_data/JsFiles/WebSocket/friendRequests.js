@@ -22,9 +22,7 @@ function friendRequestSend() {
 			'type': 'friend_request',
 			'profile_id': profileId
 		}));
-		console.log(message);
 		messageInputDom.value = '';
-		console.log('Friend request sent.');
 }
 
 
@@ -128,9 +126,7 @@ function handleFriendRequestResponse(request_id, isAccepted) {
         'request_id': request_id
     }));
 
-    friendRequestRemoveDiv(request_id);
 
-    console.log(`Friend request ${isAccepted ? 'accepted' : 'rejected'} for request_id: ${request_id}`);
 }
 
 export function friendRequestRemoveDiv(request_id){
