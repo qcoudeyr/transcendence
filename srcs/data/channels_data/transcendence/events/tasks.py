@@ -148,7 +148,7 @@ class GameConsumer(AsyncConsumer):
                 await players_send_object(player_ids, pad_0, 'PAD_0')
                 await players_send_object(player_ids, pad_1, 'PAD_1')
 
-                time.sleep(0.001)
+                time.sleep(0.003)
 
         # Send game results (as frame message ?)
         # Update profiles status and player things (is_game_ready, movement...)
