@@ -73,6 +73,14 @@ async def players_send_object(player_ids, object, name):
 
 class GameConsumer(AsyncConsumer):
     async def classic_game(self, player_ids):
+        await channel_layer.group_send(
+            "general_chat",
+            {
+                'type': 'send.chat.message',
+                'name': '[server]',
+                'message': 'balise 5',
+            }
+        )
         if len(player_ids) != 2:
             return
         # Game objects
