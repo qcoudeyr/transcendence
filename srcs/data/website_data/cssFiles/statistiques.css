@@ -57,13 +57,13 @@
 .box.total-wins {
     grid-column: span 2;
     grid-row: span 1;
-    background: rgba(
+    /* background: rgba(
         0,
         150,
         255,
         0.7
     ); /* Distinct color for the Projects box */
-    border: 2px solid rgba(0, 100, 200, 0.8); /* Border for emphasis */
+    /* border: 2px solid rgba(0, 100, 200, 0.8); Border for emphasis */
     transition: background 0.3s ease; /* Transition effect */
 	box-shadow: 0 0 30px rgba(0, 225, 255, 0.6);
 }
@@ -81,27 +81,29 @@
 .box.games-played {
     grid-column: span 1;
     grid-row: span 1;
-    background: rgba(
+    /* background: rgba(
         0,
         150,
         255,
         0.7
     ); /* Distinct color for the Projects box */
-    border: 2px solid rgba(0, 100, 200, 0.8); /* Border for emphasis */
-    transition: background 0.3s ease; /* Transition effect */
+    /* border: 2px solid rgba(0, 100, 200, 0.8); Border for emphasis */
+    /* transition: background 0.3s ease; Transition effect */
+	box-shadow: 0 0 30px rgba(0, 225, 255, 0.6);
 }
 
 .box.play-time {
     grid-column: span 1;
     grid-row: span 1;
-    background: rgba(
+	box-shadow: 0 0 30px rgba(0, 225, 255, 0.6);
+    /* background: rgba(
         0,
         150,
         255,
         0.7
-    ); /* Distinct color for the Projects box */
-    border: 2px solid rgba(0, 100, 200, 0.8); /* Border for emphasis */
-    transition: background 0.3s ease; /* Transition effect */
+    ); Distinct color for the Projects box */
+    /* border: 2px solid rgba(0, 100, 200, 0.8); Border for emphasis */
+    /* transition: background 0.3s ease; Transition effect */
 }
 
 .box.skills-mastered {
