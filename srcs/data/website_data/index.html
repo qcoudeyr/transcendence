@@ -154,8 +154,51 @@
             <!-- Skills section -->
 			<div class="box hours-played">
 				<h2>Hours Played</h2>
-				<p>250+ Hours</p>
+				<canvas id="hoursPlayedChart"></canvas>
 			</div>
+			
+			<!-- Include Chart.js (via CDN) -->
+			<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+			
+			<!-- Script for the Chart -->
+			<script>
+				const ctx = document.getElementById('hoursPlayedChart').getContext('2d');
+				const hoursPlayedChart = new Chart(ctx, {
+					type: 'bar',
+					data: {
+						labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+						datasets: [{
+							label: 'Hours Played',
+							data: [20, 30, 50, 40, 60, 80, 90, 75, 85, 70, 55, 65], // Example data for each month
+							backgroundColor: 'rgba(54, 162, 235, 0.5)',
+							borderColor: 'rgba(54, 162, 235, 1)',
+							borderWidth: 1
+						}]
+					},
+					options: {
+						scales: {
+							y: {
+								beginAtZero: true,
+								title: {
+									display: true,
+									text: 'Hours'
+								}
+							},
+							x: {
+								title: {
+									display: true,
+									text: 'Months'
+								}
+							}
+						},
+						plugins: {
+							legend: {
+								display: false // Hides legend if only one dataset
+							}
+						}
+					}
+				});
+			</script>
 			
 			<div class="box total-wins">
 				<h2>Total Wins</h2>
