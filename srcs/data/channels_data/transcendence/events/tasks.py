@@ -140,7 +140,8 @@ class GameConsumer(AsyncConsumer):
                 # Apply physic (set new positions)
                 if ball.x >= MAP_LENGTH / 2 or ball.x <= -MAP_LENGTH / 2:
                     direction *= -1
-                ball.x += direction
+                last_time = time.time()
+                ball.x += direction * speed * (last_time - new_time)
 
                 new_time = time.time()
                 tick_count += 1
