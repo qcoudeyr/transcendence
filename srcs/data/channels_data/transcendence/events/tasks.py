@@ -129,9 +129,10 @@ class GameConsumer(AsyncConsumer):
             round_continue = True
             direction = 1
             speed = 5
-            time_start = time.time()
+            tick = 1.0
+            tick_count = 0
+            start_time = time.time()
             while (round_continue):
-                time_end = time.time()
                 # Set pads positions
                 # pad_0.set_position()
                 # pad_1.set_position()
@@ -139,16 +140,21 @@ class GameConsumer(AsyncConsumer):
                 # Apply physic (set new positions)
                 if ball.x >= MAP_LENGTH / 2 or ball.x <= -MAP_LENGTH / 2:
                     direction *= -1
-                time_delta = time_end - time_start
-                time_start = time.time()
-                ball.x += direction * speed * time_delta
+                ball.x += direction
+
+                new_time = time.time()
+                tick_count += 1
+                targeted_time = start_time + tick*tick_count
+
+                time_to_wait = targeted_time - new_time
+
+                if time_to_wait > 0:
+                    await asyncio.sleep(time_to_wait)
 
                 # Send objects position
                 await players_send_object(player_ids, ball, 'BALL')
                 # await players_send_object(player_ids, pad_0, 'PAD_0')
                 # await players_send_object(player_ids, pad_1, 'PAD_1')
-
-                await asyncio.sleep(0.05)
 
         # Send game results (as frame message ?)
         # Update profiles status and player things (is_game_ready, movement...)
