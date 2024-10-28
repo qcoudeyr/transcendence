@@ -1,7 +1,11 @@
+import time
+import asyncio
+
 from celery import shared_task
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-import time
+from channels.consumer import AsyncConsumer
+from channels.db import database_sync_to_async
 
 from profiles.models import Profile
 
@@ -24,7 +28,7 @@ class Ball(GameObject):
         super().__init__(0, 0, 0)
         self.radius = radius
 
-    def set_default(self):
+    async def set_default(self):
         self.x = 0
         self.y = GAME_HEIGHT
         self.z = 0
@@ -36,6 +40,7 @@ class Pad(GameObject):
         super().__init__(0, 0, 0)
         self.length = PAD_LENGTH
 
+    @database_sync_to_async
     def set_default(self):
         if self.pad_id == 0:
             self.x = MAP_LENGTH / 2
@@ -50,15 +55,15 @@ class Pad(GameObject):
         player.pad_z = self.z
         player.save(update_fields=['pad_x', 'pad_y', 'pad_z'])
 
-def players_broadcast(player_ids, event):
+async def players_broadcast(player_ids, event):
     for player_id in player_ids:
-        async_to_sync(channel_layer.group_send)(
+        await channel_layer.group_send(
             "notifications_" + str(player_id),
             event
         )
 
-def players_send_object(player_ids, object, name):
-    players_broadcast(player_ids, {
+async def players_send_object(player_ids, object, name):
+    await players_broadcast(player_ids, {
         'type': 'send.game.object',
         'object': name,
         'x': object.x,
@@ -66,74 +71,147 @@ def players_send_object(player_ids, object, name):
         'z': object.z,
     })
 
-@shared_task
-def classic_game(player_ids):
-    if len(player_ids) != 2:
-        return
-    # Game objects
-    ball = Ball(BALL_RADIUS)
-    pad_0 = Pad(player_ids[0], 0)
-    pad_1 = Pad(player_ids[1], 1)
+class GameConsumer(AsyncConsumer):
+    async def classic_game(self, player_ids):
+        if len(player_ids) != 2:
+            return
+        # Game objects
+        ball = Ball(BALL_RADIUS)
+        pad_0 = Pad(player_ids[0], 0)
+        pad_1 = Pad(player_ids[1], 1)
 
-    ball.set_default()
-    pad_0.set_default()
-    pad_1.set_default()
+        await ball.set_default()
+        await pad_0.set_default()
+        await pad_1.set_default()
 
-    # Send game start
-    players_broadcast(player_ids, {'type': 'send.game.start'})
+        # Send game start
+        await players_broadcast(player_ids, {'type': 'send.game.start'})
 
-    # Wait for players
-    players_ready = False
-    while (not players_ready):
-        players_ready = True
-        for player_id in player_ids:
-            player = Profile.objects.get(pk=player_id)
-            if not player.is_game_ready:
-                players_ready = False
+        # Wait for players
+        players_ready = False
+        while (not players_ready):
+            players_ready = True
+            for player_id in player_ids:
+                player = await database_sync_to_async(Profile.objects.get)(pk=player_id)
+                if not player.is_game_ready:
+                    players_ready = False
 
-        time.sleep(0.1)
+            await asyncio.sleep(0.1)
 
-    game_continue = True
-    while (game_continue):
-        # Set and send objects initial position
-        ball.set_default()
-        pad_0.set_default()
-        pad_1.set_default()
-        players_send_object(player_ids, ball, 'BALL')
-        players_send_object(player_ids, pad_0, 'PAD_0')
-        players_send_object(player_ids, pad_1, 'PAD_1')
+        game_continue = True
+        while (game_continue):
+            # Set and send objects initial position
+            await ball.set_default()
+            await pad_0.set_default()
+            await pad_1.set_default()
+            await players_send_object(player_ids, ball, 'BALL')
+            await players_send_object(player_ids, pad_0, 'PAD_0')
+            await players_send_object(player_ids, pad_1, 'PAD_1')
 
-        # Send round start
-        # for i in range(3, 0, -1):
-        #     players_broadcast(player_ids, {'type': 'send.frame.message', 'message': str(i)})
-        #     time.sleep(1)
-        # players_broadcast(player_ids, {'type': 'send.frame.message', 'message': 'Fight !'})
+            # Send round start
+            # for i in range(3, 0, -1):
+            #     players_broadcast(player_ids, {'type': 'send.frame.message', 'message': str(i)})
+            #     time.sleep(1)
+            # players_broadcast(player_ids, {'type': 'send.frame.message', 'message': 'Fight !'})
 
-        round_continue = True
-        direction = 1
-        speed = 5
-        time_start = time.time()
-        while (round_continue):
-            time_end = time.time()
-            # Set pads positions
-            # pad_0.set_position()
-            # pad_1.set_position()
-
-            # Apply physic (set new positions)
-            if ball.x >= MAP_LENGTH / 2 or ball.x <= -MAP_LENGTH / 2:
-                direction *= -1
-            time_delta = time_end - time_start
+            round_continue = True
+            direction = 1
+            speed = 5
             time_start = time.time()
-            ball.x += direction * speed * time_delta
+            while (round_continue):
+                time_end = time.time()
+                # Set pads positions
+                # pad_0.set_position()
+                # pad_1.set_position()
 
-            # Send objects position
-            players_send_object(player_ids, ball, 'BALL')
-            players_send_object(player_ids, pad_0, 'PAD_0')
-            players_send_object(player_ids, pad_1, 'PAD_1')
+                # Apply physic (set new positions)
+                if ball.x >= MAP_LENGTH / 2 or ball.x <= -MAP_LENGTH / 2:
+                    direction *= -1
+                time_delta = time_end - time_start
+                time_start = time.time()
+                ball.x += direction * speed * time_delta
 
-            time.sleep(0.001)
+                # Send objects position
+                await players_send_object(player_ids, ball, 'BALL')
+                await players_send_object(player_ids, pad_0, 'PAD_0')
+                await players_send_object(player_ids, pad_1, 'PAD_1')
 
-    # Send game results (as frame message ?)
-    # Update profiles status and player things (is_game_ready, movement...)
-    # Send game end
-    # Save game history
+                time.sleep(0.001)
+
+        # Send game results (as frame message ?)
+        # Update profiles status and player things (is_game_ready, movement...)
+        # Send game end
+        # Save game history
+
+
+# @shared_task
+# def classic_game(player_ids):
+#     if len(player_ids) != 2:
+#         return
+#     # Game objects
+#     ball = Ball(BALL_RADIUS)
+#     pad_0 = Pad(player_ids[0], 0)
+#     pad_1 = Pad(player_ids[1], 1)
+
+#     ball.set_default()
+#     pad_0.set_default()
+#     pad_1.set_default()
+
+#     # Send game start
+#     players_broadcast(player_ids, {'type': 'send.game.start'})
+
+#     # Wait for players
+#     players_ready = False
+#     while (not players_ready):
+#         players_ready = True
+#         for player_id in player_ids:
+#             player = Profile.objects.get(pk=player_id)
+#             if not player.is_game_ready:
+#                 players_ready = False
+
+#         time.sleep(0.1)
+
+#     game_continue = True
+#     while (game_continue):
+#         # Set and send objects initial position
+#         ball.set_default()
+#         pad_0.set_default()
+#         pad_1.set_default()
+#         players_send_object(player_ids, ball, 'BALL')
+#         players_send_object(player_ids, pad_0, 'PAD_0')
+#         players_send_object(player_ids, pad_1, 'PAD_1')
+
+#         # Send round start
+#         # for i in range(3, 0, -1):
+#         #     players_broadcast(player_ids, {'type': 'send.frame.message', 'message': str(i)})
+#         #     time.sleep(1)
+#         # players_broadcast(player_ids, {'type': 'send.frame.message', 'message': 'Fight !'})
+
+#         round_continue = True
+#         direction = 1
+#         speed = 5
+#         time_start = time.time()
+#         while (round_continue):
+#             time_end = time.time()
+#             # Set pads positions
+#             # pad_0.set_position()
+#             # pad_1.set_position()
+
+#             # Apply physic (set new positions)
+#             if ball.x >= MAP_LENGTH / 2 or ball.x <= -MAP_LENGTH / 2:
+#                 direction *= -1
+#             time_delta = time_end - time_start
+#             time_start = time.time()
+#             ball.x += direction * speed * time_delta
+
+#             # Send objects position
+#             players_send_object(player_ids, ball, 'BALL')
+#             players_send_object(player_ids, pad_0, 'PAD_0')
+#             players_send_object(player_ids, pad_1, 'PAD_1')
+
+#             time.sleep(0.001)
+
+#     # Send game results (as frame message ?)
+#     # Update profiles status and player things (is_game_ready, movement...)
+#     # Send game end
+#     # Save game history

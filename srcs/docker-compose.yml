@@ -157,7 +157,8 @@ services:
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
     entrypoint: ["/vault/entrypoint/entrypoint.sh"]
-    command: "celery -A transcendence worker -l INFO"
+    # command: "celery -A transcendence worker -l INFO"
+    command: "python manage.py runworker game-server"
 
 #####################
 ########REDIS########
