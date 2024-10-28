@@ -1,12 +1,15 @@
 /* General styling for the History Section */
 .history-section {
+    padding: 2em;
+    width: 100%;
+}
+
+/* New wrapper for the match history and current match info */
+.history-wrapper {
     display: flex;
     justify-content: center;
     align-items: flex-start;
     gap: 2em;
-    padding: 2em;
-    width: 100%;
-    min-width: 500px; /* Minimum width to accommodate both containers */
     overflow-x: auto; /* Allow horizontal scrolling if needed */
 }
 
@@ -20,10 +23,9 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
     text-align: center;
-    width: 180px;
+    width: 180px; /* Width of match history container */
     max-height: 300px;
     overflow-y: auto;
-    flex: 0 0 180px; /* Fixed width, no growing or shrinking */
 }
 
 /* Styling for Individual Games */
@@ -61,31 +63,21 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
     text-align: center;
-    width: 280px;
+    width: 280px; /* Width of match details container */
     min-height: 200px;
-    transition: all 0.2s ease-in-out;
-    flex: 0 0 280px; /* Fixed width, no growing or shrinking */
+}
+
+/* Ensure text color is visible */
+.history-section,
+.match_history_container,
+.current_match_selected_info {
+    color: #fff; /* Text color for visibility */
 }
 
 .current_match_selected_info h3 {
-    color: #fff;
     font-size: 1.5em;
 }
 
 .current_match_selected_info p {
-    color: #fff;
     font-size: 1.2em;
 }
-
-/* Ensure text color is visible */
-.history-section, .match_history_container, .current_match_selected_info {
-    color: #fff;
-}
-
-/* Additional styling for the history title */
-.history_title h2 {
-    margin-top: 0;
-    color: #fff;
-}
-
-/* Ensure the body allows for the full width of the history section */

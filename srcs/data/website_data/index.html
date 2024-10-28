@@ -124,35 +124,36 @@
         </div>
     </section>
 	<section id="history" class="history-section">
-		<div class="match_history_container">
-			<div class="history_title">
-				<h2>HISTORY</h2>
+		<div class="history-wrapper"> <!-- New wrapper div -->
+			<div class="match_history_container">
+				<div class="history_title">
+					<h2>HISTORY</h2>
+				</div>
+				<!-- List of Old Matches -->
+				<div id="game_1" class="game lost" onclick="selectMatch('lost', '10-15')">
+					<p>Match 1</p>
+				</div>
+				<div id="game_2" class="game won" onclick="selectMatch('won', '15-5')">
+					<p>Match 2</p>
+				</div>
+				<div id="game_3" class="game lost" onclick="selectMatch('lost', '8-15')">
+					<p>Match 3</p>
+				</div>
+				<!-- Add more matches as needed -->
 			</div>
-			
-			<!-- List of Old Matches -->
-			<div id="game_1" class="game lost" onclick="selectMatch('lost', '10-15')">
-				<p>Match 1</p>
+	
+			<div class="current_match_selected_info">
+				<h3>Match Details</h3>
+				<p id="match_status">Select a match to see details.</p>
+				<p id="match_score"></p>
 			</div>
-			<div id="game_2" class="game won" onclick="selectMatch('won', '15-5')">
-				<p>Match 2</p>
-			</div>
-			<div id="game_3" class="game lost" onclick="selectMatch('lost', '8-15')">
-				<p>Match 3</p>
-			</div>
-			<!-- Add more matches as needed -->
-		</div>
-		
-		<div class="current_match_selected_info">
-			<h3>Match Details</h3>
-			<p id="match_status">Select a match to see details.</p>
-			<p id="match_score"></p>
 		</div>
 		<script>
 			function selectMatch(status, score) {
-    document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
-    document.getElementById('match_score').innerText = `Score: ${score}`;
-}
-			</script>
+				document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
+				document.getElementById('match_score').innerText = `Score: ${score}`;
+			}
+		</script>
 	</section>
     <section id="tournaments" class="tournaments-section">
 		<h3 class="tournament_desc">Compete in the very first game ever with enhanced graphics and maybe win the Tournament !!</h3>
