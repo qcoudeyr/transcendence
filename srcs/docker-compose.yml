@@ -185,6 +185,12 @@ services:
       context: ./requirements/elasticsearch/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
     container_name: tr_elasticsearch
     volumes:
       - ./data/credentials/elasticsearch_approle.env:/vault/config/elasticsearch_approle.env:ro
