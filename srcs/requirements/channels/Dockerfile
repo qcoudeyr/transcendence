@@ -20,4 +20,4 @@ COPY tools/start.sh /usr/local/bin/start_worker.sh
 RUN chmod +x /usr/local/bin/start_worker.sh
 
 # Run daphne
-CMD ["start.sh"]
+# CMD ["start.sh"]
