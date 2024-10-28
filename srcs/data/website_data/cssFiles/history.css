@@ -1,0 +1,80 @@
+/* General styling for the History Section */
+.history-section {
+    display: flex;
+    gap: 2em;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2em;
+}
+
+/* Styling for Match History Container */
+.match_history_container {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2em;
+    border-radius: 15px;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Title Styling */
+.history_title h2 {
+    color: #fff;
+    font-size: 2em;
+    margin-bottom: 1em;
+}
+
+/* Individual Game Styling */
+.game {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1em;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 1em;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.game:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+}
+
+/* Won and Lost Match Colors */
+.game.won {
+    color: #39ff14;
+    border-color: rgba(57, 255, 20, 0.6);
+}
+
+.game.lost {
+    color: #ff073a;
+    border-color: rgba(255, 7, 58, 0.6);
+}
+
+/* Styling for the Match Details Section */
+.current_match_selected_info {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2em;
+    border-radius: 15px;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+    text-align: center;
+    width: 300px;
+    min-height: 200px;
+    transition: all 0.2s ease-in-out;
+}
+
+.current_match_selected_info h3 {
+    color: #fff;
+    font-size: 1.5em;
+}
+
+.current_match_selected_info p {
+    color: #fff;
+    font-size: 1.2em;
+}
