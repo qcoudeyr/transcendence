@@ -129,7 +129,7 @@ class GameConsumer(AsyncConsumer):
             round_continue = True
             direction = 1
             speed = 5
-            tick = 1.0
+            tick = 0.1
             tick_count = 0
             start_time = time.time()
             while (round_continue):
