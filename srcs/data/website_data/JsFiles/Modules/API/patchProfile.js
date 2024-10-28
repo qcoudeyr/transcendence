@@ -1,4 +1,3 @@
-import { switchEditProfileForm } from "../../Pages/profile.js";
 import { getNameBioAndAvatar } from "./getProfileInfo.js";
 
 let selectedAvatarFile = null; // Global variable to store the selected avatar file
