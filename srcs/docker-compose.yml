@@ -148,6 +148,7 @@ services:
       - redis
       - postgresql
       - django
+      - channels
     environment:
       - VAULT_ADDR=http://vault:8300
       - SERVICE_NAME=channels
