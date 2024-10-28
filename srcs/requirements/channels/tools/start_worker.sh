@@ -4,4 +4,4 @@
 
 sleep 6
 
-cd /app/transcendence && python manage.py runworker game-server -v 3
+/vault/entrypoint/entrypoint.sh python manage.py runworker game-server -v 3
