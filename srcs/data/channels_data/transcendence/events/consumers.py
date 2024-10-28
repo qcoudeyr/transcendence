@@ -9,7 +9,7 @@ from django.db import transaction
 
 from profiles.models import Profile, FriendRequest, GroupRequest, Group
 from game.models import PartyQueue
-from events.tasks import classic_game
+# from events.tasks import classic_game
 
 class EventConsumer(AsyncWebsocketConsumer):
     async def connect(self):
