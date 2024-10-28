@@ -16,6 +16,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from django_channels_jwt.middleware import JwtAuthMiddlewareStack
 
 from events.routing import websocket_urlpatterns
+from events.tasks import GameConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'transcendence.settings')
 
@@ -27,5 +28,8 @@ application = ProtocolTypeRouter(
         "websocket": AllowedHostsOriginValidator(
             JwtAuthMiddlewareStack(URLRouter(websocket_urlpatterns))
         ),
+        "channel": ChannelNameRouter({
+            "game-server": GameConsumer.as_asgi(),
+        })
     }
 )

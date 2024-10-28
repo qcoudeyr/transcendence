@@ -364,6 +364,14 @@ class EventConsumer(AsyncWebsocketConsumer):
             group = await get_profile_group(self.profile)
             if mode == 'CLASSIC' and group_size <= 2:
                 player_ids = await create_classic_party(group.pk, group_size)
+                if len(player_ids) == 2:
+                    await self.channel_layer.send(
+                        'game-server',
+                        {
+                            'type': 'classic.game',
+                            'player_ids': player_ids,
+                        }
+                    )
 
     async def game_ready(self, content):
         await update_profile_game_ready(self.profile, True)
@@ -753,7 +761,8 @@ def create_classic_party(new_group_id, new_group_size):
                 member.status = 'IG'
                 member.save(update_fields=['status'])
         if not already_ig:
-            classic_game.delay(player_ids)
+            player_ids = []
+            # classic_game.delay(player_ids)
 
     return player_ids
 
