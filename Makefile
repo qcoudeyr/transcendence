@@ -1,11 +1,11 @@
 SHELL := /bin/bash
 
-all: create-data-dirs init-vault build-and-up init-portainer
+all: create-data-dirs ssl-cert init-vault build-and-up init-portainer
 
 create-data-dirs:
 	@echo "Creating data directories if they do not exist..."
 
-	@mkdir -p ./srcs/data/django_data \
+	@mkdir ./srcs/data/django_data \
 		./srcs/data/portainer_data \
 		./srcs/data/postgres_data \
 		./srcs/data/vault_data \
@@ -15,14 +15,24 @@ create-data-dirs:
 		./srcs/data/apm_server_data \
 		./srcs/data/fleet_server_data \
 		./srcs/data/grafana_data \
-		./srcs/data/logs
-
+		./srcs/data/logs \
+		./srcs/data/certbot \
+		./srcs/data/certbot/logs \
+		./srcs/data/certificates > /dev/null 2>&1 || true
 	@echo "Data directories created."
 
 build-and-up:
+	@cd ./srcs && docker compose up tls; \
+	R_VALUE=$$?; \
+	if [ $$R_VALUE -eq 0 ]; then \
+		echo "TLS setup done, continuing without sleep..."; \
+	else \
+		echo "TLS setup failed, sleeping for 15 seconds..."; \
+		sleep 15; \
+	fi
 	@cd ./srcs && docker compose up setup && docker compose up -d
-	@sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true
 	@echo "Build Complete !"
+
 
 init-portainer:
 	@echo "Starting of the init scripts..."
@@ -36,6 +46,14 @@ init-portainer:
 	fi || true
 
 init-vault:
+	@echo "Starting of the init scripts..."
+	@cd ./srcs && ./scripts/tls_setup.sh; \
+	R_VALUE=$$?; \
+	if [ $$R_VALUE -eq 0 ]; then \
+		echo "Vault init done!"; \
+	else \
+		echo "Vault init script failed with return value $$R_VALUE!"; \
+	fi
 	@echo "Starting Vault container..."
 	@cd ./srcs && docker compose up vault -d
 	@echo "Vault container started !"
@@ -46,7 +64,7 @@ init-vault:
 		echo "Vault init done!"; \
 	else \
 		echo "Vault init script failed with return value $$R_VALUE!"; \
-	fi || true
+	fi
 	@echo "Vault setup started..."
 	@cd ./srcs && ./scripts/vault_setup.sh; \
 	R_VALUE=$$?; \
@@ -54,16 +72,13 @@ init-vault:
 		echo "Vault setup done!"; \
 	else \
 		echo "Vault setup script failed with return value $$R_VALUE!"; \
-	fi || true
+	fi
 
 clean-sensitive-data:
 	@echo "Cleaning up sensitive data..."
-
-	# Find the GPG key fingerprint for "vault-key"
-	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10); \
+	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10) && \
 	if [ -n "$$GPG_FINGERPRINT" ]; then \
-		# Remove the GPG private key (secret key) by fingerprint \
-		gpg --batch --yes --delete-secret-keys "$$GPG_FINGERPRINT"; \
+		gpg --batch --yes --delete-secret-keys "$$GPG_FINGERPRINT" && \
 		if [ $$? -eq 0 ]; then \
 			echo "GPG secret key '$$GPG_FINGERPRINT' removed successfully."; \
 		else \
@@ -72,11 +87,9 @@ clean-sensitive-data:
 	else \
 		echo "No GPG secret key found for 'vault-key'."; \
 	fi
-
-	# Check if the public key exists separately
-	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10); \
+	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10) && \
 	if [ -n "$$GPG_FINGERPRINT" ]; then \
-		gpg --batch --yes --delete-keys "$$GPG_FINGERPRINT"; \
+		gpg --batch --yes --delete-keys "$$GPG_FINGERPRINT" && \
 		if [ $$? -eq 0 ]; then \
 			echo "GPG public key '$$GPG_FINGERPRINT' removed successfully."; \
 		else \
@@ -85,14 +98,26 @@ clean-sensitive-data:
 	else \
 		echo "No GPG public key found for 'vault-key'."; \
 	fi
-	# Remove the encrypted root token file
-	@cd ./srcs/ && rm -f vault_root_token.gpg
-	@if [ $$? -eq 0 ]; then echo "Encrypted file 'vault_root_token.gpg' removed successfully."; else echo "Failed to remove 'root_token.gpg'."; fi
+	@rm -rf ./srcs/vault_root_token.gpg \
+	./srcs/requirements/vault/certs/ ./srcs/requirements/tls/certs/ && \
+	if [ $$? -eq 0 ]; then \
+		echo "Encrypted file 'vault_root_token.gpg' removed successfully."; \
+	else \
+		echo "Failed to remove 'root_token.gpg'."; \
+	fi
 
+clean-ssl:
+	@echo "Cleaning up ssl certificates..."
+	@find ./srcs/data -type d -name 'certs' -exec rm -rf {} + && \
+	if [ $$? -eq 0 ]; then \
+		echo "All 'certs' directories removed successfully."; \
+	else \
+		echo "Failed to remove some 'certs' directories."; \
+	fi
+	@rm -rf ./srcs/data/certificates/nginx ./srcs/data/certificates/vault ./srcs/data/certificates/root-ca.*
 	@echo "Sensitive data cleanup complete."
 
-
-fclean: clean-data clean-sensitive-data
+fclean: clean-data clean-sensitive-data clean-ssl
 	@echo "Removing migrations..."
 	@docker exec tr_django remove_migrations.sh || true
 	@docker exec tr_channels remove_migrations.sh || true
@@ -170,6 +195,46 @@ show-vault-token:
 	}
 
 
+
+# Generate SSL certificates if not present
+ssl-cert: create-data-dirs
+	@echo "🔍 Checking for existing SSL certificates..."
+	@if [ -d "./srcs/data/certbot/certificates/pong-br.com/" ]; then \
+		echo "✅ SSL certificates already exist. Skipping generation."; \
+	else \
+		if [ -d ".backup/data/certbot/certificates/pong-br.com" ]; then \
+			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
+			echo "📁 Restoring backup SSL certificates..."; \
+			cp -R ./.backup/data/certbot/certificates/pong-br.com/ ./srcs/data/certbot/certificates/; \
+		else \
+			echo "🔐 Generating new SSL certificates..."; \
+			cd ./srcs && docker compose up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
+			echo "⏳ Waiting for certbot container to initialize..."; \
+			sleep 2; \
+			echo "🔑 Running certificate generation..."; \
+			docker exec tr_certbot /bin/sh -c "certbot certonly \
+			--dns-luadns \
+			--dns-luadns-credentials /.secrets/certbot/luadns.ini \
+			--email admin@pong-br.com \
+			--agree-tos \
+			--no-eff-email \
+			-d pong-br.com \
+			-d test.pong-br.com"; \
+			if [ $$? -ne 0 ]; then \
+				echo "❌ Certificate generation failed"; \
+				exit 1; \
+			fi; \
+			echo "📂 Setting permissions on certificate files..."; \
+			chmod 755 --recursive ./data/certbot/certificates/pong-br.com/ || { echo "❌ Failed to set permissions"; exit 1; }; \
+			echo "✅ SSL certificate generation completed successfully."; \
+		fi; \
+	fi
+
+# Force renewal of certificates
+ssl-renew:
+	docker compose run --rm certbot certbot renew --force-renewal
+
+
 re: fclean all
 
-.PHONY: all build-and-up fclean re restart-docker stop-docker start-docker setup show-vault-token
+.PHONY: all build-and-up ssl-cert ssl-renew fclean re restart-docker stop-docker start-docker setup show-vault-token

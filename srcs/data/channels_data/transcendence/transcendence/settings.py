@@ -35,6 +35,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# Security settings for HTTPS
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
@@ -94,6 +102,7 @@ DATABASES = {
         'PASSWORD': env('DATABASE_PASSWORD'),
         'HOST': env('DATABASE_HOST'),
         'PORT': env('DATABASE_PORT'),
+        'OPTIONS': {'sslmode': 'require'}
     }
 }
 
@@ -145,6 +154,9 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("redis", 6379)],
+            'ssl_certfile': '/app/certs/django.crt',
+            'ssl_keyfile': '/app/certs/django.key',
+            'ssl_ca_certs': '/app/certs/ca.crt',
         },
     },
 }
@@ -201,5 +213,7 @@ LOGGING = {
 ELASTIC_APM = {
 	'SERVICE_NAME': 'channel',
 	'SECRET_TOKEN': '',
-	'SERVER_URL': 'http://apm-server:8200'
+	'SERVER_URL': 'http://apm-server:8200',
+	'SERVER_CERT': '/app/certs/localhost/localhost.crt',
+	'VERIFY_SERVER_CERT': False
 }

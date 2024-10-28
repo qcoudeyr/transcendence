@@ -28,6 +28,22 @@ log() {
     esac
 }
 
+# Create required directories
+setup_directories() {
+    log "INFO" "Creating required directories..."
+
+    mkdir -p ./data/certificates/vault
+    mkdir -p ./data/vault_data/{data,logs,file}
+    mkdir -p ./requirements/vault/certs
+
+    # Set proper permissions
+    chmod 755 ./data/certificates/vault
+    chmod 755 ./data/vault_data/{data,logs,file}
+
+	mkdir -p ./data/credentials
+    chmod 700 ./data/credentials
+}
+
 # Function to parse env file into associative array
 parse_env_file() {
     local env_file=$1
@@ -214,9 +230,137 @@ get_password_alias() {
     esac
 }
 
+# Function to setup PKI secrets engine and root CA
+setup_pki_ca() {
+    log "INFO" "Setting up PKI secrets engine and root CA..."
+
+    # Enable PKI secrets engine
+    docker exec tr_vault vault secrets disable pki || true
+    docker exec tr_vault vault secrets enable pki
+
+    # Configure max lease TTL to 10 years
+    docker exec tr_vault vault secrets tune -max-lease-ttl=87600h pki
+
+    # Generate root CA
+    docker exec tr_vault vault write -format=json pki/root/generate/internal \
+        common_name="transcendence Root CA" \
+        ttl=87600h > ./data/certificates/vault/root-ca.json
+
+    # Extract the certificate
+    jq -r '.data.certificate' ./data/certificates/vault/root-ca.json > ./data/certificates/vault/root-ca.crt
+
+    # Convert to PEM format
+    openssl x509 -in ./data/certificates/vault/root-ca.crt -out ./data/certificates/vault/root-ca.pem -outform PEM
+
+    # Copy certificates to container
+    docker cp ./data/certificates/vault/root-ca.crt tr_vault:/vault/certs/
+    docker cp ./data/certificates/vault/root-ca.pem tr_vault:/vault/certs/
+
+    # Configure CA and CRL URLs
+    docker exec tr_vault vault write pki/config/urls \
+        issuing_certificates="https://vault:8300/v1/pki/ca" \
+        crl_distribution_points="https://vault:8300/v1/pki/crl"
+
+    log "INFO" "Root CA setup completed"
+}
+
+# Function to setup intermediate CA
+setup_intermediate_ca() {
+    log "INFO" "Setting up intermediate CA..."
+
+    # Enable PKI secrets engine for intermediate CA
+    docker exec tr_vault vault secrets disable pki_int || true
+    docker exec tr_vault vault secrets enable -path=pki_int pki
+
+    # Configure max lease TTL to 1 year
+    docker exec tr_vault vault secrets tune -max-lease-ttl=8760h pki_int
+
+    # Generate intermediate CSR
+    docker exec tr_vault vault write -format=json pki_int/intermediate/generate/internal \
+        common_name="transcendence Intermediate CA" \
+        | jq -r '.data.csr' > ./data/certificates/vault/pki_intermediate.csr
+
+    # Sign the intermediate certificate
+    docker cp ./data/certificates/vault/pki_intermediate.csr tr_vault:/vault/certs/
+
+    docker exec tr_vault vault write -format=json pki/root/sign-intermediate \
+        csr=@/vault/certs/pki_intermediate.csr \
+        format=pem_bundle \
+        ttl="8760h" > ./data/certificates/vault/signed_intermediate.json
+
+    # Extract and store the signed certificate
+    jq -r '.data.certificate' ./data/certificates/vault/signed_intermediate.json > ./data/certificates/vault/intermediate.cert.pem
+
+    # Copy the signed certificate to container
+    docker cp ./data/certificates/vault/intermediate.cert.pem tr_vault:/vault/certs/
+
+    # Import the signed certificate
+    docker exec tr_vault vault write pki_int/intermediate/set-signed \
+        certificate=@/vault/certs/intermediate.cert.pem
+
+    # Configure URLs for the intermediate CA
+    docker exec tr_vault vault write pki_int/config/urls \
+        issuing_certificates="https://vault:8300/v1/pki_int/ca" \
+        crl_distribution_points="https://vault:8300/v1/pki_int/crl"
+
+    log "INFO" "Intermediate CA setup completed"
+}
+
+# Function to create role for service certificates
+create_pki_role() {
+    local service_name=$1
+    local allowed_domains=$2
+
+    log "INFO" "Creating PKI role for $service_name..."
+
+    docker exec tr_vault vault write pki_int/roles/$service_name \
+        allowed_domains="$allowed_domains,localhost" \
+        allow_any_name=true \
+        allow_subdomains=true \
+        allow_localhost=true \
+        allow_ip_sans=true \
+        allow_bare_domains=true \
+        enforce_hostnames=false \
+        max_ttl="72h"
+}
+
+# Function to generate service certificate
+generate_service_cert() {
+    local service=$1
+    local domain=$2
+
+    log "INFO" "Generating certificate for $service..."
+
+    # Create service directory
+    mkdir -p "./data/certificates/$service"
+
+    # Generate certificate using Vault
+    docker exec tr_vault vault write -format=json \
+        pki_int/issue/$service \
+        common_name="$domain" \
+        alt_names="localhost,$domain" \
+        ip_sans="127.0.0.1" \
+        ttl="72h" > "./data/certificates/$service/$service-cert.json"
+
+    # Extract certificate components
+    jq -r '.data.certificate' "./data/certificates/$service/$service-cert.json" > "./data/certificates/$service/$service.crt"
+    jq -r '.data.private_key' "./data/certificates/$service/$service-cert.json" > "./data/certificates/$service/$service.key"
+    jq -r '.data.issuing_ca' "./data/certificates/$service/$service-cert.json" > "./data/certificates/$service/ca.crt"
+
+    # Create combined PEM file
+    cat "./data/certificates/$service/$service.crt" "./data/certificates/$service/$service.key" > "./data/certificates/$service/$service.pem"
+
+    # Set permissions
+    chmod 644 "./data/certificates/$service/$service.crt"
+    chmod 600 "./data/certificates/$service/$service.key"
+    chmod 644 "./data/certificates/$service/$service.pem"
+
+    log "INFO" "Certificate generated for $service"
+}
+
 # Main execution
 main() {
-    log "INFO" "Starting Vault configuration and credential setup..."
+    log "INFO" "Starting Vault configuration..."
 
     # Check Vault initialization
     check_vault_initialization
@@ -224,9 +368,23 @@ main() {
     # Unseal Vault if needed
     unseal_vault
 
-    # Create credentials directory
-    mkdir -p ./data/credentials
-    chmod 700 ./data/credentials
+    # Setup required directories
+    setup_directories
+
+    # Setup PKI infrastructure
+    setup_pki_ca
+    setup_intermediate_ca
+
+    # Define services and their domains
+#    declare -A services=(
+#        ["nginx"]="nginx"
+#    )
+
+    # Generate certificates for each service
+#    for service in "${!services[@]}"; do
+#        create_pki_role "$service" "${services[$service]}"
+#        generate_service_cert "$service" "${services[$service]}"
+#    done
 
     # Parse the template_credential.env file
     eval $(parse_env_file "template_credential.env")
@@ -278,6 +436,7 @@ main() {
 
     log "INFO" "Configuration complete. AppRole credentials are stored in ./data/credentials/"
     log "WARN" "Please secure the credentials directory and remove it after distributing credentials to services"
+    log "INFO" "Vault configuration completed successfully"
 }
 
 # Run main function

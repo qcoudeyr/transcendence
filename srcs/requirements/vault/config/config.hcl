@@ -8,8 +8,8 @@ storage "raft" {
 
 listener "tcp" {
   address = "[::]:8300"
-  tls_disable = "true"
-
+  tls_cert_file = "/vault/certs/vault.crt"
+  tls_key_file = "/vault/certs/vault.key"
 }
 
 cluster_addr = "https://127.0.0.1:8301"

@@ -20,7 +20,7 @@ export function websocketConnect()
 			'Content-Type': 'application/json',
 			'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
 		}
-		
+
 	})
 	.then(response => {
 		// Check if the response is okay (status in the range 200-299)
@@ -30,7 +30,7 @@ export function websocketConnect()
 		return response.json(); // Parse the JSON from the response
 	})
 	.then(data => {
-		let socketurl = "ws://localhost/ws/events/?uuid=" + data.uuid;
+		let socketurl = "wss://" + window.location.host + "/ws/events/?uuid=" + data.uuid;
 		openWebsocket(socketurl);
 	})
 	.catch(error => {
@@ -83,5 +83,5 @@ function openWebsocket(socketurl){
 			}
 		}
 	}
-	
+
 }

@@ -1,4 +1,92 @@
+x-defaults: &default-settings
+  environment:
+    SERVERNAME: pong-br.com
+    #############################################
+    # CRS Variables
+    #############################################
+    # Paranoia Level
+    PARANOIA: 1
+    # Replaces PARANOIA as of CRS 4
+    BLOCKING_PARANOIA: 1
+    # Inbound and Outbound Anomaly Score Threshold
+    ANOMALY_INBOUND: 5
+    ANOMALY_OUTBOUND: 4
+    # Executing Paranoia Level
+    # - EXECUTING_PARANOIA=2
+    #
+    # Replaces EXECUTING_PARANOIA as of CRS 4
+    # - DETECTION_PARANOIA=2
+    #
+    # New in CRS 4
+    REPORTING_LEVEL: 2
+
+    #######################################################
+    # Reverse Proxy mode
+    # (only available if SETPROXY was enabled during the
+    # parent ModSecurity image)
+    #######################################################
+    # PROXYLOCATION: Application Backend of Reverse Proxy
+    # PROXYLOCATION: http://app:8000/
+    #
+    # If needed: add own httpd-proxy.conf (only available if SETPROXY
+    # was enabled during build of parent ModSecurity image)
+    #  - ./httpd-proxy.conf:/usr/local/apache2/conf/extra/httpd-proxy.conf
+
+    #######################################################
+    # Various CRS Variables with Default Values
+    #######################################################
+    # ENFORCE_BODYPROC_URLENCODED: 1
+    ALLOWED_METHODS: GET HEAD POST OPTIONS PUT PATCH DELETE
+    # ALLOWED_REQUEST_CONTENT_TYPE: '|application/x-www-form-urlencoded| |multipart/form-data| |multipart/related| |text/xml| |application/xml| |application/soap+xml| |application/json| |application/cloudevents+json| |application/cloudevents-batch+json|'
+    # ALLOWED_REQUEST_CONTENT_TYPE_CHARSET: 'utf-8|iso-8859-1|iso-8859-15|windows-1252'
+    # ALLOWED_HTTP_VERSIONS: HTTP/1.0 HTTP/1.1 HTTP/2 HTTP/2.0
+    # RESTRICTED_EXTENSIONS: .asa/ .asax/ .ascx/ .axd/ .backup/ .bak/ .bat/ .cdx/ .cer/ .cfg/ .cmd/ .com/ .config/ .conf/ .cs/ .csproj/ .csr/ .dat/ .db/ .dbf/ .dll/ .dos/ .htr/ .htw/ .ida/ .idc/ .idq/ .inc/ .ini/ .key/ .licx/ .lnk/ .log/ .mdb/ .old/ .pass/ .pdb/ .pol/ .printer/ .pwd/ .rdb/ .resources/ .resx/ .sql/ .swp/ .sys/ .vb/ .vbs/ .vbproj/ .vsdisco/ .webinfo/ .xsd/ .xsx/
+    # RESTRICTED_HEADERS_BASIC: /content-encoding/ /proxy/ /lock-token/ /content-range/ /if/ /x-http-method-override/ /x-http-method/ /x-method-override/
+    # RESTRICTED_HEADERS_EXTENDED: /accept-charset/
+    # STATIC_EXTENSIONS: /.jpg/ /.jpeg/ /.png/ /.gif/ /.js/ /.css/ /.ico/ /.svg/ /.webp/
+
+    #######################################################
+    # CRS Variables with Default Value unlimited
+    #######################################################
+    # MAX_NUM_ARGS: 255
+    # ARG_NAME_LENGTH: 100
+    # ARG_LENGTH: 400
+    # TOTAL_ARG_LENGTH: 64000
+    # MAX_FILE_SIZE: 1048576
+    # COMBINED_FILE_SIZES: 1048576
+
+    #######################################################
+    # Volumes for ModSecurity Tuning
+    #######################################################
+  volumes:
+    - ./REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+    - ./RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+
+    #######################################################
+    # Add TLS server certificate and key
+    # (only available if SETPROXY was enabled during the
+    # parent ModSecurity image)
+    #######################################################
+    #- ./server.crt:/usr/local/apache2/conf/server.crt
+    #- ./server.key:/usr/local/apache2/conf/server.key
+
+
 services:
+  tls:
+    container_name: tr_tls
+    profiles:
+      - setup
+    build:
+      context: ./requirements/tls/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    user: root  # ensures we can write to the local tls/ directory.
+    init: true
+    volumes:
+      - ./requirements/tls/entrypoint.sh:/entrypoint.sh:ro,Z
+      - ./requirements/tls/instances.yml:/usr/share/elasticsearch/tls/instances.yml:ro,Z
+      - ./requirements/tls/certs:/usr/share/elasticsearch/tls/certs:z
+
   setup:
     profiles:
       - setup
@@ -15,6 +103,7 @@ services:
       - ./requirements/setup/entrypoint.sh:/entrypoint.sh
       - ./requirements/setup/lib.sh:/lib.sh
       - ./requirements/setup/roles:/roles
+      - ./requirements/tls/certs/ca/ca.crt:/ca.crt:ro,z
     environment:
       - SERVICE_NAME=setup
       - SECRET_PATH=setup
@@ -34,8 +123,12 @@ services:
     container_name: tr_postgresql
     volumes:
       - ./data/credentials/postgresql_approle.env:/vault/config/postgresql_approle.env:ro
-      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - ./requirements/postgresql/entrypoint/:/vault/entrypoint/:ro
       - postgres_data:/var/lib/postgresql/data
+      - ./requirements/postgresql/postgresql.conf:/etc/postgresql.conf:ro
+      - ./requirements/tls/certs/postgresql/postgresql.crt:/etc/ssl/private/server.crt
+      - ./requirements/tls/certs/postgresql/postgresql.key:/etc/ssl/private/server.key
+      - ./requirements/tls/certs/ca/ca.crt:/etc/ssl/private/ca.crt
     restart: always
     expose:
       - 5432
@@ -52,7 +145,7 @@ services:
       - SERVICE_NAME=postgresql
       - SECRET_PATH=postgresql
     entrypoint: ["/vault/entrypoint/entrypoint.sh","docker-entrypoint.sh"]
-    command: "postgres"
+    command: "postgres -c config_file=/etc/postgresql.conf"
 
 ######################
 ########DJANGO########
@@ -68,6 +161,11 @@ services:
       - ./data/media_data:/app/media
       - ./data/credentials/django_approle.env:/vault/config/django_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - ./requirements/tls/certs/django/django.crt:/app/certs/django.crt:ro
+      - ./requirements/tls/certs/django/django.key:/app/certs/django.key:ro
+      - ./requirements/tls/certs/ca/ca.crt:/app/certs/ca.crt:ro
+      - ./requirements/tls/certs/apm-server/apm-server.crt:/app/certs/localhost/localhost.crt:ro
+      - ./requirements/tls/certs/postgresql/:/app/certs/postgresql/:ro
     expose:
       - 8000
     ports:
@@ -79,7 +177,7 @@ services:
       transcendence:
         ipv4_address: 10.0.10.10
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=django
       - SECRET_PATH=django
       - DATABASE_NAME=${DATABASE_NAME}
@@ -100,10 +198,16 @@ services:
     restart: always
     hostname: channels
     volumes:
+      - ./data/certbot/certificates/pong-br.com/:/etc/nginx/ssl/pong-br.com/:ro
       - ./data/channels_data:/app
       - ./data/django_data/transcendence/profiles:/app/transcendence/profiles
       - ./data/credentials/channels_approle.env:/vault/config/channels_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - ./requirements/tls/certs/channels/channels.crt:/app/certs/channels.crt:ro
+      - ./requirements/tls/certs/channels/channels.key:/app/certs/channels.key:ro
+      - ./requirements/tls/certs/ca/ca.crt:/app/certs/ca.crt:ro
+      - ./requirements/tls/certs/apm-server/apm-server.crt:/app/certs/localhost/localhost.crt:ro
+      - ./requirements/tls/certs/postgresql/:/app/certs/postgresql/:ro
     expose:
       - 8002
     ports:
@@ -117,7 +221,7 @@ services:
       - postgresql
       - django
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=channels
       - SECRET_PATH=channels
       - DATABASE_NAME=${DATABASE_NAME}
@@ -151,21 +255,32 @@ services:
       context: ./requirements/elasticsearch/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
     container_name: tr_elasticsearch
     volumes:
       - ./data/credentials/elasticsearch_approle.env:/vault/config/elasticsearch_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
       - ./requirements/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
       - elasticsearch_data:/usr/share/elasticsearch/data:Z
+        # (!) TLS certificates. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/elasticsearch/config/ca.crt:ro,z
+      - ./requirements/tls/certs/elasticsearch/elasticsearch.crt:/usr/share/elasticsearch/config/elasticsearch.crt:ro,z
+      - ./requirements/tls/certs/elasticsearch/elasticsearch.key:/usr/share/elasticsearch/config/elasticsearch.key:ro,z
     ports:
       - 9200:9200
       - 9300:9300
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=elasticsearch
       - SECRET_PATH=elasticsearch
       - node.name=elasticsearch
       - discovery.type=single-node
+      - LS_JAVA_OPTS=-Xms256m -Xmx512m
     hostname: elasticsearch
     networks:
       transcendence:
@@ -188,13 +303,15 @@ services:
       - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
       - ./data/credentials/logstash_approle.env:/vault/config/logstash_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/logstash/config/ca.crt:ro,z
     ports:
       - 5044:5044
       - 50000:50000/tcp
       - 50000:50000/udp
       - 9600:9600
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=logstash
       - SECRET_PATH=logstash
       - LS_JAVA_OPTS=-Xms256m -Xmx256m
@@ -218,13 +335,18 @@ services:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     container_name: tr_kibana
     volumes:
+      # Entrypoint script to fetch Vault credentials
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
       - ./requirements/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
       - ./data/credentials/kibana_approle.env:/vault/config/kibana_approle.env:ro
-      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) TLS certificates. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/kibana/config/ca.crt:ro,z
+      - ./requirements/tls/certs/kibana/kibana.crt:/usr/share/kibana/config/kibana.crt:ro,Z
+      - ./requirements/tls/certs/kibana/kibana.key:/usr/share/kibana/config/kibana.key:ro,Z
     ports:
       - 5601:5601
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=kibana
       - SECRET_PATH=kibana
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
@@ -261,9 +383,11 @@ services:
         source: /var/run/docker.sock
         target: /var/run/docker.sock
         read_only: true
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/filebeat/ca.crt:ro,z
     hostname: filebeat
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=filebeat
       - SECRET_PATH=filebeat
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
@@ -286,8 +410,10 @@ services:
       - ./requirements/curator/config/delete_log_files_curator.yml:/.curator/delete_log_files_curator.yml:ro,Z
       - ./data/credentials/curator_approle.env:/vault/config/curator_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/.curator/ca.crt:ro,z
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=curator
       - SECRET_PATH=curator
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
@@ -311,8 +437,6 @@ services:
     container_name: tr_fleet_server
     user: root
     volumes:
-      - ./data/credentials/fleet-server_approle.env:/vault/config/fleet-server_approle.env:ro
-      - ./requirements/entrypoint/:/vault/entrypoint/:ro
       - fleet_server_data:/usr/share/elastic-agent/state:Z
       - type: bind
         source: /var/lib/docker/containers
@@ -322,19 +446,27 @@ services:
         source: /var/run/docker.sock
         target: /var/run/docker.sock
         read_only: true
+      - ./data/credentials/fleet-server_approle.env:/vault/config/fleet-server_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) TLS certificates. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/elastic-agent/ca.crt:ro,z
+      - ./requirements/tls/certs/fleet-server/fleet-server.crt:/usr/share/elastic-agent/fleet-server.crt:ro,Z
+      - ./requirements/tls/certs/fleet-server/fleet-server.key:/usr/share/elastic-agent/fleet-server.key:ro,Z
     environment:
-      SET_ENV: 1
-      VAULT_ADDR: http://vault:8300
+      VAULT_ADDR: https://vault:8300
       SERVICE_NAME: fleet-server
       SECRET_PATH: fleet-server
-      FLEET_SERVER_ENABLE: 1
-      FLEET_SERVER_INSECURE_HTTP: 1
+      FLEET_SERVER_ENABLE: '1'
       FLEET_SERVER_HOST: 0.0.0.0
       FLEET_SERVER_POLICY_ID: fleet-server-policy
-      KIBANA_FLEET_SETUP: 1
+      FLEET_URL: https://fleet-server:8220
+      FLEET_SERVER_CERT: /usr/share/elastic-agent/fleet-server.crt
+      FLEET_SERVER_CERT_KEY: /usr/share/elastic-agent/fleet-server.key
+      ELASTICSEARCH_HOST: https://elasticsearch:9200
+      ELASTICSEARCH_CA: /usr/share/elastic-agent/ca.crt
+      KIBANA_FLEET_SETUP: '1'
       ELASTICSEARCH_USERNAME: elastic
       ES_JAVA_OPTS: -Xms256m -Xmx256m
-      DEBUG: true
     ports:
       - 8220:8220
     hostname: fleet-server
@@ -361,16 +493,21 @@ services:
       - apm_server_data:/usr/share/elastic-agent/state:Z
       - ./data/credentials/apm-server_approle.env:/vault/config/apm-server_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) TLS certificates. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/elastic-agent/ca.crt:ro,z
+      - ./requirements/tls/certs/apm-server/apm-server.crt:/usr/share/elastic-agent/apm-server.crt:ro,Z
+      - ./requirements/tls/certs/apm-server/apm-server.key:/usr/share/elastic-agent/apm-server.key:ro,Z
     environment:
-      - VAULT_ADDR=http://vault:8300
-      - SERVICE_NAME=apm-server
-      - SECRET_PATH=apm-server
-      - FLEET_ENROLL=1
-      - FLEET_TOKEN_POLICY_NAME=Agent Policy APM Server
-      - FLEET_INSECURE=1
-      - FLEET_URL=http://fleet-server:8220
-      - ELASTICSEARCH_USERNAME=elastic
-      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      VAULT_ADDR: https://vault:8300
+      SERVICE_NAME: apm-server
+      SECRET_PATH: apm-server
+      FLEET_ENROLL: '1'
+      FLEET_TOKEN_POLICY_NAME: Agent Policy APM Server
+      FLEET_URL: https://fleet-server:8220
+      ELASTICSEARCH_HOST: https://elasticsearch:9200
+      ELASTICSEARCH_CA: /usr/share/elastic-agent/ca.crt
+      ELASTICSEARCH_USERNAME: elastic
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
     ports:
       - 8200:8200
     hostname: apm-server
@@ -398,8 +535,10 @@ services:
       - ./requirements/heartbeat/config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro,Z
       - ./data/credentials/heartbeat_approle.env:/vault/config/heartbeat_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/heartbeat/ca.crt:ro,z
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=heartbeat
       - SECRET_PATH=heartbeat
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
@@ -428,6 +567,8 @@ services:
       - ./requirements/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro,Z
       - ./data/credentials/metricbeat_approle.env:/vault/config/metricbeat_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/metricbeat/ca.crt:ro,z
       - type: bind
         source: /
         target: /hostfs
@@ -445,7 +586,7 @@ services:
         target: /var/run/docker.sock
         read_only: true
     environment:
-      VAULT_ADDR : "http://vault:8300"
+      VAULT_ADDR : "https://vault:8300"
       SERVICE_NAME : "metricbeat"
       SECRET_PATH : "metricbeat"
       ES_JAVA_OPTS : "-Xms256m -Xmx256m"
@@ -524,26 +665,41 @@ services:
 ########NGINX########
 #####################
   nginx:
-    image: owasp/modsecurity-crs:4.7.0-nginx-202410090410
+    image: owasp/modsecurity-crs:nginx-alpine
     container_name: tr_nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:8080"
+      - "443:8443"
     volumes:
-      - ./requirements/nginx/nginx.conf:/etc/nginx/transcendence.conf
-      - ./requirements/nginx/default.conf:/etc/nginx/conf.d/transcendence.conf
-      - ./requirements/nginx/proxy_params:/etc/nginx/proxy_params
+      - ./data/certbot/certificates/pong-br.com/:/etc/nginx/ssl/pong-br.com/:ro
+      - ./requirements/nginx/pong-br.conf:/etc/nginx/templates/conf.d/default.conf.template
+      - ./requirements/nginx/proxy_params:/config/nginx/sites-conf.d/proxy_params
       - ./data/website_data/:/app/static/:ro
       - ./data/media_data/:/app/media/
     networks:
       transcendence:
         ipv4_address: 10.0.10.2
     hostname: nginx
-    depends_on:
-      - vault
-      - django
+    restart: unless-stopped
     environment:
-      VAULT_ADDR: ${VAULT_ADDR}
+      - VAULT_ADDR=${VAULT_ADDR}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    <<: *default-settings
+
+#####################
+########CERTBOT########
+#####################
+  certbot:
+    image: certbot/dns-luadns
+    container_name: tr_certbot
+    volumes:
+        - ./requirements/certbot/luadns.ini:/.secrets/certbot/luadns.ini:ro
+        - ./data/certbot/certificates/:/etc/letsencrypt/archive
+        - ./data/certbot/logs:/var/log/letsencrypt
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    restart: unless-stopped
 
 #####################
 ########VAULT########
@@ -555,16 +711,18 @@ services:
       - "8300:8300"
       - "8301:8301"
     volumes:
-      - ./requirements/vault/certs/:/certs/:rw
       - ./requirements/vault/config/:/vault/config/:rw
       - ./data/vault_data/data:/vault/data/:rw
       - ./data/vault_data/logs/:/vault/logs/:rw
       - ./data/vault_data/file:/vault/file/:rw
+      - ./data/certificates/vault:/vault/certs
+      - ./data/certificates/:/certs
     environment:
-      VAULT_ADDR: "http://vault:8300"
-      VAULT_API_ADDR: "http://vault:8301"
-      VAULT_ADDRESS: "http://vault:8300"
-      VAULT_UI: true
+      - VAULT_ADDR=https://vault:8300
+      - VAULT_API_ADDR=https://vault:8301
+      - VAULT_ADDRESS=https://vault:8300
+      - VAULT_UI=true
+      - VAULT_CAPATH=/vault/certs/vault.pem
     cap_add:
       - IPC_LOCK
     networks:

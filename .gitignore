@@ -30,3 +30,4 @@ srcs/data/fleet_server_data/*
 
 srcs/data/vault_data/data/vault.db
 srcs/vault_root_token.gpg
+.backup/
