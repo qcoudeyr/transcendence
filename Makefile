@@ -31,6 +31,7 @@ build-and-up:
 		sleep 15; \
 	fi
 	@cd ./srcs && docker compose up setup && docker compose up -d
+	@sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true
 	@echo "Build Complete !"
 
 

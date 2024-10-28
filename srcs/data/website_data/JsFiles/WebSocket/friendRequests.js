@@ -10,7 +10,7 @@ import { notificationReset } from "./notifications-displays.js"
 		}
 	}
 
-
+	
 
 function friendRequestSend() {
 		let socket = getWebsocket();
@@ -28,7 +28,7 @@ function friendRequestSend() {
 
 export function getFriendsAvatar(avatarUrl) {
     return new Promise((resolve, reject) => {
-        let completeAvatarUrl = "https://" + window.location.host + avatarUrl;
+        let completeAvatarUrl = "http://" + window.location.host + avatarUrl;
 
         fetch(completeAvatarUrl, {
             method: 'GET',

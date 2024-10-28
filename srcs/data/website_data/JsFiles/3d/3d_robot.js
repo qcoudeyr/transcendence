@@ -175,9 +175,30 @@ if(Math.abs(initialRotation.y-robotController.rotation.y)>0.01){
 }
 }
 
-// Event listeners 
-window.addEventListener('mousemove', onMouseMove); 
-window.addEventListener('resize', onWindowResizeRobot);
+function onMouseClick(event) {
+	const rect = robotContainer.getBoundingClientRect();
+	mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+	mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  
+	raycaster.setFromCamera(mouse, robotCamera);
+  
+	if (robotController) {
+	  const intersects = raycaster.intersectObject(robotController, true);
+  
+	  if (intersects.length > 0) {
+		robotController.traverse((child) => {
+		  if (child.isMesh) {
+			child.material.color.set(0x808080); // Set to gray
+		  }
+		});
+	  }
+	}
+  }
+  
+  // Event listeners
+  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('resize', onWindowResizeRobot);
+  window.addEventListener('click', onMouseClick);
 
 // Animation loop 
 function animateRobot() { 
