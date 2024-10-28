@@ -37,13 +37,13 @@ export function setupLogin() {
 			localStorage.setItem("accessToken", data.access);
 			localStorage.setItem("refreshToken", data.refresh);
 		  	window.location.hash = "#home";
-			// location.reload(true);
 			const sections = document.querySelectorAll("section"); // Select all sections
 			sections.forEach((section) => {
 				section.style.display = section.id === "home" ? "block" : "none";
 			});
 			document.querySelector('nav').style.display = 'none';
 			console.log('data.access=' + data.access);
+			location.reload(true);
 		})
 		.catch((error) => {
 		  displayError("Wrong Credentials, please try again.");

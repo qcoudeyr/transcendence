@@ -48,8 +48,7 @@ export function updateProfile(event) {
         console.log('Profile updated successfully:', data);
         getNameBioAndAvatar(); // Call the imported function
 		//HERE
-		switchEditProfileForm();
-		// location.reload();
+		location.reload();
     })
     .catch(error => {
         console.error('Error during the profile update:', error);
