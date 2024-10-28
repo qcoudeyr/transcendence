@@ -6,6 +6,10 @@
     padding: 30px 10px;
     font-family: 'DM Sans', sans-serif;
     background-color: #ff000000;
+	min-height: 100%;
+	min-width: 100%;
+	
+
 }
 
 /* New wrapper for the match history and current match info */
@@ -16,6 +20,7 @@
     gap: 2em;
     overflow-x: auto; /* Allow horizontal scrolling if needed */
 	min-height: 100%;
+	min-width: 100%;
 }
 
 /* Styling for Match History Container */
