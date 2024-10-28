@@ -9,7 +9,6 @@
 
 /* Central bento box container */
 .bento-stats-container {
-    scale: 0.6;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(2, auto);
