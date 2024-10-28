@@ -11,6 +11,7 @@
     align-items: flex-start;
     gap: 2em;
     overflow-x: auto; /* Allow horizontal scrolling if needed */
+	min-height: 100%;
 }
 
 /* Styling for Match History Container */
