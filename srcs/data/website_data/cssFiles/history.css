@@ -4,10 +4,7 @@
     align-items: center;
     justify-content: center;
     padding: 30px 10px;
-    font-family: 'DM Sans', sans-serif;
     background-color: #ff000000;
-	
-
 }
 
 /* New wrapper for the match history and current match info */
@@ -62,7 +59,7 @@
 
 /* Styling for the Match Details Section */
 .current_match_selected_info {
-	margin-top: 25%;
+	margin-top: 7%;
     background: rgba(255, 255, 255, 0.05);
     padding: 2em;
     border-radius: 15px;
