@@ -1,3 +1,4 @@
+import { switchEditProfileForm } from "../../Pages/profile.js";
 import { getNameBioAndAvatar } from "./getProfileInfo.js";
 
 let selectedAvatarFile = null; // Global variable to store the selected avatar file
@@ -46,6 +47,8 @@ export function updateProfile(event) {
     .then(data => {
         console.log('Profile updated successfully:', data);
         getNameBioAndAvatar(); // Call the imported function
+		//HERE
+		switchEditProfileForm();
 		// location.reload();
     })
     .catch(error => {
