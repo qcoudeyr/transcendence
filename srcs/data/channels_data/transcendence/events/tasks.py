@@ -70,6 +70,14 @@ def players_send_object(player_ids, object, name):
 def classic_game(player_ids):
     if len(player_ids) != 2:
         return
+    for player_id in player_ids:
+        player = Profile.objects.get(pk=player_id)
+        if player.status == 'IG':
+            return
+    for player_id in player_ids:
+        player = Profile.objects.get(pk=player_id)
+        player.status = 'IG'
+        player.save(update_fields=['status'])
     # Game objects
     ball = Ball(BALL_RADIUS)
     pad_0 = Pad(player_ids[0], 0)
