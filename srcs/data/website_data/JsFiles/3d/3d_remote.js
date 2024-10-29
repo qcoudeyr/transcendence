@@ -181,6 +181,28 @@ function animateRotationToInitial() {
   }
 }
 
+
+function onMouseClick(event) {
+	const rect = remoteContainer.getBoundingClientRect();
+	mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+	mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  
+	raycaster.setFromCamera(mouse, remoteCamera);
+  
+	if (remoteController) {
+	  const intersects = raycaster.intersectObject(remoteController, true);
+  
+	  if (intersects.length > 0) {
+		remoteController.traverse((child) => {
+		  if (child.isMesh) {
+			child.material.color.set(0x808080); // Set to gray
+		  }
+		});
+	  }
+	}
+  }
+
+  window.addEventListener('click', onMouseClick);
 // Event listener for mouse movement
 window.addEventListener('mousemove', onMouseMove);
 

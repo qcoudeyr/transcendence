@@ -147,8 +147,8 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("redis", 6379)],
-            "capacity": 100000,
-            "expiry": 3,
+            "capacity": 200000,
+            "expiry": 1,
         },
     },
 }
@@ -200,7 +200,7 @@ MEDIA_URL = '/media/'
 #             'propagate': False,
 #         },
 #     },
-# }
+
 
 ELASTIC_APM = {
 	'SERVICE_NAME': 'channel',

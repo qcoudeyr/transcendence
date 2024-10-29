@@ -24,7 +24,7 @@ export function websocketConnect()
 			'Content-Type': 'application/json',
 			'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
 		}
-
+		
 	})
 	.then(response => {
 		// Check if the response is okay (status in the range 200-299)
@@ -34,7 +34,7 @@ export function websocketConnect()
 		return response.json(); // Parse the JSON from the response
 	})
 	.then(data => {
-		let socketurl = "wss://" + window.location.host + "/ws/events/?uuid=" + data.uuid;
+		let socketurl = "ws://" + window.location.host + "/ws/events/?uuid=" + data.uuid;
 		openWebsocket(socketurl);
 	})
 	.catch(error => {
@@ -88,35 +88,7 @@ function openWebsocket(socketurl){
 			{
 				removeReceivedFriend(content.profile_id);
 			}
-			if(content.type === 'group_request')
-			{
-				groupRequestRevieve(content.profile_id, content.name, content.avatar);
-			}
-			if(content.type === 'group_member')
-			{
-				displayGroupList(content.name, content.profile_id, content.avatar);
-			}
-			if(content.type === 'group_request_remove')
-			{
-				removeGroupRequest(content.profile_id);
-			}
-			if(content.type === 'group_member_remove')
-			{
-				removeFriendFromGroup(content.profile_id);
-			}
-			if(content.type === 'game_start')
-			{
-				showPlayingSection();
-			}
-			if(content.type === 'game_end')
-			{
-				gameEnd();
-			}
-			if(content.type === 'game_object')
-			{
-				mooveBall(content.object, content.x, content.y, content.z);
-			}
 		}
 	}
-
+	
 }

@@ -2,4 +2,6 @@
 
 # python manage.py migrate
 
-python manage.py runworker game-server
+sleep 6
+
+python manage.py runworker game-server -v 3
