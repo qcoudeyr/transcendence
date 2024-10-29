@@ -1,22 +1,21 @@
-export function checkAccessToken()
-{
-		fetch("/api/media/auth/", {
-		method: "GET",
-		headers: {
+export function checkAccessToken() {
+    fetch("/api/media/auth/", {
+        method: "GET",
+        headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('accessToken') // Authentication token
         },
-		body: null
-	  })
-		.then((response) => response.ok ? response.json() : Promise.reject(response))
-		.then((data) => {
-			alert(data.);
-		})
-		.catch((error) => {
-			alert('Login no longer valid reloading..');
-		  	localStorage.clear();
-		  	document.reload(true);
-		});
-	
+        body: null
+    })
+    .then((response) => response.ok ? response.json() : Promise.reject(response))
+    .then((data) => {
+        console.log(data); // Logs the entire data object to the console
+        alert(JSON.stringify(data, null, 2)); // Optional: show data in an alert, formatted as a string
+    })
+    .catch((error) => {
+        alert('Login no longer valid. Reloading...');
+        localStorage.clear();
+        location.reload(true); // Use location.reload instead of document.reload
+    });
 }
 
 export function setupLogin() {
