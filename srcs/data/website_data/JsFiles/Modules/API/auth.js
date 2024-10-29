@@ -8,13 +8,16 @@ export function checkAccessToken() {
     })
     .then((response) => response.ok ? response.json() : Promise.reject(response))
     .then((data) => {
-        console.log(data); // Logs the entire data object to the console
-        alert(JSON.stringify(data, null, 2)); // Optional: show data in an alert, formatted as a string
+		if (data.authenticated === true)
+			return true
+		else
+			return false;
     })
     .catch((error) => {
         alert('Login no longer valid. Reloading...');
         localStorage.clear();
         location.reload(true); // Use location.reload instead of document.reload
+		return false;
     });
 }
 
