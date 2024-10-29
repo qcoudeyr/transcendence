@@ -7,7 +7,7 @@ services:
       context: ./requirements/tls/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
-    user: root  # ensures we can write to the local tls/ directory.
+    user: root
     init: true
     volumes:
       - ./requirements/tls/entrypoint.sh:/entrypoint.sh:ro,Z

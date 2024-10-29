@@ -200,7 +200,7 @@ MEDIA_URL = '/media/'
 #             'propagate': False,
 #         },
 #     },
-
+# }
 
 ELASTIC_APM = {
 	'SERVICE_NAME': 'channel',
