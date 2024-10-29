@@ -9,12 +9,12 @@ export function checkAccessToken()
 	  })
 		.then((response) => response.ok ? response.json() : Promise.reject(response))
 		.then((data) => {
-			alert(data);
+			alert(data.);
 		})
 		.catch((error) => {
 			alert('Login no longer valid reloading..');
 		  	localStorage.clear();
-		  	document.reload();
+		  	document.reload(true);
 		});
 	
 }
