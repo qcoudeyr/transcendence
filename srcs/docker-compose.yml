@@ -219,8 +219,6 @@ services:
       - ./data/website_data/:/app/static/:ro
       - ./data/media_data/:/app/media/
 
-
-
     networks:
       transcendence:
         ipv4_address: 10.0.10.2
