@@ -6,10 +6,13 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import async_to_sync
 from django.db import transaction
+from channels.layers import get_channel_layer
 
 from profiles.models import Profile, FriendRequest, GroupRequest, Group
-from game.models import PartyQueue
+from game.models import PartyQueue, GameHistory
 # from events.tasks import classic_game
+
+channel_layer = get_channel_layer()
 
 class EventConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -46,6 +49,12 @@ class EventConsumer(AsyncWebsocketConsumer):
         for friend in friends:
             logging.error('[' + str(friend.pk) + ']')
             await self.join_friend_channel(friend_pk=friend.pk)
+
+        # Already in game
+        if self.profile.is_in_game:
+            await update_profile_status(self.profile, 'IG')
+            await self.join_game_channel({})
+            await self.send_game_start({})
 
         # Notify friends when Online
         for friend in friends:
@@ -98,6 +107,9 @@ class EventConsumer(AsyncWebsocketConsumer):
                     'status': self.profile.get_status_display(),
                 }
             )
+
+        # Leave game channel
+        await self.leave_game_channel({})
 
         # Clear group requests
         await delete_profile_group_request_received(self.profile)
@@ -358,24 +370,13 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def game_join_queue(self, content):
-        await self.chat_message({'message': 'balise 1'})
         if 'mode' in content and await is_group_chief(self.profile):
-            await self.chat_message({'message': 'balise 2'})
             mode = content['mode']
             group_size = await get_profile_group_size(self.profile)
             group = await get_profile_group(self.profile)
+
             if mode == 'CLASSIC' and group_size <= 2:
-                player_ids = await create_classic_party(group.pk, group_size)
-                await self.chat_message({'message': 'balise 3'})
-                if len(player_ids) == 2:
-                    await self.chat_message({'message': 'balise 4'})
-                    await self.channel_layer.send(
-                        'game-server',
-                        {
-                            'type': 'classic.game',
-                            'player_ids': player_ids,
-                        }
-                    )
+                await search_classic_game(group.pk, group_size)
 
     async def game_ready(self, content):
         await update_profile_game_ready(self.profile, True)
@@ -522,6 +523,14 @@ class EventConsumer(AsyncWebsocketConsumer):
 
     async def leave_friend_channel(self, friend_pk):
         await self.channel_layer.group_discard(self.private_groups[friend_pk], self.channel_name)
+
+    async def join_game_channel(self, event):
+        if self.profile.actual_game_id != None:
+            self.game_group = "game_" + str(self.profile.actual_game_id)
+            await self.channel_layer.group_add(self.game_group, self.channel_name)
+
+    async def leave_game_channel(self, event):
+        await self.channel_layer.group_discard(self.game_group, self.channel_name)
 
 # Database access from consumers
 @database_sync_to_async
@@ -737,38 +746,57 @@ def get_profile_group_size(profile):
 
 @database_sync_to_async
 @transaction.atomic
-def create_classic_party(new_group_id, new_group_size):
+def search_classic_game(new_group_id, new_group_size):
     player_ids = []
+    new_group = Group.objects.get(pk=new_group_id)
     group_sizes = {new_group_id: new_group_size}
     queue, created = PartyQueue.objects.get_or_create(mode='CLASSIC')
 
+    for member in list(new_group.members.all()):
+        if member.is_in_game:
+            return
     if new_group_size != 2:
         if hasattr(queue, 'groups') and len(queue.groups.all()) != 0:
             group = queue.groups.first()
             group_sizes[group.pk] = len(group.members.all())
         else:
-            new_group = Group.objects.get(pk=new_group_id)
             new_group.party_queue = queue
             new_group.save(update_fields=['party_queue'])
 
     player_quantity = sum(group_sizes.values())
     if player_quantity == 2:
-        already_ig = False
         for group_id in group_sizes:
             group = Group.objects.get(pk=group_id)
             group.party_queue = None
             group.save(update_fields=['party_queue'])
             for member in list(group.members.all()):
                 player_ids.append(member.pk)
-                if member.status == 'IG':
-                    already_ig = True
                 member.status = 'IG'
-                member.save(update_fields=['status'])
-        if not already_ig:
-            player_ids = []
-            # classic_game.delay(player_ids)
+                member.is_in_game = True
+                member.save(update_fields=['status', 'is_in_game'])
 
-    return player_ids
+        game_history = GameHistory.objects.create(
+            player_0=Profile.objects.get(id=player_ids[0]),
+            player_1=Profile.objects.get(id=player_ids[1]),
+        )
+
+        for player_id in player_ids:
+            player = Profile.objects.get(pk=player_id)
+            player.actual_game_id = game_history.pk
+            player.save(update_fields=['actual_game_id'])
+            async_to_sync(channel_layer.group_send)(
+                'notification_' + str(player.pk),
+                {'type': 'join.game.channel'}
+            )
+
+        async_to_sync(channel_layer.send)(
+            'engine-server',
+            {
+                'type': 'classic.game',
+                'game_id': game_history.pk,
+                'player_ids': player_ids,
+            }
+        )
 
 @database_sync_to_async
 @transaction.atomic
