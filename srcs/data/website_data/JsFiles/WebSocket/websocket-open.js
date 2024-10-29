@@ -88,6 +88,42 @@ function openWebsocket(socketurl){
 			{
 				removeReceivedFriend(content.profile_id);
 			}
+			if(content.type === 'group_request')
+			{
+				groupRequestRevieve(content.profile_id, content.name, content.avatar);
+			}
+			if(content.type === 'group_member')
+			{
+				displayGroupList(content.name, content.profile_id, content.avatar);
+			}
+			if(content.type === 'group_request_remove')
+			{
+				removeGroupRequest(content.profile_id);
+			}
+			if(content.type === 'group_member_remove')
+			{
+				removeFriendFromGroup(content.profile_id);
+			}
+			if(content.type === 'game_start')
+			{
+				showPlayingSection();
+			}
+			if(content.type === 'game_end')
+			{
+				gameEnd();
+			}
+			if(content.type === 'game_object')
+			{
+				mooveBall(content.object, content.x, content.y, content.z);
+			}
+			// if(content.type === 'game_score')
+			// {
+			// 	//scoreUpdate(content.score_1, content.score_2);
+			// }
+			// if (content.type === 'game_frame_message')
+			// {
+			// 	frameMessage(content.message);
+			// }
 		}
 	}
 
