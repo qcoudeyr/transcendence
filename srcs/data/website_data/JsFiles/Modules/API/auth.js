@@ -1,22 +1,24 @@
-export function checkAccessToken()
-{
-		fetch("/api/media/auth/", {
-		method: "POST",
-		headers: {
+export function checkAccessToken() {
+    fetch("/api/media/auth/", {
+        method: "GET",
+        headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('accessToken') // Authentication token
         },
-		body: null
-	  })
-		.then((response) => response.ok ? response.json() : Promise.reject(response))
-		.then((data) => {
-			alert(data);
-		})
-		.catch((error) => {
-			alert('Login no longer valid reloading..');
-		  	localStorage.clear();
-		  	document.reload();
-		});
-	
+        body: null
+    })
+    .then((response) => response.ok ? response.json() : Promise.reject(response))
+    .then((data) => {
+		if (data.authenticated === true)
+			return true
+		else
+			return false;
+    })
+    .catch((error) => {
+        alert('Login no longer valid. Reloading...');
+        localStorage.clear();
+        location.reload(true); // Use location.reload instead of document.reload
+		return false;
+    });
 }
 
 export function setupLogin() {
@@ -43,6 +45,7 @@ export function setupLogin() {
 			});
 			document.querySelector('nav').style.display = 'none';
 			console.log('data.access=' + data.access);
+			window.location.hash = 'home';
 			location.reload(true);
 		})
 		.catch((error) => {
