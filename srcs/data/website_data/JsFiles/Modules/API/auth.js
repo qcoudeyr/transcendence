@@ -45,6 +45,7 @@ export function setupLogin() {
 			});
 			document.querySelector('nav').style.display = 'none';
 			console.log('data.access=' + data.access);
+			window.location.hash = 'home';
 			location.reload(true);
 		})
 		.catch((error) => {
