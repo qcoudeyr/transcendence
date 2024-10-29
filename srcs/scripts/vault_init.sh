@@ -6,7 +6,8 @@ RETRY_DELAY=5
 VAULT_CONTAINER="tr_vault"
 GPG_KEY_NAME="vault-key"
 GPG_KEY_EMAIL="vault-key@example.com"
-OUTPUT_FILE="vault_root_token.gpg"
+OUTPUT_FILE="./srcs/vault_root_token.gpg"
+DEFAULT_DEV_PASSPHRASE="development-passphrase-123"
 
 # Color codes for output
 RED='\033[0;31m'
@@ -71,10 +72,19 @@ check_gpg_key() {
 # Function to generate a new GPG key
 generate_gpg_key() {
     local passphrase
-    read -s -p "Enter passphrase for GPG key: " passphrase
-    echo
 
-    if ! gpg --batch --gen-key <<EOF
+    if [ "$DEV" = "1" ]; then
+        log_info "Development mode: Using default passphrase"
+        passphrase="$DEFAULT_DEV_PASSPHRASE"
+    else
+        read -s -p "Enter passphrase for GPG key: " passphrase
+        echo
+    fi
+
+    # Create temporary batch file for key generation
+    local batch_file=$(mktemp)
+    cat > "$batch_file" <<EOF
+%echo Generating GPG key
 Key-Type: RSA
 Key-Length: 2048
 Name-Real: $GPG_KEY_NAME
@@ -82,12 +92,17 @@ Name-Email: $GPG_KEY_EMAIL
 Name-Comment: $GPG_KEY_NAME
 Expire-Date: 0
 Passphrase: $passphrase
+%commit
+%echo Done
 EOF
-    then
+
+    if ! gpg --batch --generate-key "$batch_file"; then
         log_error "Failed to generate GPG key"
+        rm "$batch_file"
         return 1
     fi
 
+    rm "$batch_file"
     log_success "GPG key generated successfully"
     return 0
 }

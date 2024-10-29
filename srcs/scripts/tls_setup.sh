@@ -30,7 +30,7 @@ log() {
 
 # Function to generate root CA
 generate_root_ca() {
-    local ca_dir="./data/certificates"
+    local ca_dir="./srcs/data/certificates"
     mkdir -p "$ca_dir"
 
     # Generate root CA private key
@@ -50,8 +50,8 @@ generate_root_ca() {
 generate_service_cert() {
     local service=$1
     local domain=$2
-    local ca_dir="./data/certificates"
-    local service_dir="./data/certificates/$service"
+    local ca_dir="./srcs/data/certificates"
+    local service_dir="./srcs/data/certificates/$service"
 
     mkdir -p "$service_dir"
 

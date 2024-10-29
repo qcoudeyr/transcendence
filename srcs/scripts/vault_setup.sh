@@ -32,16 +32,16 @@ log() {
 setup_directories() {
     log "INFO" "Creating required directories..."
 
-    mkdir -p ./data/certificates/vault
-    mkdir -p ./data/vault_data/{data,logs,file}
-    mkdir -p ./requirements/vault/certs
+    mkdir -p ./srcs/data/certificates/vault
+    mkdir -p ./srcs/data/vault_data/{data,logs,file}
+    mkdir -p ./srcs/requirements/vault/certs
 
     # Set proper permissions
-    chmod 755 ./data/certificates/vault
-    chmod 755 ./data/vault_data/{data,logs,file}
+    chmod 644 ./srcs/data/certificates/vault
+    chmod 644 ./srcs/data/vault_data/{data,logs,file}
 
-	mkdir -p ./data/credentials
-    chmod 700 ./data/credentials
+	mkdir -p ./srcs/data/credentials
+    chmod 766 ./srcs/data/credentials
 }
 
 # Function to parse env file into associative array
@@ -207,8 +207,8 @@ create_approle() {
     local secret_id=$(docker exec tr_vault vault write -format=json -f auth/${service_name}/role/${service_name}/secret-id | jq -r '.data.secret_id')
 
     # Store credentials in a temporary file
-    echo "ROLE_ID=${role_id}" > ./data/credentials/${service_name}_approle.env
-    echo "SECRET_ID=${secret_id}" >> ./data/credentials/${service_name}_approle.env
+    echo "ROLE_ID=${role_id}" > ./srcs/data/credentials/${service_name}_approle.env
+    echo "SECRET_ID=${secret_id}" >> ./srcs/data/credentials/${service_name}_approle.env
 }
 
 # Function to get password aliases
@@ -244,17 +244,17 @@ setup_pki_ca() {
     # Generate root CA
     docker exec tr_vault vault write -format=json pki/root/generate/internal \
         common_name="transcendence Root CA" \
-        ttl=87600h > ./data/certificates/vault/root-ca.json
+        ttl=87600h > ./srcs/data/certificates/vault/root-ca.json
 
     # Extract the certificate
-    jq -r '.data.certificate' ./data/certificates/vault/root-ca.json > ./data/certificates/vault/root-ca.crt
+    jq -r '.data.certificate' ./srcs/data/certificates/vault/root-ca.json > ./srcs/data/certificates/vault/root-ca.crt
 
     # Convert to PEM format
-    openssl x509 -in ./data/certificates/vault/root-ca.crt -out ./data/certificates/vault/root-ca.pem -outform PEM
+    openssl x509 -in ./srcs/data/certificates/vault/root-ca.crt -out ./srcs/data/certificates/vault/root-ca.pem -outform PEM
 
     # Copy certificates to container
-    docker cp ./data/certificates/vault/root-ca.crt tr_vault:/vault/certs/
-    docker cp ./data/certificates/vault/root-ca.pem tr_vault:/vault/certs/
+    docker cp ./srcs/data/certificates/vault/root-ca.crt tr_vault:/vault/certs/
+    docker cp ./srcs/data/certificates/vault/root-ca.pem tr_vault:/vault/certs/
 
     # Configure CA and CRL URLs
     docker exec tr_vault vault write pki/config/urls \
@@ -278,21 +278,21 @@ setup_intermediate_ca() {
     # Generate intermediate CSR
     docker exec tr_vault vault write -format=json pki_int/intermediate/generate/internal \
         common_name="transcendence Intermediate CA" \
-        | jq -r '.data.csr' > ./data/certificates/vault/pki_intermediate.csr
+        | jq -r '.data.csr' > ./srcs/data/certificates/vault/pki_intermediate.csr
 
     # Sign the intermediate certificate
-    docker cp ./data/certificates/vault/pki_intermediate.csr tr_vault:/vault/certs/
+    docker cp ./srcs/data/certificates/vault/pki_intermediate.csr tr_vault:/vault/certs/
 
     docker exec tr_vault vault write -format=json pki/root/sign-intermediate \
         csr=@/vault/certs/pki_intermediate.csr \
         format=pem_bundle \
-        ttl="8760h" > ./data/certificates/vault/signed_intermediate.json
+        ttl="8760h" > ./srcs/data/certificates/vault/signed_intermediate.json
 
     # Extract and store the signed certificate
-    jq -r '.data.certificate' ./data/certificates/vault/signed_intermediate.json > ./data/certificates/vault/intermediate.cert.pem
+    jq -r '.data.certificate' ./srcs/data/certificates/vault/signed_intermediate.json > ./srcs/data/certificates/vault/intermediate.cert.pem
 
     # Copy the signed certificate to container
-    docker cp ./data/certificates/vault/intermediate.cert.pem tr_vault:/vault/certs/
+    docker cp ./srcs/data/certificates/vault/intermediate.cert.pem tr_vault:/vault/certs/
 
     # Import the signed certificate
     docker exec tr_vault vault write pki_int/intermediate/set-signed \
@@ -332,7 +332,7 @@ generate_service_cert() {
     log "INFO" "Generating certificate for $service..."
 
     # Create service directory
-    mkdir -p "./data/certificates/$service"
+    mkdir -p "./srcs/data/certificates/$service"
 
     # Generate certificate using Vault
     docker exec tr_vault vault write -format=json \
@@ -340,20 +340,20 @@ generate_service_cert() {
         common_name="$domain" \
         alt_names="localhost,$domain" \
         ip_sans="127.0.0.1" \
-        ttl="72h" > "./data/certificates/$service/$service-cert.json"
+        ttl="72h" > "./srcs/data/certificates/$service/$service-cert.json"
 
     # Extract certificate components
-    jq -r '.data.certificate' "./data/certificates/$service/$service-cert.json" > "./data/certificates/$service/$service.crt"
-    jq -r '.data.private_key' "./data/certificates/$service/$service-cert.json" > "./data/certificates/$service/$service.key"
-    jq -r '.data.issuing_ca' "./data/certificates/$service/$service-cert.json" > "./data/certificates/$service/ca.crt"
+    jq -r '.data.certificate' "./srcs/data/certificates/$service/$service-cert.json" > "./srcs/data/certificates/$service/$service.crt"
+    jq -r '.data.private_key' "./srcs/data/certificates/$service/$service-cert.json" > "./srcs/data/certificates/$service/$service.key"
+    jq -r '.data.issuing_ca' "./srcs/data/certificates/$service/$service-cert.json" > "./srcs/data/certificates/$service/ca.crt"
 
     # Create combined PEM file
-    cat "./data/certificates/$service/$service.crt" "./data/certificates/$service/$service.key" > "./data/certificates/$service/$service.pem"
+    cat "./srcs/data/certificates/$service/$service.crt" "./srcs/data/certificates/$service/$service.key" > "./srcs/data/certificates/$service/$service.pem"
 
     # Set permissions
-    chmod 644 "./data/certificates/$service/$service.crt"
-    chmod 600 "./data/certificates/$service/$service.key"
-    chmod 644 "./data/certificates/$service/$service.pem"
+    chmod 644 "./srcs/data/certificates/$service/$service.crt"
+    chmod 600 "./srcs/data/certificates/$service/$service.key"
+    chmod 644 "./srcs/data/certificates/$service/$service.pem"
 
     log "INFO" "Certificate generated for $service"
 }
@@ -387,7 +387,7 @@ main() {
 #    done
 
     # Parse the template_credential.env file
-    eval $(parse_env_file "template_credential.env")
+    eval $(parse_env_file "./srcs/template_credential.env")
 
     # Enable KV secrets engine
     docker exec tr_vault vault secrets enable -path=kv -version=2 kv || true
@@ -434,7 +434,7 @@ main() {
         docker exec tr_vault vault kv put "kv/$service" ${service_vars[$service]}
     done
 
-    log "INFO" "Configuration complete. AppRole credentials are stored in ./data/credentials/"
+    log "INFO" "Configuration complete. AppRole credentials are stored in ./srcs/data/credentials/"
     log "WARN" "Please secure the credentials directory and remove it after distributing credentials to services"
     log "INFO" "Vault configuration completed successfully"
 }

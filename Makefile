@@ -1,11 +1,27 @@
-SHELL := /bin/bash
+# Color and formatting definitions
+GREEN := \033[0;32m
+YELLOW := \033[0;33m
+RED := \033[0;31m
+BLUE := \033[0;34m
+NC := \033[0m
+BOLD := \033[1m
 
-all: create-data-dirs ssl-cert init-vault build-and-up init-portainer
+# Environment variables
+ENABLE_DEVOPS ?= false
+DEV=1
+
+# Existing variables
+SHELL := /bin/bash
+NETWORK_NAME = tr_network
+NETWORK_SUBNET = 10.0.10.0/24
+NETWORK_DRIVER = bridge
+
+all:  create-data-dirs init-network ssl-cert init-vault build-and-up init-portainer
+
 
 create-data-dirs:
-	@echo "Creating data directories if they do not exist..."
-
-	@mkdir ./srcs/data/django_data \
+	$(call log_info,"Creating data directories...")
+	@mkdir -p ./srcs/data/django_data \
 		./srcs/data/portainer_data \
 		./srcs/data/postgres_data \
 		./srcs/data/vault_data \
@@ -19,21 +35,46 @@ create-data-dirs:
 		./srcs/data/certbot \
 		./srcs/data/certbot/logs \
 		./srcs/data/certificates > /dev/null 2>&1 || true
-	@echo "Data directories created."
+	$(call log_success,"Data directories created successfully")
+
+init-network:
+	@echo "🔍 Checking for existing Docker network $(NETWORK_NAME)..."
+	@if docker network inspect $(NETWORK_NAME) >/dev/null 2>&1; then \
+		echo "ℹ️  Network $(NETWORK_NAME) already exists"; \
+	else \
+		echo "🌐 Creating new Docker network: $(NETWORK_NAME)"; \
+		echo "📝 Configuration:"; \
+		echo "   • Driver: $(NETWORK_DRIVER)"; \
+		echo "   • Subnet: $(NETWORK_SUBNET)"; \
+		if docker network create --driver $(NETWORK_DRIVER) --subnet $(NETWORK_SUBNET) $(NETWORK_NAME) >/dev/null 2>&1; then \
+			echo "✅ Network created successfully!"; \
+		else \
+			echo "❌ Failed to create network"; \
+			exit 1; \
+		fi; \
+	fi
 
 build-and-up:
-	@cd ./srcs && docker compose up tls; \
+	@echo "🔐 Starting TLS setup..."
+	@docker compose -f ./srcs/docker-compose.yml up tls; \
 	R_VALUE=$$?; \
 	if [ $$R_VALUE -eq 0 ]; then \
-		echo "TLS setup done, continuing without sleep..."; \
+		echo "✅ TLS setup completed successfully"; \
 	else \
-		echo "TLS setup failed, sleeping for 15 seconds..."; \
+		echo "⚠️  TLS setup failed, waiting 15 seconds..."; \
 		sleep 15; \
-	fi
-	@cd ./srcs && docker compose up setup && docker compose up -d
-	@sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true
-	@echo "Build Complete !"
-
+	fi; \
+	echo "🚀 Starting main services..."; \
+	if [ "$(ENABLE_DEVOPS)" = "true" ]; then \
+		echo "⚙️  DevOps services enabled, starting setup..."; \
+		docker compose -f ./srcs/devops-docker-compose.yml up setup && \
+		docker compose -f ./srcs/docker-compose.yml -f ./srcs/devops-docker-compose.yml up -d; \
+	else \
+		echo "ℹ️  DevOps services disabled, starting only main services..."; \
+		docker compose -f ./srcs/docker-compose.yml up -d; \
+	fi; \
+	sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true; \
+	echo "✨ Build Complete!"
 
 init-portainer:
 	@echo "Starting of the init scripts..."
@@ -46,20 +87,20 @@ init-portainer:
 		echo "Portainer init script failed with return value $$R_VALUE!"; \
 	fi || true
 
-init-vault:
-	@echo "Starting of the init scripts..."
-	@cd ./srcs && ./scripts/tls_setup.sh; \
+init-vault:  init-network
+	@echo "Starting of the tls scripts..."
+	@./srcs/scripts/tls_setup.sh;\
 	R_VALUE=$$?; \
 	if [ $$R_VALUE -eq 0 ]; then \
-		echo "Vault init done!"; \
+		echo "Vault tls done!"; \
 	else \
-		echo "Vault init script failed with return value $$R_VALUE!"; \
+		echo "Vault tls script failed with return value $$R_VALUE!"; \
 	fi
 	@echo "Starting Vault container..."
-	@cd ./srcs && docker compose up vault -d
+	@docker compose -f ./srcs/docker-compose.yml up vault -d
 	@echo "Vault container started !"
 	@echo "Vault initialization started..."
-	@cd ./srcs && ./scripts/vault_init.sh; \
+	@DEV=$(DEV) ./srcs/scripts/vault_init.sh; \
 	R_VALUE=$$?; \
 	if [ $$R_VALUE -eq 0 ]; then \
 		echo "Vault init done!"; \
@@ -67,7 +108,7 @@ init-vault:
 		echo "Vault init script failed with return value $$R_VALUE!"; \
 	fi
 	@echo "Vault setup started..."
-	@cd ./srcs && ./scripts/vault_setup.sh; \
+	@./srcs/scripts/vault_setup.sh; \
 	R_VALUE=$$?; \
 	if [ $$R_VALUE -eq 0 ]; then \
 		echo "Vault setup done!"; \
@@ -123,7 +164,7 @@ fclean: clean-data clean-sensitive-data clean-ssl
 	@docker exec tr_django remove_migrations.sh || true
 	@docker exec tr_channels remove_migrations.sh || true
 	@echo "Stopping and removing all Docker containers..."
-	@cd ./srcs &&  docker compose down --volumes --remove-orphans || true
+	@docker compose -f ./srcs/docker-compose.yml -f ./srcs/devops-docker-compose.yml down --volumes --remove-orphans || true
 	@docker stop $$(docker ps -q) || true
 	@docker rm $$(docker ps -a -q) || true
 	@echo "Removing all Docker images..."
@@ -139,41 +180,10 @@ fclean: clean-data clean-sensitive-data clean-ssl
 	@sudo rm -rf ./srcs/data/fleet_server_data
 	@echo "Cleanup complete."
 
-stop-docker:
-	@echo "Stopping Docker daemon and all containers..."
-	@sudo systemctl stop docker* > /dev/null 2>&1
-	@echo "All Docker containers stopped!"
-
-start-docker:
-	@echo "Starting Docker daemon..."
-	@sudo systemctl start docker.service docker.socket > /dev/null 2>&1
-	@echo "Docker daemon started!"
-
 clean-data:
 	@echo "Cleaning of the data folder..."
 	@sudo find srcs/data -mindepth 1 -maxdepth 1 ! -name 'django_data' ! -name 'media_data' ! -name 'website_data' ! -name 'channels_data' -exec rm -rf {} +
 	@echo "Cleaning done !"
-
-restart-docker:
-	@if [ -z "$(container)" ]; then \
-		echo "Restarting all Docker containers..."; \
-		docker restart $$(docker ps -q) > /dev/null 2>&1; \
-		echo "All Docker containers have been restarted."; \
-	else \
-		if docker ps -a --format '{{.Names}}' | grep -q "^$(container)$$"; then \
-			echo "Restarting Docker container '$(container)'..."; \
-			docker restart $(container) > /dev/null 2>&1; \
-			echo "Docker container '$(container)' has been restarted."; \
-		else \
-			echo "Error: Docker container '$(container)' not found."; \
-			echo "Here is the list of available containers to restart:"; \
-			docker ps -a --format '{{.Names}}'; \
-			exit 1; \
-		fi \
-	fi
-%:
-	@$(MAKE) restart-docker container=$@
-
 
 
 # Add this to your existing Makefile
@@ -209,7 +219,7 @@ ssl-cert: create-data-dirs
 			cp -R ./.backup/data/certbot/certificates/pong-br.com/ ./srcs/data/certbot/certificates/; \
 		else \
 			echo "🔐 Generating new SSL certificates..."; \
-			cd ./srcs && docker compose up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
+			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
 			echo "⏳ Waiting for certbot container to initialize..."; \
 			sleep 2; \
 			echo "🔑 Running certificate generation..."; \
@@ -226,16 +236,16 @@ ssl-cert: create-data-dirs
 				exit 1; \
 			fi; \
 			echo "📂 Setting permissions on certificate files..."; \
-			chmod 755 --recursive ./data/certbot/certificates/pong-br.com/ || { echo "❌ Failed to set permissions"; exit 1; }; \
+			chmod 644 --recursive ./data/certbot/certificates/pong-br.com/ || { echo "❌ Failed to set permissions"; exit 1; }; \
 			echo "✅ SSL certificate generation completed successfully."; \
 		fi; \
 	fi
 
 # Force renewal of certificates
 ssl-renew:
-	docker compose run --rm certbot certbot renew --force-renewal
-
+	docker compose -f ./srcs/docker-compose.yml run --rm certbot certbot renew --force-renewal
 
 re: fclean all
 
-.PHONY: all build-and-up ssl-cert ssl-renew fclean re restart-docker stop-docker start-docker setup show-vault-token
+.PHONY: all build-and-up ssl-cert ssl-renew fclean re show-vault-token
+
