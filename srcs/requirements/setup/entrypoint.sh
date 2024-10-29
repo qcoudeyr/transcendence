@@ -20,13 +20,9 @@ log_error() {
 export_secrets() {
     _secrets=$1
 
-    if [ "${SET_ENV:-0}" = "1" ]; then
-        log_info "Using declare -x to set environment variables"
-        eval "$(echo "$_secrets" | /vault/entrypoint/jq -r 'to_entries | .[] | "declare -x \(.key)=\(.value)"')"
-    else
-        log_info "Using export to set environment variables"
-        eval "$(echo "$_secrets" | /vault/entrypoint/jq -r 'to_entries | .[] | "export \(.key)=\(.value)"')"
-    fi
+    # Simplified export approach that works in both sh and bash
+    eval "$(echo "$_secrets" | /vault/entrypoint/jq -r 'to_entries | .[] | "export \(.key)=\(.value)"')"
+    log_info "Environment variables set using export"
 }
 
 # Function to fetch secrets from Vault
@@ -47,7 +43,7 @@ fetch_vault_secrets() {
 
     # Login to Vault using AppRole
     log_info "Authenticating with Vault"
-    VAULT_RESPONSE=$(/vault/entrypoint/curl -s \
+    VAULT_RESPONSE=$(/vault/entrypoint/curl --cacert /vault/entrypoint/certs/rootCA.crt --insecure -s \
         --request POST \
         --data "{\"role_id\":\"${ROLE_ID}\",\"secret_id\":\"${SECRET_ID}\"}" ${VAULT_ADDR}/v1/auth/${_service_name}/login)
     VAULT_TOKEN=$(echo "$VAULT_RESPONSE" | /vault/entrypoint/jq -r '.auth.client_token')
@@ -60,7 +56,7 @@ fetch_vault_secrets() {
 
     # Fetch secrets
     log_info "Fetching secrets from path: $_secret_path"
-    SECRETS=$(/vault/entrypoint/curl -s \
+    SECRETS=$(/vault/entrypoint/curl --cacert /vault/entrypoint/certs/rootCA.crt --insecure -s \
         --header "X-Vault-Token: ${VAULT_TOKEN}" \
         ${VAULT_ADDR}/v1/kv/data/${_secret_path} | /vault/entrypoint/jq -r '.data.data')
 

@@ -2,11 +2,12 @@ import { navigateToSection, changePages, switchProfileSection, playButtonSetup, 
 import { setupLogin, setupRegister, checkAccessToken } from './Modules/API/auth.js';
 import { getMailAndUsername, getNameBioAndAvatar } from './Modules/API/getProfileInfo.js';
 import { websocketConnect } from './WebSocket/websocket-open.js';
+// import { checkToken } from './Modules/API/auth.js';
 
 
 document.addEventListener("DOMContentLoaded", function () {
 	hidePreloaderAfterLoad();
-	
+
 	// Navigation logic
 	const sections = document.querySelectorAll("section");
 	const links = document.querySelectorAll("nav a");

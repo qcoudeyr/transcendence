@@ -48,7 +48,7 @@ class Pad(GameObject):
             self.x = - MAP_LENGTH / 2
         self.y = GAME_HEIGHT
         self.z = MAP_WIDTH / 2
-        
+
         player = Profile.objects.get(pk=self.player_id)
         player.pad_x = self.x
         player.pad_y = self.y

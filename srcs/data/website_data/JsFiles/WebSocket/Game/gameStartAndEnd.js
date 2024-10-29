@@ -4,7 +4,7 @@
 
 // function handleSocketMessage(event) {
 //     const data = JSON.parse(event.data);
-    
+
 //     if (data.type === "game_start") {
 //         // Set up key press listener when the game starts
 //         document.addEventListener("keydown", handleKeyPress);
@@ -34,5 +34,5 @@
 
 export function gameEnd()
 {
-	
+
 }

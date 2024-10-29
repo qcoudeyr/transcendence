@@ -1,147 +1,113 @@
 #!/usr/bin/env bash
-# lib.sh
 
-# Enhanced logging functions with timestamp and log levels
+es_ca_cert="${BASH_SOURCE[0]%/*}"/ca.crt
+
+# Log a message.
 function log {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] $1"
+	echo "[+] $1"
 }
 
-function debug {
-    if [[ "${DEBUG:-false}" == "true" ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DEBUG] $1"
-    fi
-}
-
+# Log a message at a sub-level.
 function sublog {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO]    ⠿ $1"
+	echo "   ⠿ $1"
 }
 
+# Log an error.
 function err {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] $1" >&2
+	echo "[x] $1" >&2
 }
 
+# Log an error at a sub-level.
 function suberr {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR]    ⠍ $1" >&2
+	echo "   ⠍ $1" >&2
 }
 
-# Enhanced wait_for_elasticsearch function with detailed logging
+# Poll the 'elasticsearch' service until it responds with HTTP code 200.
 function wait_for_elasticsearch {
-    local elasticsearch_host="${ELASTICSEARCH_HOST:-elasticsearch}"
-    debug "Elasticsearch host: ${elasticsearch_host}"
+	local elasticsearch_host="${ELASTICSEARCH_HOST:-elasticsearch}"
 
-    local -a args=( '-s' '-D-' '-m15' '-w' '%{http_code}' "http://${elasticsearch_host}:9200/" )
+	local -a args=( '-s' '-D-' '-m15' '-w' '%{http_code}' 'https://elasticsearch:9200/'
+		'--resolve' "elasticsearch:9200:${elasticsearch_host}" '--cacert' "$es_ca_cert"
+		)
 
-    if [[ -n "${ELASTIC_PASSWORD:-}" ]]; then
-        debug "Using authentication with elastic user"
-        args+=( '-u' "elastic:${ELASTIC_PASSWORD}" )
-    else
-        debug "No authentication configured"
-    fi
+	if [[ -n "${ELASTIC_PASSWORD:-}" ]]; then
+		args+=( '-u' "elastic:${ELASTIC_PASSWORD}" )
+	fi
 
-    local -i result=1
-    local output
-    local -i attempt=1
+	local -i result=1
+	local output
 
-    # retry for max 300s (60*5s)
-    for _ in $(seq 1 60); do
-        debug "Attempt ${attempt}/60 to connect to Elasticsearch"
+	# retry for max 300s (60*5s)
+	for _ in $(seq 1 60); do
+		local -i exit_code=0
+		output="$(curl "${args[@]}")" || exit_code=$?
 
-        local -i exit_code=0
-        local start_time=$(date +%s)
-        output="$(curl "${args[@]}" 2>&1)" || exit_code=$?
-        local end_time=$(date +%s)
-        local duration=$((end_time - start_time))
+		if ((exit_code)); then
+			result=$exit_code
+		fi
 
-        if ((exit_code)); then
-            debug "Curl command failed with exit code ${exit_code}"
-            debug "Curl output: ${output}"
-            result=$exit_code
-        fi
+		if [[ "${output: -3}" -eq 200 ]]; then
+			result=0
+			break
+		fi
 
-        debug "HTTP response code: ${output: -3}"
-        debug "Request took ${duration} seconds"
+		sleep 5
+	done
 
-        if [[ "${output: -3}" -eq 200 ]]; then
-            debug "Received HTTP 200 response"
-            result=0
-            break
-        fi
+	if ((result)) && [[ "${output: -3}" -ne 000 ]]; then
+		echo -e "\n${output::-3}"
+	fi
 
-        sublog "Attempt ${attempt}/60 failed. Waiting 5 seconds before retry..."
-        sleep 5
-        ((attempt++))
-    done
-
-    if ((result)); then
-        if [[ "${output: -3}" -ne 000 ]]; then
-            err "Failed to connect to Elasticsearch after ${attempt} attempts"
-            echo -e "\nDetailed response:\n${output::-3}"
-            debug "Final curl exit code: ${result}"
-        fi
-    else
-        log "Successfully connected to Elasticsearch after ${attempt} attempts"
-    fi
-
-    return $result
+	return $result
 }
 
-# Enhanced wait_for_builtin_users function
+# Poll the Elasticsearch users API until it returns users.
 function wait_for_builtin_users {
-    local elasticsearch_host="${ELASTICSEARCH_HOST:-elasticsearch}"
-    debug "Checking built-in users on host: ${elasticsearch_host}"
+	local elasticsearch_host="${ELASTICSEARCH_HOST:-elasticsearch}"
 
-    local -a args=( '-s' '-D-' '-m15' "http://${elasticsearch_host}:9200/_security/user?pretty" )
+	local -a args=( '-s' '-D-' '-m15' 'https://elasticsearch:9200/_security/user?pretty'
+		'--resolve' "elasticsearch:9200:${elasticsearch_host}" '--cacert' "$es_ca_cert"
+		)
 
-    if [[ -n "${ELASTIC_PASSWORD:-}" ]]; then
-        debug "Using authentication for user check"
-        args+=( '-u' "elastic:${ELASTIC_PASSWORD}" )
-    fi
+	if [[ -n "${ELASTIC_PASSWORD:-}" ]]; then
+		args+=( '-u' "elastic:${ELASTIC_PASSWORD}" )
+	fi
 
-    local -i result=1
-    local -i attempt=1
+	local -i result=1
 
-    local line
-    local -i exit_code
-    local -i num_users
+	local line
+	local -i exit_code
+	local -i num_users
 
-    # retry for max 30s (30*1s)
-    for _ in $(seq 1 30); do
-        debug "Attempt ${attempt}/30 to check built-in users"
-        num_users=0
+	# retry for max 30s (30*1s)
+	for _ in $(seq 1 30); do
+		num_users=0
 
-        while IFS= read -r line || ! exit_code="$line"; do
-            if [[ "$line" =~ _reserved.+true ]]; then
-                ((num_users++))
-                debug "Found reserved user: ${line}"
-            fi
-        done < <(curl "${args[@]}"; printf '%s' "$?")
+		# read exits with a non-zero code if the last read input doesn't end
+		# with a newline character. The printf without newline that follows the
+		# curl command ensures that the final input not only contains curl's
+		# exit code, but causes read to fail so we can capture the return value.
+		# Ref. https://unix.stackexchange.com/a/176703/152409
+		while IFS= read -r line || ! exit_code="$line"; do
+			if [[ "$line" =~ _reserved.+true ]]; then
+				(( num_users++ ))
+			fi
+		done < <(curl "${args[@]}"; printf '%s' "$?")
 
-        if ((exit_code)); then
-            debug "Curl command failed with exit code ${exit_code}"
-            result=$exit_code
-        fi
+		if ((exit_code)); then
+			result=$exit_code
+		fi
 
-        debug "Found ${num_users} reserved users"
+		# we expect more than just the 'elastic' user in the result
+		if (( num_users > 1 )); then
+			result=0
+			break
+		fi
 
-        if (( num_users > 1 )); then
-            debug "Successfully found ${num_users} built-in users"
-            result=0
-            break
-        fi
+		sleep 1
+	done
 
-        sublog "Attempt ${attempt}/30: Found only ${num_users} users. Waiting 1 second before retry..."
-        sleep 1
-        ((attempt++))
-    done
-
-    if ((result)); then
-        err "Failed to find expected number of built-in users after ${attempt} attempts"
-        debug "Last exit code: ${result}"
-    else
-        log "Successfully verified built-in users after ${attempt} attempts"
-    fi
-
-    return $result
+	return $result
 }
 
 # Verify that the given Elasticsearch user exists.
@@ -151,7 +117,8 @@ function check_user_exists {
 	local elasticsearch_host="${ELASTICSEARCH_HOST:-elasticsearch}"
 
 	local -a args=( '-s' '-D-' '-m15' '-w' '%{http_code}'
-		"http://${elasticsearch_host}:9200/_security/user/${username}"
+		"https://elasticsearch:9200/_security/user/${username}"
+		'--resolve' "elasticsearch:9200:${elasticsearch_host}" '--cacert' "$es_ca_cert"
 		)
 
 	if [[ -n "${ELASTIC_PASSWORD:-}" ]]; then
@@ -187,7 +154,8 @@ function set_user_password {
 	local elasticsearch_host="${ELASTICSEARCH_HOST:-elasticsearch}"
 
 	local -a args=( '-s' '-D-' '-m15' '-w' '%{http_code}'
-		"http://${elasticsearch_host}:9200/_security/user/${username}/_password"
+		"https://elasticsearch:9200/_security/user/${username}/_password"
+		'--resolve' "elasticsearch:9200:${elasticsearch_host}" '--cacert' "$es_ca_cert"
 		'-X' 'POST'
 		'-H' 'Content-Type: application/json'
 		'-d' "{\"password\" : \"${password}\"}"
@@ -221,7 +189,8 @@ function create_user {
 	local elasticsearch_host="${ELASTICSEARCH_HOST:-elasticsearch}"
 
 	local -a args=( '-s' '-D-' '-m15' '-w' '%{http_code}'
-		"http://${elasticsearch_host}:9200/_security/user/${username}"
+		"https://elasticsearch:9200/_security/user/${username}"
+		'--resolve' "elasticsearch:9200:${elasticsearch_host}" '--cacert' "$es_ca_cert"
 		'-X' 'POST'
 		'-H' 'Content-Type: application/json'
 		'-d' "{\"password\":\"${password}\",\"roles\":[\"${role}\"]}"
@@ -254,7 +223,8 @@ function ensure_role {
 	local elasticsearch_host="${ELASTICSEARCH_HOST:-elasticsearch}"
 
 	local -a args=( '-s' '-D-' '-m15' '-w' '%{http_code}'
-		"http://${elasticsearch_host}:9200/_security/role/${name}"
+		"https://elasticsearch:9200/_security/role/${name}"
+		'--resolve' "elasticsearch:9200:${elasticsearch_host}" '--cacert' "$es_ca_cert"
 		'-X' 'POST'
 		'-H' 'Content-Type: application/json'
 		'-d' "$body"

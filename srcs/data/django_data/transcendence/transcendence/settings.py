@@ -35,8 +35,16 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', '')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
 ALLOWED_HOSTS = ["*"]
+
+#SSL/TLS configuration
+
+# Security settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 
 # Application definition
 
@@ -98,9 +106,9 @@ DATABASES = {
         'PASSWORD': env('DATABASE_PASSWORD'),
         'HOST': env('DATABASE_HOST'),
         'PORT': env('DATABASE_PORT'),
+        'OPTIONS': {'sslmode': 'require'}
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -206,5 +214,7 @@ SIMPLE_JWT = {
 ELASTIC_APM = {
 	'SERVICE_NAME': 'django',
 	'SECRET_TOKEN': '',
-	'SERVER_URL': 'http://apm-server:8200'
+	'SERVER_URL': 'https://apm-server:8200',
+	'SERVER_CERT': '/app/certs/localhost/localhost.crt',
+	'VERIFY_SERVER_CERT': False,
 }

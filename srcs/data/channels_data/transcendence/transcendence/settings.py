@@ -205,7 +205,7 @@ MEDIA_URL = '/media/'
 ELASTIC_APM = {
 	'SERVICE_NAME': 'channel',
 	'SECRET_TOKEN': '',
-	'SERVER_URL': 'http://apm-server:8200'
+	'SERVER_URL': 'https://apm-server:8200'
 }
 
 # Celery config
