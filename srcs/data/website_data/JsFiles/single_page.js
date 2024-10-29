@@ -37,7 +37,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	if (localStorage.getItem('accessToken') && localStorage.getItem('refreshToken')){
 		window.onload = function() {
 		if (checkAccessToken() === false)
+		{
 			logout();
+		}
 		getMailAndUsername(); // Call the function here
 		getNameBioAndAvatar();
 		websocketConnect();

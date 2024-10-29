@@ -10,6 +10,7 @@ export function checkAccessToken()
 		.then((response) => response.ok ? response.json() : Promise.reject(response))
 		.then((data) => {
 			alert(data);
+			return (true);
 		})
 		.catch((error) => {
 			alert('Login no longer valid reloading..');
