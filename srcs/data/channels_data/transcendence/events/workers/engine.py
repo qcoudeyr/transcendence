@@ -6,6 +6,7 @@ import logging
 from channels.layers import get_channel_layer
 from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
+from django.core.cache import cache
 
 from profiles.models import Profile
 
@@ -22,6 +23,7 @@ class PongEngine:
     def __init__(self, game_id, player_ids):
         self.game_id = game_id
         self.player_ids = player_ids
+        self.game_channel = 'game_' + str(game_id)
 
     async def game_loop(self):
         await channel_layer.group_send(
@@ -32,12 +34,16 @@ class PongEngine:
                 'message': f'game id: {self.game_id}'
             }
         )
-        # Send game start (before wait for everyone to add the game channel)
+        # Send game start (before, wait for everyone to add the game channel)
         await asyncio.sleep(1)
         await channel_layer.group_send(
-            'game_' + str(self.game_id),
+            self.game_channel,
             {'type': 'send.game.start'}
         )
+
+        # Set game state
+        self.some_count = 0
+        await cache.aset(self.game_channel, f'Hello {self.some_count} from the engine !')
 
         # Wait for players
         players_ready = False
@@ -56,6 +62,7 @@ class PongEngine:
             {
                 'type': 'game.update',
                 'game_id': self.game_id,
+                'game_channel': self.game_channel,
             }
         )
 
@@ -92,7 +99,8 @@ class PongEngine:
         # Save game history
     
     async def apply_physic(self):
-        pass
+        self.some_count += 1
+        await cache.aset(self.game_channel, f'Hello {self.some_count} from the engine !')
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
