@@ -16,6 +16,9 @@ channel_layer = get_channel_layer()
 
 class EventConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        # Connexion always accepted, bad connexions are handled by the middleware
+        await self.accept()
+
         # Events handled by the server
         self.events = {
             'chat_message': self.chat_message,
@@ -68,9 +71,6 @@ class EventConsumer(AsyncWebsocketConsumer):
                     'status': self.profile.get_status_display(),
                 }
             )
-
-        # Connexion always accepted, bad connexions are handled by the middleware
-        await self.accept()
 
     async def disconnect(self, close_code):
         await update_profile_status(self.profile, 'OF')
