@@ -532,7 +532,8 @@ class EventConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_add(self.game_group, self.channel_name)
 
     async def leave_game_channel(self, event):
-        await self.channel_layer.group_discard(self.game_group, self.channel_name)
+        if self.game_group != None:
+            await self.channel_layer.group_discard(self.game_group, self.channel_name)
 
 # Database access from consumers
 @database_sync_to_async
