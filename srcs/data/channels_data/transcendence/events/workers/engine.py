@@ -81,6 +81,9 @@ class PongEngine:
         # Update profiles status and player things (is_game_ready, movement...)
         # Send game end
         # Save game history
+    
+    async def apply_physic(self):
+        pass
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
