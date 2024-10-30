@@ -525,6 +525,7 @@ class EventConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.private_groups[friend_pk], self.channel_name)
 
     async def join_game_channel(self, event):
+        database_sync_to_async(self.profile.refresh_from_db)()
         if self.profile.actual_game_id != None:
             self.game_group = "game_" + str(self.profile.actual_game_id)
             await self.channel_layer.group_add(self.game_group, self.channel_name)
