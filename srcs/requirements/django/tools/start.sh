@@ -4,10 +4,11 @@ sleep 5
 
 remove_migrations.sh
 
-IFS=', ' read -r -a apps <<< "$APPS"
-for i in "${apps[@]}"; do
-    python manage.py makemigrations "$i"
-done
+# IFS=', ' read -r -a apps <<< "$APPS"
+# for i in "${apps[@]}"; do
+#     python manage.py makemigrations "$i"
+# done
+python manage.py makemigrations
 
 python manage.py migrate
 
