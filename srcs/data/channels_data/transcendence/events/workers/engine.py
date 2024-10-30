@@ -1,5 +1,7 @@
 import time
 import asyncio
+import traceback
+import logging
 
 from channels.layers import get_channel_layer
 from channels.consumer import AsyncConsumer
@@ -89,6 +91,8 @@ class EngineConsumer(AsyncConsumer):
             return
 
         # Create game instance
-        engine = PongEngine(game_id, player_ids)
-        await engine.game_loop()
-
+        try:
+            engine = PongEngine(game_id, player_ids)
+            await engine.game_loop()
+        except Exception:
+            logging.error(traceback.format_exc())
