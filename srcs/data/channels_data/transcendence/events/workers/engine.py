@@ -32,7 +32,8 @@ class PongEngine:
                 'message': f'game id: {self.game_id}'
             }
         )
-        # Send game start
+        # Send game start (before wait for everyone to add the game channel)
+        await asyncio.sleep(1)
         await channel_layer.group_send(
             'game_' + str(self.game_id),
             {'type': 'send.game.start'}
