@@ -84,10 +84,11 @@ class PongEngine:
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
-        channel_layer.group_send(
+        await channel_layer.group_send(
             'general_chat',
             {
                 'type': 'send.chat.message',
+                'name': 'engine',
                 'message': 'classic_game'
             }
         )
