@@ -54,6 +54,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             await self.join_friend_channel(friend_pk=friend.pk)
 
         # Already in game
+        self.game_group = None
         if self.profile.is_in_game:
             await update_profile_status(self.profile, 'IG')
             await self.join_game_channel({})
