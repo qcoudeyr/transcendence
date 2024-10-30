@@ -16,22 +16,15 @@ TICK_RATE = 1.0 / 60
 
 channel_layer = get_channel_layer()
 
-class EngineConsumer(AsyncConsumer):
-    async def classic_game(self, event):
-        if 'player_ids' in event and 'game_id' in event:
-            game_id = event['game_id']
-            player_ids = event['player_ids']
-        else:
-            return
-        if len(player_ids) != 2:
-            return
+class PongEngine:
+    def __init__(self, game_id, player_ids):
+        self.game_id = game_id
+        self.player_ids = player_ids
 
-        # Create game instance
-        engine = PongEngine(game_id)
-
+    async def game_loop(self):
         # Send game start
         await channel_layer.group_send(
-            'game_' + str(game_id),
+            'game_' + str(self.game_id),
             {'type': 'send.game.start'}
         )
 
@@ -39,24 +32,24 @@ class EngineConsumer(AsyncConsumer):
         players_ready = False
         while (not players_ready):
             players_ready = True
-            for player_id in player_ids:
+            for player_id in self.player_ids:
                 player = await database_sync_to_async(Profile.objects.get)(pk=player_id)
                 if not player.is_game_ready:
                     players_ready = False
 
             await asyncio.sleep(0.1)
 
-        # Subscribe players to game updates
+        # Subscribe players to periodic game updates
         await channel_layer.send(
             'update-server',
             {
                 'type': 'game.update',
-                'game_id': game_id,
+                'game_id': self.game_id,
             }
         )
 
-        engine.game_continue = True
-        while (engine.game_continue):
+        game_continue = True
+        while (game_continue):
             # Initialize game objects
 
             # Send round start
@@ -70,10 +63,10 @@ class EngineConsumer(AsyncConsumer):
             tick_count = 0
             start_time = time.time()
 
-            engine.round_continue = True
-            while (engine.round_continue):
+            round_continue = True
+            while (round_continue):
                 # Apply physic (update objects)
-                await engine.apply_physic()
+                await self.apply_physic()
 
                 # Ensure tick rate
                 tick_count += 1
@@ -86,3 +79,16 @@ class EngineConsumer(AsyncConsumer):
         # Update profiles status and player things (is_game_ready, movement...)
         # Send game end
         # Save game history
+
+class EngineConsumer(AsyncConsumer):
+    async def classic_game(self, event):
+        if 'player_ids' in event and 'game_id' in event:
+            game_id = event['game_id']
+            player_ids = event['player_ids']
+        else:
+            return
+
+        # Create game instance
+        engine = PongEngine(game_id, player_ids)
+        await engine.game_loop()
+
