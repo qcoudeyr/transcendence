@@ -24,6 +24,14 @@ class PongEngine:
         self.player_ids = player_ids
 
     async def game_loop(self):
+        await channel_layer.group_send(
+            'general_chat',
+            {
+                'type': 'send.chat.message',
+                'name': 'engine',
+                'message': f'game id: {self.game_id}'
+            }
+        )
         # Send game start
         await channel_layer.group_send(
             'game_' + str(self.game_id),
