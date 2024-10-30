@@ -783,7 +783,7 @@ def search_classic_game(new_group_id, new_group_size):
             player.actual_game_id = game_history.pk
             player.save(update_fields=['actual_game_id'])
             async_to_sync(channel_layer.group_send)(
-                'notification_' + str(player.pk),
+                'notifications_' + str(player.pk),
                 {'type': 'join.game.channel'}
             )
 
