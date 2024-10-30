@@ -528,6 +528,7 @@ class EventConsumer(AsyncWebsocketConsumer):
     async def join_game_channel(self, event):
         await database_sync_to_async(self.profile.refresh_from_db)()
         if self.profile.actual_game_id != None:
+            await self.send_chat_message({'name': 'debug', 'message': f'game id: {self.profile.actual_game_id}'})
             self.game_group = "game_" + str(self.profile.actual_game_id)
             await self.channel_layer.group_add(self.game_group, self.channel_name)
 
