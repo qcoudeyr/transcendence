@@ -775,13 +775,11 @@ def search_classic_game(new_group_id, new_group_size):
                 member.is_in_game = True
                 member.save(update_fields=['status', 'is_in_game'])
 
-        game_history = GameHistory.objects.create(
-            player_0=Profile.objects.get(id=player_ids[0]),
-            player_1=Profile.objects.get(id=player_ids[1]),
-        )
+        game_history = GameHistory.objects.create()
 
         for player_id in player_ids:
             player = Profile.objects.get(pk=player_id)
+            game_history.players.add(player)
             player.actual_game_id = game_history.pk
             player.save(update_fields=['actual_game_id'])
             async_to_sync(channel_layer.group_send)(
