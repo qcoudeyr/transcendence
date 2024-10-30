@@ -84,6 +84,13 @@ class PongEngine:
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
+        channel_layer.group_send(
+            'general_chat',
+            {
+                'type': 'send.chat.message',
+                'message': 'classic_game'
+            }
+        )
         if 'player_ids' in event and 'game_id' in event:
             game_id = event['game_id']
             player_ids = event['player_ids']
