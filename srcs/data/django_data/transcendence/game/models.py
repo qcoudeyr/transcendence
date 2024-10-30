@@ -5,17 +5,14 @@ class PartyQueue(models.Model):
     mode = models.CharField(max_length=20, primary_key=True)
 
 class GameHistory(models.Model):
-    player_0 = models.OneToOneField(
-        "profiles.Profile",
-        on_delete=models.PROTECT,
-    )
-    player_1 = models.OneToOneField(
+    players = models.ManyToManyField(
         "profiles.Profile",
         on_delete=models.PROTECT,
     )
     winner = models.OneToOneField(
         "profiles.Profile",
         on_delete=models.PROTECT,
+        related_name='game_history_winner',
         null=True,
     )
     score_0 = models.IntegerField(default=0)
