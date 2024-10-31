@@ -7,7 +7,7 @@ from django.core.cache import cache
 
 channel_layer = get_channel_layer()
 
-TICK_RATE = 1.0 / 2
+TICK_RATE = 1.0 / 64
 
 class UpdateConsumer(AsyncConsumer):
     async def game_update(self, event):
