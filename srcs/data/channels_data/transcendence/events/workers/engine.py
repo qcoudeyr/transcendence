@@ -124,7 +124,7 @@ class PongEngine:
 
         if x >= MAP_LENGTH / 2 or x <= -MAP_LENGTH / 2:
             self.direction *= -1
-        self.game_state['x'] = x + self.direction * TICK_RATE
+        self.game_state['x'] = x + self.direction * 1.0 / TICK_RATE
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
