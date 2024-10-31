@@ -124,8 +124,10 @@ class PongEngine:
     async def apply_physic(self):
         x = self.game_state['x']
 
-        if x >= MAP_LENGTH / 2 or x <= -MAP_LENGTH / 2:
-            self.direction *= -1
+        if x >= MAP_LENGTH / 2:
+            self.direction = -1
+        elif x <= -MAP_LENGTH / 2:
+            self.direction = 1
         self.game_state['x'] = x + self.direction * self.speed * (time.time() - self.time)
         self.time = time.time()
 
