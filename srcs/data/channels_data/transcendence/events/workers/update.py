@@ -10,20 +10,7 @@ channel_layer = get_channel_layer()
 TICK_RATE = 1.0 / 64
 
 class UpdateConsumer(AsyncConsumer):
-    async def game_update(self, event):
-        await channel_layer.group_send(
-            'general_chat',
-            {
-                'type': 'send.chat.message',
-                'name': 'update',
-                'message': 'game update'
-            }
-        )
-        if 'game_channel' in event:
-            self.game_channel = event['game_channel']
-        else:
-            return
-
+    async def update_loop(self):
         # Tick rate setup
         tick_rate = TICK_RATE
         tick_count = 0
@@ -44,3 +31,18 @@ class UpdateConsumer(AsyncConsumer):
             time_to_wait = targeted_time - time.time()
             if time_to_wait > 0:
                 await asyncio.sleep(time_to_wait)
+
+    async def game_update(self, event):
+        await channel_layer.group_send(
+            'general_chat',
+            {
+                'type': 'send.chat.message',
+                'name': 'update',
+                'message': 'game update'
+            }
+        )
+        if 'game_channel' in event:
+            self.game_channel = event['game_channel']
+        else:
+            return
+        asyncio.create_task(self.update_loop())
