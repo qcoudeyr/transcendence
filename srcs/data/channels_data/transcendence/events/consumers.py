@@ -378,12 +378,13 @@ class EventConsumer(AsyncWebsocketConsumer):
             group = await get_profile_group(self.profile)
 
             if mode == 'CLASSIC' and group_size <= 2:
-                if await search_classic_game(group.pk, group_size):
+                game_id, player_ids = await search_classic_game(group.pk, group_size)
+                if game_id != None:
                     await channel_layer.send(
                         'engine-server',
                         {
                             'type': 'classic.game',
-                            'game_id': game_history.pk,
+                            'game_id': game_id,
                             'player_ids': player_ids,
                         }
                     )
@@ -767,7 +768,7 @@ def search_classic_game(new_group_id, new_group_size):
 
     for member in list(new_group.members.all()):
         if member.is_in_game:
-            return False
+            return None, None
     if new_group_size != 2:
         if hasattr(queue, 'groups') and len(queue.groups.all()) != 0:
             group = queue.groups.first()
@@ -800,9 +801,9 @@ def search_classic_game(new_group_id, new_group_size):
                 {'type': 'join.game.channel'}
             )
         
-        return True
+        return game_history.pk, player_ids
 
-    return False
+    return None, None
 
         # async_to_sync(channel_layer.send)(
         #     'engine-server',
