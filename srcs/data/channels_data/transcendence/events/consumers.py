@@ -513,13 +513,20 @@ class EventConsumer(AsyncWebsocketConsumer):
             })
         )
 
-    async def send_game_object(self, event):
+    async def send_game_state(self, event):
+        # Select which camera to send based on the profile
+        if self.profile.pk == event['PLAYER_0']:
+            event['CAMERA'] = event['CAMERA_0']
+        else:
+            event['CAMERA'] = event['CAMERA_1']
         await self.send(text_data=json.dumps({
-            'type': 'game_object',
-            'object': event['object'],
-            'x': event['x'],
-            'y': event['y'],
-            'z': event['z'],
+            'type': 'game_state',
+            'BALL': event['BALL'],
+            'CAMERA': event['CAMERA'],
+            'PAD_0': event['PAD_0'],
+            'PAD_1': event['PAD_1'],
+            'TIMER': event['TIMER'],
+            'SCORE': event['SCORE'],
             })
         )
 

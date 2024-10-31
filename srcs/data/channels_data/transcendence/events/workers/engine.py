@@ -114,7 +114,15 @@ class PongEngine:
         self.time = time.time()
         self.game_state = {
             'type': 'game_state',
+            'PLAYER_0': self.player_ids[0],
+            'PLAYER_1': self.player_ids[1],
             'BALL': {'x': DEFAULT_BALL_X, 'y': DEFAULT_BALL_Y, 'z': DEFAULT_BALL_Z},
+            'CAMERA_0': {'x': DEFAULT_CAMERA_0_X, 'y': DEFAULT_CAMERA_0_Y, 'z': DEFAULT_CAMERA_0_Z},
+            'CAMERA_1': {'x': DEFAULT_CAMERA_1_X, 'y': DEFAULT_CAMERA_1_Y, 'z': DEFAULT_CAMERA_1_Z},
+            'PAD_0': {'x': DEFAULT_PAD_0_X, 'y': DEFAULT_PAD_0_Y, 'z': DEFAULT_PAD_0_Z, },
+            'PAD_1': {'x': DEFAULT_PAD_1_X, 'y': DEFAULT_PAD_1_Y, 'z': DEFAULT_PAD_1_Z, },
+            'TIMER': {'minutes': , 'seconds': },
+            'SCORE': {'0': , '1': },
         }
         await cache.aset(self.game_channel, self.game_state)
     
