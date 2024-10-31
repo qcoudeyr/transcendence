@@ -42,3 +42,4 @@ srcs/requirements/tls/certs/ca/ca.srl
 srcs/data/certbot/logs/letsencrypt.log.1
 srcs/data/django_data/transcendence/game/migrations/__init__.py
 srcs/data/django_data/transcendence/game/migrations/0001_initial.py
+srcs/requirements/certbot/luadns.ini
