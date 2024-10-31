@@ -113,11 +113,8 @@ class PongEngine:
         self.speed = 5
         self.time = time.time()
         self.game_state = {
-            'type': 'send.game.object',
-            'object': 'BALL',
-            'x': DEFAULT_BALL_X,
-            'y': DEFAULT_BALL_Y,
-            'z': DEFAULT_BALL_Z,
+            'type': 'game_state',
+            'BALL': {'x': DEFAULT_BALL_X, 'y': DEFAULT_BALL_Y, 'z': DEFAULT_BALL_Z},
         }
         await cache.aset(self.game_channel, self.game_state)
     
@@ -128,7 +125,7 @@ class PongEngine:
             self.direction = -1
         elif x <= -MAP_LENGTH / 2:
             self.direction = 1
-        self.game_state['x'] = x + self.direction * self.speed * (time.time() - self.time)
+        self.game_state['BALL']['x'] = x + self.direction * self.speed * (time.time() - self.time)
         self.time = time.time()
 
 class EngineConsumer(AsyncConsumer):
