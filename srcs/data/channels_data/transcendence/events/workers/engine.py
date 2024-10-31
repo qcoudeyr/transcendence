@@ -119,7 +119,7 @@ class PongEngine:
         await cache.aset(self.game_channel, self.game_state)
     
     async def apply_physic(self):
-        x = self.game_state['x']
+        x = self.game_state['BALL']['x']
 
         if x >= MAP_LENGTH / 2:
             self.direction = -1
