@@ -148,6 +148,6 @@ class EngineConsumer(AsyncConsumer):
         # Create game instance
         try:
             engine = PongEngine(game_id, player_ids)
-            await asyncio.create_task(engine.game_loop())
+            asyncio.create_task(engine.game_loop())
         except Exception:
             logging.error(traceback.format_exc())
