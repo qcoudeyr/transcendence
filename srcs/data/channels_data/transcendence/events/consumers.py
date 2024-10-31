@@ -378,7 +378,15 @@ class EventConsumer(AsyncWebsocketConsumer):
             group = await get_profile_group(self.profile)
 
             if mode == 'CLASSIC' and group_size <= 2:
-                await search_classic_game(group.pk, group_size)
+                if await search_classic_game(group.pk, group_size):
+                    await channel_layer.send(
+                        'engine-server',
+                        {
+                            'type': 'classic.game',
+                            'game_id': game_history.pk,
+                            'player_ids': player_ids,
+                        }
+                    )
 
     async def game_ready(self, content):
         await update_profile_game_ready(self.profile, True)
@@ -759,7 +767,7 @@ def search_classic_game(new_group_id, new_group_size):
 
     for member in list(new_group.members.all()):
         if member.is_in_game:
-            return
+            return False
     if new_group_size != 2:
         if hasattr(queue, 'groups') and len(queue.groups.all()) != 0:
             group = queue.groups.first()
@@ -791,15 +799,19 @@ def search_classic_game(new_group_id, new_group_size):
                 'notifications_' + str(player.pk),
                 {'type': 'join.game.channel'}
             )
+        
+        return True
 
-        async_to_sync(channel_layer.send)(
-            'engine-server',
-            {
-                'type': 'classic.game',
-                'game_id': game_history.pk,
-                'player_ids': player_ids,
-            }
-        )
+    return False
+
+        # async_to_sync(channel_layer.send)(
+        #     'engine-server',
+        #     {
+        #         'type': 'classic.game',
+        #         'game_id': game_history.pk,
+        #         'player_ids': player_ids,
+        #     }
+        # )
 
 @database_sync_to_async
 @transaction.atomic
