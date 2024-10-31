@@ -109,6 +109,7 @@ class PongEngine:
         # Save game history
 
     async def reset_physic(self):
+        self.direction = 1
         self.game_state = {
             'type': 'send.game.object',
             'object': 'BALL',
@@ -119,11 +120,10 @@ class PongEngine:
         await cache.aset(self.game_channel, self.game_state)
     
     async def apply_physic(self):
-        direction = 1
         x = self.game_state['x']
 
         if x >= MAP_LENGTH / 2 or x <= -MAP_LENGTH / 2:
-            direction *= -1
+            self.direction *= -1
         self.game_state['x'] = x + direction * TICK_RATE
 
 class EngineConsumer(AsyncConsumer):
