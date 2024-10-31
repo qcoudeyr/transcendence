@@ -110,6 +110,8 @@ class PongEngine:
 
     async def reset_physic(self):
         self.direction = 1
+        self.speed = 5
+        self.time = time.time()
         self.game_state = {
             'type': 'send.game.object',
             'object': 'BALL',
@@ -124,7 +126,8 @@ class PongEngine:
 
         if x >= MAP_LENGTH / 2 or x <= -MAP_LENGTH / 2:
             self.direction *= -1
-        self.game_state['x'] = x + self.direction * 128
+        self.game_state['x'] = x + self.direction * self.speed * (time.time() - self.time)
+        self.time = time.time()
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
