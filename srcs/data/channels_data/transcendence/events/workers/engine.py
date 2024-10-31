@@ -12,10 +12,14 @@ from profiles.models import Profile
 
 BALL_RADIUS = 0.1
 PAD_LENGTH = 0.3
-GAME_HEIGHT = 0.15
+MAP_HEIGHT = 0.15
 MAP_LENGTH = 10
 MAP_WIDTH = 2.5
 TICK_RATE = 1.0 / 60
+
+DEFAULT_BALL_X = 0
+DEFAULT_BALL_Y = MAP_HEIGHT
+DEFAULT_BALL_Z = 0
 
 channel_layer = get_channel_layer()
 
@@ -42,8 +46,7 @@ class PongEngine:
         )
 
         # Set game state
-        self.some_count = 0
-        await cache.aset(self.game_channel, f'Hello {self.some_count} from the engine !')
+        await self.reset_physic()
 
         # Wait for players
         players_ready = False
@@ -69,6 +72,7 @@ class PongEngine:
         game_continue = True
         while (game_continue):
             # Initialize game objects
+            await self.reset_physic()
 
             # Send round start
             # for i in range(3, 0, -1):
@@ -83,6 +87,9 @@ class PongEngine:
 
             round_continue = True
             while (round_continue):
+                # Retrieve game state
+                self.game_state = await cache.aget(self.game_channel)
+
                 # Apply physic (update objects)
                 await self.apply_physic()
 
@@ -93,14 +100,31 @@ class PongEngine:
                 if time_to_wait > 0:
                     await asyncio.sleep(time_to_wait)
 
+                # Update game state in cache
+                await cache.aset(self.game_channel, self.game_state)
+
         # Send game results (as frame message ?)
         # Update profiles status and player things (is_game_ready, movement...)
         # Send game end
         # Save game history
+
+    async def reset_physic(self):
+        self.game_state = {
+            'type': 'send.game.object',
+            'object': 'BALL',
+            'x': DEFAULT_BALL_X,
+            'y': DEFAULT_BALL_Y,
+            'z': DEFAULT_BALL_Z,
+        }
+        await cache.aset(self.game_channel, self.game_state)
     
     async def apply_physic(self):
-        self.some_count += 1
-        await cache.aset(self.game_channel, f'Hello {self.some_count} from the engine !')
+        direction = 1
+        x = self.game_state['x']
+
+        if x >= MAP_LENGTH / 2 or x <= -MAP_LENGTH / 2:
+            direction *= -1
+        self.game_state['x'] = x + direction * TICK_RATE
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):

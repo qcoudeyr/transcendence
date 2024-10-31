@@ -35,11 +35,7 @@ class UpdateConsumer(AsyncConsumer):
             game_state = await cache.aget(self.game_channel)
             await channel_layer.group_send(
                 self.game_channel,
-                {
-                    'type': 'send.chat.message',
-                    'name': 'update server',
-                    'message': game_state,
-                }
+                game_state
             )
 
             # Ensure tick rate
