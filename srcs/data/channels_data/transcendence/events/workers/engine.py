@@ -146,7 +146,7 @@ class PongEngine:
 
         # Send game results (as frame message ?)
         # Update profiles status and player things
-        await update_players_exit_game(player_ids)
+        await update_players_exit_game(self.player_ids)
 
         # Send game end
         await channel_layer.group_send(
