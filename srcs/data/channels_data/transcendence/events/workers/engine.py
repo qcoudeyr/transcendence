@@ -72,6 +72,11 @@ class PongEngine:
             {'type': 'send.game.start'}
         )
 
+        # Initialize game timer and score
+        self.game_time_left = DEFAULT_GAME_TIMER_MINUTES * 60 + DEFAULT_GAME_TIMER_SECONDS
+        self.game_timer = {'minutes': DEFAULT_GAME_TIMER_MINUTES, 'seconds': DEFAULT_GAME_TIMER_SECONDS}
+        self.score = {'0': 0, '1': 0}
+
         # Set game state
         await self.reset_physic()
 
@@ -95,11 +100,6 @@ class PongEngine:
                 'game_channel': self.game_channel,
             }
         )
-
-        # Initialize game timer and score
-        self.game_time_left = DEFAULT_GAME_TIMER_MINUTES * 60 + DEFAULT_GAME_TIMER_SECONDS
-        self.game_timer = {'minutes': DEFAULT_GAME_TIMER_MINUTES, 'seconds': DEFAULT_GAME_TIMER_SECONDS}
-        self.score = {'0': 0, '1': 0}
 
         self.game_continue = True
         while (self.game_continue):
