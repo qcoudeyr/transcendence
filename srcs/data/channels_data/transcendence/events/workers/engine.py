@@ -175,14 +175,15 @@ class PongEngine:
             self.direction = 1
         self.game_state['BALL']['x'] = x + self.direction * self.speed * lap_duration
 
-        if self.game_time_left <= 0:
-            self.game_continue = False
-
     async def update_game_timer(self, lap_duration):
         self.game_time_left -= lap_duration
         minutes = int(self.game_time_left // 60)
         seconds = int(self.game_time_left % 60)
         self.game_timer = {'minutes': minutes, 'seconds': seconds}
+
+        # Stop the game when timer reach 0
+        if self.game_time_left <= 0:
+            self.game_continue = False
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
