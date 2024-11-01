@@ -161,7 +161,7 @@ class PongEngine:
             'PAD_0': {'x': DEFAULT_PAD_0_X, 'y': DEFAULT_PAD_0_Y, 'z': DEFAULT_PAD_0_Z, },
             'PAD_1': {'x': DEFAULT_PAD_1_X, 'y': DEFAULT_PAD_1_Y, 'z': DEFAULT_PAD_1_Z, },
             'TIMER': self.game_timer,
-            'SCORE': self.score,
+            'PLAYER_SCORE': self.score,
         }
         await cache.aset(self.game_channel, self.game_state)
     

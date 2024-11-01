@@ -517,8 +517,12 @@ class EventConsumer(AsyncWebsocketConsumer):
         # Select which camera to send based on the profile
         if self.profile.pk == event['PLAYER_0']:
             event['CAMERA'] = event['CAMERA_0']
+            event['SCORE']['left'] = event['PLAYER_SCORE']['0']
+            event['SCORE']['right'] = event['PLAYER_SCORE']['1']
         else:
             event['CAMERA'] = event['CAMERA_1']
+            event['SCORE']['left'] = event['PLAYER_SCORE']['1']
+            event['SCORE']['right'] = event['PLAYER_SCORE']['0']
         await self.send(text_data=json.dumps({
             'type': 'game_state',
             'BALL': event['BALL'],
