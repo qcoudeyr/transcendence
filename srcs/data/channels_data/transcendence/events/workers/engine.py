@@ -186,6 +186,7 @@ class PongEngine:
         minutes = int(self.game_time_left // 60)
         seconds = int(self.game_time_left % 60)
         self.game_timer = {'minutes': minutes, 'seconds': seconds}
+        self.game_state['TIMER'] = self.game_timer
 
         # Stop the game when timer reach 0
         if self.game_time_left <= 0:
