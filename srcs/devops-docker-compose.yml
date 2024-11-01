@@ -1,0 +1,455 @@
+services:
+  setup:
+    profiles:
+      - setup
+    build:
+      context: ./requirements/setup/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_setup
+    hostname: setup
+    init: true
+    volumes:
+      - ./data/credentials/setup_approle.env:/vault/config/setup_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - ./requirements/setup/entrypoint.sh:/entrypoint.sh
+      - ./requirements/setup/lib.sh:/lib.sh
+      - ./requirements/setup/roles:/roles
+      - ./requirements/tls/certs/ca/ca.crt:/ca.crt:ro,z
+    environment:
+      - SERVICE_NAME=setup
+      - SECRET_PATH=setup
+      - VAULT_ADDR=${VAULT_ADDR}
+    networks:
+      - transcendence
+    depends_on:
+      - elasticsearch
+
+###########################
+###### ELASTICSEARCH ######
+###########################
+  elasticsearch:
+    build:
+      context: ./requirements/elasticsearch/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    container_name: tr_elasticsearch
+    volumes:
+      - ./data/credentials/elasticsearch_approle.env:/vault/config/elasticsearch_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - ./requirements/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
+      - elasticsearch_data:/usr/share/elasticsearch/data:Z
+        # (!) TLS certificates. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/elasticsearch/config/ca.crt:ro,z
+      - ./requirements/tls/certs/elasticsearch/elasticsearch.crt:/usr/share/elasticsearch/config/elasticsearch.crt:ro,z
+      - ./requirements/tls/certs/elasticsearch/elasticsearch.key:/usr/share/elasticsearch/config/elasticsearch.key:ro,z
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - VAULT_ADDR=https://vault:8300
+      - SERVICE_NAME=elasticsearch
+      - SECRET_PATH=elasticsearch
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - LS_JAVA_OPTS=-Xms256m -Xmx512m
+    hostname: elasticsearch
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.13
+    restart: unless-stopped
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/bin/tini","--","/usr/local/bin/docker-entrypoint.sh"]
+    command: "eswrapper"
+
+######################
+###### LOGSTASH ######
+######################
+  logstash:
+    build:
+      context: ./requirements/logstash/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_logstash
+    volumes:
+      - ./requirements/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./requirements/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+      - ./data/credentials/logstash_approle.env:/vault/config/logstash_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/logstash/config/ca.crt:ro,z
+    ports:
+      - 5044:5044
+      - 50000:50000/tcp
+      - 50000:50000/udp
+      - 9600:9600
+    environment:
+      - VAULT_ADDR=https://vault:8300
+      - SERVICE_NAME=logstash
+      - SECRET_PATH=logstash
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.14
+    hostname: logstash
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/local/bin/docker-entrypoint"]
+
+####################
+###### KIBANA ######
+####################
+  kibana:
+    build:
+      context: ./requirements/kibana/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_kibana
+    volumes:
+      # Entrypoint script to fetch Vault credentials
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - ./requirements/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+      - ./data/credentials/kibana_approle.env:/vault/config/kibana_approle.env:ro
+      # (!) TLS certificates. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/kibana/config/ca.crt:ro,z
+      - ./requirements/tls/certs/kibana/kibana.crt:/usr/share/kibana/config/kibana.crt:ro,Z
+      - ./requirements/tls/certs/kibana/kibana.key:/usr/share/kibana/config/kibana.key:ro,Z
+    ports:
+      - 5601:5601
+    environment:
+      - VAULT_ADDR=https://vault:8300
+      - SERVICE_NAME=kibana
+      - SECRET_PATH=kibana
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.15
+    hostname: kibana
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/bin/tini","--"]
+    command: "/usr/local/bin/kibana-docker"
+
+######################
+###### FILEBEAT ######
+######################
+  filebeat:
+    build:
+      context: ./requirements/filebeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_filebeat
+    user: root
+    volumes:
+      - ./requirements/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
+      - ./data/credentials/filebeat_approle.env:/vault/config/filebeat_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/filebeat/ca.crt:ro,z
+    hostname: filebeat
+    environment:
+      - VAULT_ADDR=https://vault:8300
+      - SERVICE_NAME=filebeat
+      - SECRET_PATH=filebeat
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.22
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/bin/tini","--","/usr/local/bin/docker-entrypoint"]
+    command: ["-environment", "container", -e, --strict.perms=false]
+
+#####################
+###### CURATOR ######
+#####################
+  curator:
+    build:
+      context: ./requirements/curator/
+    init: true
+    container_name: tr_curator
+    volumes:
+      - ./requirements/curator/config/curator.yml:/.curator/curator.yml:ro,Z
+      - ./requirements/curator/config/delete_log_files_curator.yml:/.curator/delete_log_files_curator.yml:ro,Z
+      - ./data/credentials/curator_approle.env:/vault/config/curator_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/.curator/ca.crt:ro,z
+    environment:
+      - VAULT_ADDR=https://vault:8300
+      - SERVICE_NAME=curator
+      - SECRET_PATH=curator
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    hostname: curator
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.16
+    depends_on:
+
+      - elasticsearch
+
+##########################
+###### FLEET-SERVER ######
+##########################
+
+  fleet-server:
+    build:
+      context: ./requirements/fleet/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_fleet_server
+    user: root
+    volumes:
+      - fleet_server_data:/usr/share/elastic-agent/state:Z
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+      - ./data/credentials/fleet-server_approle.env:/vault/config/fleet-server_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) TLS certificates. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/elastic-agent/ca.crt:ro,z
+      - ./requirements/tls/certs/fleet-server/fleet-server.crt:/usr/share/elastic-agent/fleet-server.crt:ro,Z
+      - ./requirements/tls/certs/fleet-server/fleet-server.key:/usr/share/elastic-agent/fleet-server.key:ro,Z
+    environment:
+      VAULT_ADDR: https://vault:8300
+      SERVICE_NAME: fleet-server
+      SECRET_PATH: fleet-server
+      FLEET_SERVER_ENABLE: '1'
+      FLEET_SERVER_HOST: 0.0.0.0
+      FLEET_SERVER_POLICY_ID: fleet-server-policy
+      FLEET_URL: https://fleet-server:8220
+      FLEET_SERVER_CERT: /usr/share/elastic-agent/fleet-server.crt
+      FLEET_SERVER_CERT_KEY: /usr/share/elastic-agent/fleet-server.key
+      ELASTICSEARCH_HOST: https://elasticsearch:9200
+      ELASTICSEARCH_CA: /usr/share/elastic-agent/ca.crt
+      KIBANA_FLEET_SETUP: '1'
+      ELASTICSEARCH_USERNAME: elastic
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
+    ports:
+      - 8220:8220
+    hostname: fleet-server
+    restart: on-failure
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.18
+    depends_on:
+
+      - elasticsearch
+      - kibana
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/bin/tini" ,"--" ,"/usr/local/bin/docker-entrypoint"]
+
+########################
+###### APM-SERVER ######
+########################
+  apm-server:
+    build:
+      context: ./requirements/fleet/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_apm_server
+    volumes:
+      - apm_server_data:/usr/share/elastic-agent/state:Z
+      - ./data/credentials/apm-server_approle.env:/vault/config/apm-server_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) TLS certificates. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/elastic-agent/ca.crt:ro,z
+      - ./requirements/tls/certs/apm-server/apm-server.crt:/usr/share/elastic-agent/apm-server.crt:ro,Z
+      - ./requirements/tls/certs/apm-server/apm-server.key:/usr/share/elastic-agent/apm-server.key:ro,Z
+    environment:
+      VAULT_ADDR: https://vault:8300
+      SERVICE_NAME: apm-server
+      SECRET_PATH: apm-server
+      FLEET_ENROLL: '1'
+      FLEET_TOKEN_POLICY_NAME: Agent Policy APM Server
+      FLEET_URL: https://fleet-server:8220
+      ELASTICSEARCH_HOST: https://elasticsearch:9200
+      ELASTICSEARCH_CA: /usr/share/elastic-agent/ca.crt
+      ELASTICSEARCH_USERNAME: elastic
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
+    ports:
+      - 8200:8200
+    hostname: apm-server
+    restart: on-failure
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.19
+    depends_on:
+      - elasticsearch
+      - kibana
+      - fleet-server
+    entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/bin/tini" ,"--" ,"/usr/local/bin/docker-entrypoint"]
+
+#######################
+###### HEARTBEAT ######
+#######################
+  heartbeat:
+    build:
+      context: ./requirements/heartbeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_heartbeat
+    volumes:
+      - ./requirements/heartbeat/config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro,Z
+      - ./data/credentials/heartbeat_approle.env:/vault/config/heartbeat_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/heartbeat/ca.crt:ro,z
+    environment:
+      - VAULT_ADDR=https://vault:8300
+      - SERVICE_NAME=heartbeat
+      - SECRET_PATH=heartbeat
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.20
+    hostname: heartbeat
+    depends_on:
+      - elasticsearch
+    entrypoint: ["/vault/entrypoint/entrypoint.sh"]
+    command: "heartbeat -e --strict.perms=false"
+
+########################
+###### METRICBEAT ######
+########################
+
+  metricbeat:
+    build:
+      context: ./requirements/metricbeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    container_name: tr_metricbeat
+    user: root
+    volumes:
+      - ./requirements/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro,Z
+      - ./data/credentials/metricbeat_approle.env:/vault/config/metricbeat_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+      # (!) CA certificate. Generate using the 'tls' service.
+      - ./requirements/tls/certs/ca/ca.crt:/usr/share/metricbeat/ca.crt:ro,z
+      - type: bind
+        source: /
+        target: /hostfs
+        read_only: true
+      - type: bind
+        source: /sys/fs/cgroup
+        target: /hostfs/sys/fs/cgroup
+        read_only: true
+      - type: bind
+        source: /proc
+        target: /hostfs/proc
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    environment:
+      VAULT_ADDR : "https://vault:8300"
+      SERVICE_NAME : "metricbeat"
+      SECRET_PATH : "metricbeat"
+      ES_JAVA_OPTS : "-Xms256m -Xmx256m"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.21
+    hostname: metricbeat
+    depends_on:
+      - elasticsearch
+    entrypoint: ["/vault/entrypoint/entrypoint.sh"]
+    command: "metricbeat -e --strict.perms=false --system.hostfs=/hostfs"
+
+##########################
+########PROMETHEUS########
+##########################
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tr_prometheus
+    volumes:
+      - ./requirements/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.30
+    restart: always
+    hostname: prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
+
+#######################
+########GRAFANA########
+#######################
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/usr/share/grafana/
+      - ./requirements/grafana:/usr/share/grafana/conf/provisioning/datasources
+    container_name: tr_grafana
+    ports:
+      - "3001:3000"
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.31
+    depends_on:
+      - prometheus
+    restart: always
+    hostname: grafana
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR}
+
+#######################
+########VOLUMES########
+#######################
+volumes:
+  elasticsearch_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/elasticsearch_data/"
+
+  apm_server_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/apm_server_data/"
+
+  fleet_server_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/fleet_server_data/"
+
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./data/grafana_data/"
+
+########################
+########NETWORKS########
+########################
+networks:
+  transcendence:
+    name: tr_network
+    external: true

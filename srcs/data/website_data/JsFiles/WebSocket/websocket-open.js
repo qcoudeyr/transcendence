@@ -24,7 +24,7 @@ export function websocketConnect()
 			'Content-Type': 'application/json',
 			'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
 		}
-		
+
 	})
 	.then(response => {
 		// Check if the response is okay (status in the range 200-299)
@@ -34,7 +34,7 @@ export function websocketConnect()
 		return response.json(); // Parse the JSON from the response
 	})
 	.then(data => {
-		let socketurl = "ws://" + window.location.host + "/ws/events/?uuid=" + data.uuid;
+		let socketurl = "wss://" + window.location.host + "/ws/events/?uuid=" + data.uuid;
 		openWebsocket(socketurl);
 	})
 	.catch(error => {
@@ -116,7 +116,15 @@ function openWebsocket(socketurl){
 			{
 				mooveBall(content.object, content.x, content.y, content.z);
 			}
+			// if(content.type === 'game_score')
+			// {
+			// 	//scoreUpdate(content.score_1, content.score_2);
+			// }
+			// if (content.type === 'game_frame_message')
+			// {
+			// 	frameMessage(content.message);
+			// }
 		}
 	}
-	
+
 }

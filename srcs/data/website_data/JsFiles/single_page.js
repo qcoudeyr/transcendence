@@ -1,5 +1,5 @@
 import { navigateToSection, changePages, switchProfileSection, playButtonSetup, updateNavbar, hidePreloaderAfterLoad } from './Modules/navigation.js';
-import { setupLogin, setupRegister } from './Modules/API/auth.js';
+import { setupLogin, setupRegister, checkAccessToken } from './Modules/API/auth.js';
 import { getMailAndUsername, getNameBioAndAvatar } from './Modules/API/getProfileInfo.js';
 import { websocketConnect } from './WebSocket/websocket-open.js';
 // import { checkToken } from './Modules/API/auth.js';
@@ -7,7 +7,7 @@ import { websocketConnect } from './WebSocket/websocket-open.js';
 
 document.addEventListener("DOMContentLoaded", function () {
 	hidePreloaderAfterLoad();
-	
+
 	// Navigation logic
 	const sections = document.querySelectorAll("section");
 	const links = document.querySelectorAll("nav a");
@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	// all info in profile goes in this
 	if (localStorage.getItem('accessToken') && localStorage.getItem('refreshToken')){
 		window.onload = function() {
+		if (checkAccessToken() === false)
+			logout();
 		getMailAndUsername(); // Call the function here
 		getNameBioAndAvatar();
 		websocketConnect();

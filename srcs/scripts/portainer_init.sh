@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Path to the portainer.db file
-DB_FILE="./data/portainer_data/portainer.db"
+DB_FILE="./srcs/data/portainer_data/portainer.db"
 
 # URL to check
 URL="http://10.0.10.40:9000/api/users/admin/init"
