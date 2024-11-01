@@ -146,6 +146,11 @@ class PongEngine:
         # Send game results (as frame message ?)
         # Update profiles status and player things (is_game_ready, movement...)
         # Send game end
+        await channel_layer.group_send(
+            self.game_channel,
+            {'type': 'send.game.end'}
+        )
+
         # Save game history
 
     async def reset_physic(self):

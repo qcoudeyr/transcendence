@@ -514,6 +514,11 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def send_game_end(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'game_end',
+            })
+        )
+        await self.leave_game_channel({})
 
     async def send_game_state(self, event):
         # Select which camera to send based on the profile
