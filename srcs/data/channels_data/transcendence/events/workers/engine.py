@@ -10,16 +10,43 @@ from django.core.cache import cache
 
 from profiles.models import Profile
 
-BALL_RADIUS = 0.1
-PAD_LENGTH = 0.3
-MAP_HEIGHT = 0.15
-MAP_LENGTH = 10
-MAP_WIDTH = 2.5
+# SERVER
 TICK_RATE = 1.0 / 128
 
+# MAP
+MAP_LENGTH = 10
+MAP_HEIGHT = 0.15
+MAP_WIDTH = 2.5
+
+# BALL
+BALL_RADIUS = 0.1
 DEFAULT_BALL_X = 0
 DEFAULT_BALL_Y = MAP_HEIGHT
 DEFAULT_BALL_Z = 0
+
+# PAD
+PAD_LENGTH = 0.3
+DEFAULT_PAD_0_X = MAP_LENGTH / 2
+DEFAULT_PAD_0_Y = MAP_HEIGHT
+DEFAULT_PAD_0_Z = 0
+DEFAULT_PAD_1_X = -MAP_LENGTH / 2
+DEFAULT_PAD_1_Y = MAP_HEIGHT
+DEFAULT_PAD_1_Z = 0
+
+# CAMERA
+CAMERA_DISTANCE_X = 4
+CAMERA_DISTANCE_Y = 4
+CAMERA_DISTANCE_Z = 0
+DEFAULT_CAMERA_0_X = DEFAULT_PAD_0_X + CAMERA_DISTANCE_X
+DEFAULT_CAMERA_0_Y = DEFAULT_PAD_0_Y + CAMERA_DISTANCE_Y
+DEFAULT_CAMERA_0_Z = DEFAULT_PAD_0_Z + CAMERA_DISTANCE_Z
+DEFAULT_CAMERA_1_X = DEFAULT_PAD_1_X + CAMERA_DISTANCE_X
+DEFAULT_CAMERA_1_Y = DEFAULT_PAD_1_Y + CAMERA_DISTANCE_Y
+DEFAULT_CAMERA_1_Z = DEFAULT_PAD_1_Z + CAMERA_DISTANCE_Z
+
+# GAME TIMER
+DEFAULT_GAME_TIMER_MINUTES = 3
+DEFAULT_GAME_TIMER_SECONDS = 0
 
 channel_layer = get_channel_layer()
 
@@ -69,8 +96,13 @@ class PongEngine:
             }
         )
 
-        game_continue = True
-        while (game_continue):
+        # Initialize game timer and score
+        self.game_time_left = DEFAULT_GAME_TIMER_MINUTES * 60 + DEFAULT_GAME_TIMER_SECONDS
+        self.game_timer = {'minutes': DEFAULT_GAME_TIMER_MINUTES, 'seconds': DEFAULT_GAME_TIMER_SECONDS}
+        self.score = {'0': 0, '1': 0}
+
+        self.game_continue = True
+        while (self.game_continue):
             # Initialize game objects
             await self.reset_physic()
 
@@ -85,13 +117,19 @@ class PongEngine:
             tick_count = 0
             start_time = time.time()
 
-            round_continue = True
-            while (round_continue):
+            lap_start_time = time.time()
+            self.round_continue = True
+            while (self.round_continue):
+                lap_duration = time.time() - lap_start_time
+
                 # Retrieve game state
                 self.game_state = await cache.aget(self.game_channel)
 
-                # Apply physic (update objects)
-                await self.apply_physic()
+                # Apply physic (update objects and apply game rules)
+                await self.apply_physic(lap_duration)
+
+                # Update game timer
+                await self.update_game_timer(lap_duration)
 
                 # Ensure tick rate
                 tick_count += 1
@@ -103,6 +141,8 @@ class PongEngine:
                 # Update game state in cache
                 await cache.aset(self.game_channel, self.game_state)
 
+                lap_start_time = time.time()
+
         # Send game results (as frame message ?)
         # Update profiles status and player things (is_game_ready, movement...)
         # Send game end
@@ -111,7 +151,6 @@ class PongEngine:
     async def reset_physic(self):
         self.direction = 1
         self.speed = 5
-        self.time = time.time()
         self.game_state = {
             'type': 'game_state',
             'PLAYER_0': self.player_ids[0],
@@ -121,20 +160,26 @@ class PongEngine:
             'CAMERA_1': {'x': DEFAULT_CAMERA_1_X, 'y': DEFAULT_CAMERA_1_Y, 'z': DEFAULT_CAMERA_1_Z},
             'PAD_0': {'x': DEFAULT_PAD_0_X, 'y': DEFAULT_PAD_0_Y, 'z': DEFAULT_PAD_0_Z, },
             'PAD_1': {'x': DEFAULT_PAD_1_X, 'y': DEFAULT_PAD_1_Y, 'z': DEFAULT_PAD_1_Z, },
-            'TIMER': {'minutes': , 'seconds': },
-            'SCORE': {'0': , '1': },
+            'TIMER': self.game_timer,
+            'SCORE': self.score,
         }
         await cache.aset(self.game_channel, self.game_state)
     
-    async def apply_physic(self):
+    async def apply_physic(self, lap_duration):
         x = self.game_state['BALL']['x']
 
         if x >= MAP_LENGTH / 2:
             self.direction = -1
         elif x <= -MAP_LENGTH / 2:
             self.direction = 1
-        self.game_state['BALL']['x'] = x + self.direction * self.speed * (time.time() - self.time)
+        self.game_state['BALL']['x'] = x + self.direction * self.speed * lap_duration
         self.time = time.time()
+
+    async def update_game_timer(self, lap_duration):
+        self.game_time_left -= lap_duration
+        minutes = int(self.game_time_left // 60)
+        seconds = int(self.game_time_left % 60)
+        self.game_timer = {'minutes': minutes, 'seconds': seconds}
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
