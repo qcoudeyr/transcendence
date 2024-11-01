@@ -41,6 +41,13 @@ canvas {
 	z-index: 1;
   }
   
+.frame-container {
+	top: 50%;
+	background-color: #ff4c4c;
+	left: 50%;
+	padding: 10px;
+}
+
   h1 {
 	margin-bottom: 30px;
 	font-size: 2.5rem;
