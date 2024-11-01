@@ -1,16 +1,21 @@
 import json
 import traceback
 import logging
+import time
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import async_to_sync
 from django.db import transaction
 from channels.layers import get_channel_layer
+from django.core.cache import cache
 
 from profiles.models import Profile, FriendRequest, GroupRequest, Group
 from game.models import PartyQueue, GameHistory
-# from events.tasks import classic_game
+
+# PAD MOVE
+MIN_MOVE_TIME_DELTA = 1.0 / 128
+MOVE_DIST = 0.03
 
 channel_layer = get_channel_layer()
 
@@ -34,6 +39,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             'group_leave': self.group_leave,
             'game_join_queue': self.game_join_queue,
             'game_ready': self.game_ready,
+            'game_move_pad': self.game_move_pad,
         }
 
         # Request's user
@@ -54,6 +60,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             await self.join_friend_channel(friend_pk=friend.pk)
 
         # Already in game
+        self.last_move_time = time.time()
         if self.profile.is_in_game:
             await update_profile_status(self.profile, 'IG')
             await self.join_game_channel({})
@@ -391,6 +398,26 @@ class EventConsumer(AsyncWebsocketConsumer):
 
     async def game_ready(self, content):
         await update_profile_game_ready(self.profile, True)
+        await database_sync_to_async(self.profile.refresh_from_db)()
+
+    async def game_move_pad(self, content):
+        move_time_delta = time.time() - self.last_move_time
+        if 'direction' in content and move_time_delta > MIN_MOVE_TIME_DELTA and self.profile.is_in_game and self.game_group != None:
+            game_state = await cache.aget(self.game_group)
+
+            if self.profile.pk == game_state['PLAYER_0']:
+                pad = 'PAD_0'
+                direction = -1
+            else:
+                pad = 'PAD_1'
+                direction = 1
+
+            if content['direction'] == 'left':
+                game_state[pad]['z'] -= direction * MOVE_DIST
+            elif content['direction'] == 'right':
+                game_state[pad]['z'] += direction * MOVE_DIST
+
+            self.last_move_time = time.time()
 
     # group_send functions here
     async def send_chat_message(self, event):
@@ -565,6 +592,7 @@ class EventConsumer(AsyncWebsocketConsumer):
     async def leave_game_channel(self, event):
         if self.game_group != None:
             await self.channel_layer.group_discard(self.game_group, self.channel_name)
+            self.game_group = None
 
 # Database access from consumers
 @database_sync_to_async
