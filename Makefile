@@ -1,15 +1,15 @@
 # Color and formatting definitions
-GREEN := \033[0;32m
-YELLOW := \033[0;33m
-RED := \033[0;31m
-BLUE := \033[0;34m
-NC := \033[0m
-BOLD := \033[1m
+YELLOW := $(shell printf "\033[33m")
+GREEN := $(shell printf "\033[32m")
+RED := $(shell printf "\033[31m")
+BLUE := $(shell printf "\033[34m")
+NC := $(shell printf "\033[0m")
 
 # Environment variables
 ENABLE_DEVOPS ?= false
 DEV=1
-
+CERT_SOURCE_DIR := ./srcs/data/certbot/certificates/pong-br.com
+BACKUP_DIR := ./.backup/data/certbot/certificates/pong-br.com
 # Existing variables
 SHELL := /bin/bash
 NETWORK_NAME = tr_network
@@ -34,7 +34,9 @@ create-data-dirs:
 		./srcs/data/logs \
 		./srcs/data/certbot \
 		./srcs/data/certbot/logs \
-		./srcs/data/certificates > /dev/null 2>&1 || true
+		./srcs/data/certificates \
+		./srcs/data/certbot/certificates/pong-br.com/ \
+		> /dev/null 2>&1 || true
 	$(call log_success,"Data directories created successfully")
 
 init-network:
@@ -60,6 +62,9 @@ build-and-up:
 	R_VALUE=$$?; \
 	if [ $$R_VALUE -eq 0 ]; then \
 		echo "✅ TLS setup completed successfully"; \
+		rm -rf srcs/data/certbot/certificates ; \
+		cp ./.backup/data/certbot/ ./srcs/data/ -r; \
+		chmod 777 --recursive ./srcs/data/certbot/certificates/; \
 	else \
 		echo "⚠️  TLS setup failed, waiting 15 seconds..."; \
 		sleep 15; \
@@ -72,9 +77,15 @@ build-and-up:
 	else \
 		echo "ℹ️  DevOps services disabled, starting only main services..."; \
 		docker compose -f ./srcs/docker-compose.yml up -d; \
-	fi; \
-	sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true; \
+	fi;
+#sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true;
 	echo "✨ Build Complete!"
+
+devops:
+	@echo "🚀 Starting DevOps services...";
+	@echo "⚙️  DevOps services enabled, starting setup...";
+	@docker compose -f ./srcs/devops-docker-compose.yml up setup && \
+	 docker compose -f ./srcs/devops-docker-compose.yml up -d;
 
 init-portainer:
 	@echo "Starting of the init scripts..."
@@ -111,6 +122,7 @@ init-vault:  init-network
 	@./srcs/scripts/vault_setup.sh; \
 	R_VALUE=$$?; \
 	if [ $$R_VALUE -eq 0 ]; then \
+		sleep 5 ;\
 		echo "Vault setup done!"; \
 	else \
 		echo "Vault setup script failed with return value $$R_VALUE!"; \
@@ -216,7 +228,8 @@ ssl-cert: create-data-dirs
 		if [ -d ".backup/data/certbot/certificates/pong-br.com" ]; then \
 			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
 			echo "📁 Restoring backup SSL certificates..."; \
-			cp -R ./.backup/data/certbot/certificates/pong-br.com/ ./srcs/data/certbot/certificates/; \
+			sleep 5 && cp ./.backup/data/certbot/ ./srcs/data/ -r; \
+			chmod 777 --recursive ./srcs/data/certbot/certificates/ \
 		else \
 			echo "🔐 Generating new SSL certificates..."; \
 			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
@@ -230,15 +243,42 @@ ssl-cert: create-data-dirs
 			--agree-tos \
 			--no-eff-email \
 			-d pong-br.com \
-			-d test.pong-br.com"; \
+			-d *.pong-br.com"; \
 			if [ $$? -ne 0 ]; then \
 				echo "❌ Certificate generation failed"; \
 				exit 1; \
 			fi; \
 			echo "📂 Setting permissions on certificate files..."; \
-			chmod 644 --recursive ./data/certbot/certificates/pong-br.com/ || { echo "❌ Failed to set permissions"; exit 1; }; \
+			chmod 777 --recursive ./data/certbot/certificates/ || { echo "❌ Failed to set permissions"; exit 1; }; \
 			echo "✅ SSL certificate generation completed successfully."; \
 		fi; \
+	fi
+
+backup:
+	@echo "${BLUE}🔍 Checking for files to backup...${NC}"
+	@if [ ! -d "$(CERT_SOURCE_DIR)" ]; then \
+		echo "${RED}❌ Error: Source directory $(CERT_SOURCE_DIR) does not exist!${NC}"; \
+		echo "${YELLOW}ℹ️  Please ensure the certificates are generated first.${NC}"; \
+		exit 1; \
+	fi
+	@echo "${BLUE}📂 Source directory found. Preparing backup...${NC}"
+	@if [ ! -d "$(BACKUP_DIR)" ]; then \
+		echo "${YELLOW}📁 Creating backup directory structure...${NC}"; \
+		mkdir -p "$(BACKUP_DIR)" 2>/dev/null || \
+		{ echo "${RED}❌ Error: Failed to create backup directory!${NC}"; exit 1; }; \
+	fi
+	@echo "${BLUE}📦 Starting backup process...${NC}"
+	@cp -r "$(CERT_SOURCE_DIR)/." "$(BACKUP_DIR)/" 2>/dev/null || \
+		{ echo "${RED}❌ Error: Failed to copy files!${NC}"; \
+		  echo "${YELLOW}ℹ️  Please check permissions and disk space.${NC}"; \
+		  exit 1; }
+	@if [ -d "$(BACKUP_DIR)" ] && [ "$$(ls -A "$(BACKUP_DIR)" 2>/dev/null)" ]; then \
+		echo "${GREEN}✅ Backup completed successfully!${NC}"; \
+		echo "${BLUE}📍 Backup location: $(BACKUP_DIR)${NC}"; \
+		echo "${YELLOW}ℹ️  Total files backed up: $$(find "$(BACKUP_DIR)" -type f | wc -l)${NC}"; \
+	else \
+		echo "${RED}❌ Error: Backup appears to be empty or incomplete!${NC}"; \
+		exit 1; \
 	fi
 
 # Force renewal of certificates

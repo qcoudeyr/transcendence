@@ -1,4 +1,22 @@
 services:
+#####################
+#######CERTBOT#######
+#####################
+  certbot:
+    image: certbot/dns-luadns
+    container_name: tr_certbot
+    volumes:
+        - ./requirements/certbot/luadns.ini:/.secrets/certbot/luadns.ini:ro
+        - ./data/certbot/certificates/:/etc/letsencrypt/archive
+        - ./data/certbot/logs:/var/log/letsencrypt
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    restart: unless-stopped
+
+#######################
+#######SETUP-TLS#######
+#######################
   tls:
     container_name: tr_tls
     profiles:
@@ -104,8 +122,8 @@ services:
       - ./data/django_data/transcendence/game:/app/transcendence/game
       - ./data/credentials/channels_approle.env:/vault/config/channels_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
-      - ./requirements/tls/certs/channels/channels.crt:/app/certs/channels.crt:ro
-      - ./requirements/tls/certs/channels/channels.key:/app/certs/channels.key:ro
+      - ./data/certbot/certificates/pong-br.com/cert1.pem:/app/certs/channels-crt.pem:ro
+      - ./data/certbot/certificates/pong-br.com/privkey1.pem:/app/certs/channels-key.pem:ro
       - ./requirements/tls/certs/ca/ca.crt:/app/certs/ca.crt:ro
       - ./requirements/tls/certs/apm-server/apm-server.crt:/app/certs/localhost/localhost.crt:ro
       - ./requirements/tls/certs/postgresql/:/app/certs/postgresql/:ro
@@ -219,19 +237,22 @@ services:
 ########PORTAINER########
 #########################
   portainer:
-    image: portainer/portainer-ce:2.20.3
+    image: portainer/portainer-ce:2.21.4
     container_name: tr_portainer
     command: -H unix:///var/run/docker.sock
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "${PORTAINER_PORT}:${PORTAINER_PORT}"
+      - 9443:9443
+    environment:
+      VIRTUAL_HOST: portainer.pongbr.com
+      VIRTUAL_PORT: 9443
+      VAULT_ADDR: ${VAULT_ADDR}
     networks:
       transcendence:
         ipv4_address: 10.0.10.40
     hostname: portainer
-    environment:
-      VAULT_ADDR: ${VAULT_ADDR}
+    restart: always
 
 #####################
 ########NGINX########
@@ -249,7 +270,8 @@ services:
       - ./requirements/nginx/nginx.conf:/etc/nginx/transcendence.conf
       - ./data/website_data/:/app/static/:ro
       - ./data/media_data/:/app/media/
-
+      - ./requirements/nginx/modsecurity.conf.template:/etc/nginx/templates/modsecurity.d/modsecurity.conf.template:ro
+      -  /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       transcendence:
         ipv4_address: 10.0.10.2
@@ -258,22 +280,6 @@ services:
     environment:
       - VAULT_ADDR=${VAULT_ADDR}
       - DOMAIN_NAME=${DOMAIN_NAME}
-
-
-#####################
-########CERTBOT########
-#####################
-  certbot:
-    image: certbot/dns-luadns
-    container_name: tr_certbot
-    volumes:
-        - ./requirements/certbot/luadns.ini:/.secrets/certbot/luadns.ini:ro
-        - ./data/certbot/certificates/:/etc/letsencrypt/archive
-        - ./data/certbot/logs:/var/log/letsencrypt
-    environment:
-      - DOMAIN_NAME=${DOMAIN_NAME}
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    restart: unless-stopped
 
 #####################
 ########VAULT########
