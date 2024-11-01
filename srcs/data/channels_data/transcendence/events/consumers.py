@@ -521,6 +521,8 @@ class EventConsumer(AsyncWebsocketConsumer):
         await self.leave_game_channel({})
 
     async def send_game_state(self, event):
+        event['SCORE'] = {'left': 0, 'right': 0}
+
         # Select which camera to send based on the profile
         if self.profile.pk == event['PLAYER_0']:
             event['CAMERA'] = event['CAMERA_0']
