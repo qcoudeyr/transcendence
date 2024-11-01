@@ -132,6 +132,8 @@ class PongEngine:
                 # Update game timer
                 await self.update_game_timer(lap_duration)
 
+                lap_start_time = time.time()
+
                 # Ensure tick rate
                 tick_count += 1
                 targeted_time = start_time + tick_rate * tick_count
@@ -141,8 +143,6 @@ class PongEngine:
 
                 # Update game state in cache
                 await cache.aset(self.game_channel, self.game_state)
-
-                lap_start_time = time.time()
 
         # Send game results (as frame message ?)
         # Update profiles status and player things (is_game_ready, movement...)
