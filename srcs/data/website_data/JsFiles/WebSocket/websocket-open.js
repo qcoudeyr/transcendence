@@ -114,7 +114,7 @@ function openWebsocket(socketurl){
 			}
 			if(content.type === 'game_state')
 			{
-				mooveBall(content.BALL);
+				mooveBall(data);
 				// scoreUpdate(content.SCORE);
 			}
 			//if(content.type === 'game_frame_message')
