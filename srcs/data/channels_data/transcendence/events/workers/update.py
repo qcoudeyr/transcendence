@@ -16,14 +16,16 @@ class UpdateConsumer(AsyncConsumer):
         tick_count = 0
         start_time = time.time()
 
-        round_continue = True
-        while (round_continue):
+        update_continue = True
+        while (update_continue):
             # Retrieve and send game state
             game_state = await cache.aget(self.game_channel)
             await channel_layer.group_send(
                 self.game_channel,
                 game_state
             )
+            if game_state['ENDED']:
+                update_continue = False
 
             # Ensure tick rate
             tick_count += 1

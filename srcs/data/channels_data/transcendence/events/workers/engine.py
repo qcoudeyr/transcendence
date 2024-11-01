@@ -162,6 +162,7 @@ class PongEngine:
             'PAD_1': {'x': DEFAULT_PAD_1_X, 'y': DEFAULT_PAD_1_Y, 'z': DEFAULT_PAD_1_Z, },
             'TIMER': self.game_timer,
             'PLAYER_SCORE': self.score,
+            'ENDED': not self.game_continue,
         }
         await cache.aset(self.game_channel, self.game_state)
     
@@ -173,7 +174,9 @@ class PongEngine:
         elif x <= -MAP_LENGTH / 2:
             self.direction = 1
         self.game_state['BALL']['x'] = x + self.direction * self.speed * lap_duration
-        self.time = time.time()
+
+        if self.game_time_left <= 0:
+            self.game_continue = False
 
     async def update_game_timer(self, lap_duration):
         self.game_time_left -= lap_duration

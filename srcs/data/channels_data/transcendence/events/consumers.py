@@ -513,6 +513,8 @@ class EventConsumer(AsyncWebsocketConsumer):
             })
         )
 
+    async def send_game_end(self, event):
+
     async def send_game_state(self, event):
         # Select which camera to send based on the profile
         if self.profile.pk == event['PLAYER_0']:
