@@ -23,7 +23,7 @@ document.addEventListener("keydown", handleKeyPress);
 }
 
 function sendGameMove(direction) {
-	socket = getWebsocket();
+	let socket = getWebsocket();
     const message = {
         type: "game_move_pad",
         direction: direction
