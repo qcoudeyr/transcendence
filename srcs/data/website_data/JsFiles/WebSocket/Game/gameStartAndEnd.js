@@ -1,3 +1,4 @@
+import { getWebsocket } from "../websocket-open.js";
 
 export function gameReadySoStart()
 {
@@ -22,6 +23,7 @@ document.addEventListener("keydown", handleKeyPress);
 }
 
 function sendGameMove(direction) {
+	socket = getWebsocket();
     const message = {
         type: "game_move_pad",
         direction: direction
