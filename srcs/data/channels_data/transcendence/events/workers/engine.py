@@ -57,6 +57,8 @@ class PongEngine:
         self.game_channel = 'game_' + str(game_id)
 
     async def game_loop(self):
+        self.game_continue = True
+
         await channel_layer.group_send(
             'general_chat',
             {
@@ -101,7 +103,6 @@ class PongEngine:
             }
         )
 
-        self.game_continue = True
         while (self.game_continue):
             # Initialize game objects
             await self.reset_physic()
