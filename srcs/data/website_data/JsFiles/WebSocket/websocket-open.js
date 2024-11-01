@@ -5,7 +5,7 @@ import { displayPrivateMessage } from "./chatSend.js";
 import { friendRequestNotification } from "./notifications-displays.js";
 import { removeFriendFromGroup, removeGroupRequest, groupRequestRevieve, displayGroupList } from "./groupRequests.js";
 import { gameEnd ,gameReadySoStart} from "./Game/gameStartAndEnd.js"
-import { mooveBall } from "./Game/ballMovement.js"
+import { mooveBall, moovePad } from "./Game/ballMovement.js"
 import { showPlayingSection } from "../Modules/navigation.js";
 
 let socket;
