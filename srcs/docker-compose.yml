@@ -132,18 +132,18 @@ services:
     entrypoint: ["/vault/entrypoint/entrypoint.sh"]
     command: "start.sh"
 
-######################
-########CELERY########
-######################
-  celery:
-    container_name: celery
+############################
+########ENGINEWORKER########
+############################
+  engineworker:
+    container_name: engineworker
     build: ./requirements/channels
     restart: always
     volumes:
       - ./data/channels_data:/app
       - ./data/django_data/transcendence/profiles:/app/transcendence/profiles
       - ./data/django_data/transcendence/game:/app/transcendence/game
-      - ./data/credentials/channels_approle.env:/vault/config/channels_approle.env:ro
+      - ./data/credentials/engineworker_approle.env:/vault/config/engineworker_approle.env:ro
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
     networks:
       transcendence:
@@ -156,16 +156,47 @@ services:
       - channels
     environment:
       - VAULT_ADDR=http://vault:8300
-      - SERVICE_NAME=channels
-      - SECRET_PATH=channels
+      - SERVICE_NAME=engineworker
+      - SECRET_PATH=engineworker
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_USER=${DATABASE_USER}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
     entrypoint: ["/vault/entrypoint/entrypoint.sh"]
-    # command: "celery -A transcendence worker -l INFO"
-    # command: "python manage.py runworker game-server"
-    command: "start_worker.sh"
+    command: "python manage.py runworker engine-server"
+
+############################
+########UPDATEWORKER########
+############################
+  updateworker:
+    container_name: updateworker
+    build: ./requirements/channels
+    restart: always
+    volumes:
+      - ./data/channels_data:/app
+      - ./data/django_data/transcendence/profiles:/app/transcendence/profiles
+      - ./data/django_data/transcendence/game:/app/transcendence/game
+      - ./data/credentials/updateworker_approle.env:/vault/config/updateworker_approle.env:ro
+      - ./requirements/entrypoint/:/vault/entrypoint/:ro
+    networks:
+      transcendence:
+        ipv4_address: 10.0.10.8
+    depends_on:
+      - vault
+      - redis
+      - postgresql
+      - django
+      - channels
+    environment:
+      - VAULT_ADDR=http://vault:8300
+      - SERVICE_NAME=updateworker
+      - SECRET_PATH=updateworker
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+    entrypoint: ["/vault/entrypoint/entrypoint.sh"]
+    command: "python manage.py runworker update-server"
 
 #####################
 ########REDIS########

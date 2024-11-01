@@ -100,6 +100,5 @@ class Profile(models.Model):
         null=True
     )
     is_game_ready = models.BooleanField(default=False)
-    pad_x = models.FloatField(default=0.0)
-    pad_y = models.FloatField(default=0.0)
-    pad_z = models.FloatField(default=0.0)
+    is_in_game = models.BooleanField(default=False)
+    actual_game_id = models.BigIntegerField(null=True, default=None)

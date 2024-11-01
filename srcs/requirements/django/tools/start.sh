@@ -4,11 +4,12 @@ sleep 5
 
 remove_migrations.sh
 
-IFS=', ' read -r -a apps <<< "$APPS"
-for i in "${apps[@]}"; do
-    python manage.py makemigrations "$i"
-done
+# IFS=', ' read -r -a apps <<< "$APPS"
+# for i in "${apps[@]}"; do
+#     python manage.py makemigrations "$i"
+# done
 
+python manage.py makemigrations $APPS
 python manage.py migrate
 
 python manage.py createsuperuser --noinput --username "$DJANGO_SUPERUSER_NAME" --email "$DJANGO_SUPERUSER_EMAIL"

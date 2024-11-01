@@ -1,18 +1,29 @@
 import json
 import traceback
 import logging
+import time
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import async_to_sync
 from django.db import transaction
+from channels.layers import get_channel_layer
+from django.core.cache import cache
 
 from profiles.models import Profile, FriendRequest, GroupRequest, Group
-from game.models import PartyQueue
-# from events.tasks import classic_game
+from game.models import PartyQueue, GameHistory
+
+# PAD MOVE
+MIN_MOVE_TIME_DELTA = 1.0 / 128
+MOVE_DIST = 0.03
+
+channel_layer = get_channel_layer()
 
 class EventConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        # Connexion always accepted, bad connexions are handled by the middleware
+        await self.accept()
+
         # Events handled by the server
         self.events = {
             'chat_message': self.chat_message,
@@ -28,6 +39,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             'group_leave': self.group_leave,
             'game_join_queue': self.game_join_queue,
             'game_ready': self.game_ready,
+            'game_move_pad': self.game_move_pad,
         }
 
         # Request's user
@@ -47,6 +59,15 @@ class EventConsumer(AsyncWebsocketConsumer):
             logging.error('[' + str(friend.pk) + ']')
             await self.join_friend_channel(friend_pk=friend.pk)
 
+        # Already in game
+        self.last_move_time = time.time()
+        if self.profile.is_in_game:
+            await update_profile_status(self.profile, 'IG')
+            await self.join_game_channel({})
+            await self.send_game_start({})
+        else:
+            self.game_group = None
+
         # Notify friends when Online
         for friend in friends:
             await self.channel_layer.group_send(
@@ -59,9 +80,6 @@ class EventConsumer(AsyncWebsocketConsumer):
                     'status': self.profile.get_status_display(),
                 }
             )
-
-        # Connexion always accepted, bad connexions are handled by the middleware
-        await self.accept()
 
     async def disconnect(self, close_code):
         await update_profile_status(self.profile, 'OF')
@@ -98,6 +116,9 @@ class EventConsumer(AsyncWebsocketConsumer):
                     'status': self.profile.get_status_display(),
                 }
             )
+
+        # Leave game channel
+        await self.leave_game_channel({})
 
         # Clear group requests
         await delete_profile_group_request_received(self.profile)
@@ -358,27 +379,46 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def game_join_queue(self, content):
-        await self.chat_message({'message': 'balise 1'})
         if 'mode' in content and await is_group_chief(self.profile):
-            await self.chat_message({'message': 'balise 2'})
             mode = content['mode']
             group_size = await get_profile_group_size(self.profile)
             group = await get_profile_group(self.profile)
+
             if mode == 'CLASSIC' and group_size <= 2:
-                player_ids = await create_classic_party(group.pk, group_size)
-                await self.chat_message({'message': 'balise 3'})
-                if len(player_ids) == 2:
-                    await self.chat_message({'message': 'balise 4'})
-                    await self.channel_layer.send(
-                        'game-server',
+                game_id, player_ids = await search_classic_game(group.pk, group_size)
+                if game_id != None:
+                    await channel_layer.send(
+                        'engine-server',
                         {
                             'type': 'classic.game',
+                            'game_id': game_id,
                             'player_ids': player_ids,
                         }
                     )
 
     async def game_ready(self, content):
         await update_profile_game_ready(self.profile, True)
+        await database_sync_to_async(self.profile.refresh_from_db)()
+
+    async def game_move_pad(self, content):
+        move_time_delta = time.time() - self.last_move_time
+        if 'direction' in content and move_time_delta > MIN_MOVE_TIME_DELTA and self.profile.is_in_game and self.game_group != None:
+            game_state = await cache.aget(self.game_group)
+
+            if self.profile.pk == game_state['PLAYER_0']:
+                pad = 'PAD_0'
+                direction = -1
+            else:
+                pad = 'PAD_1'
+                direction = 1
+
+            if content['direction'] == 'left':
+                game_state[pad]['z'] -= direction * MOVE_DIST
+            elif content['direction'] == 'right':
+                game_state[pad]['z'] += direction * MOVE_DIST
+
+            await cache.aset(self.game_group, game_state)
+            self.last_move_time = time.time()
 
     # group_send functions here
     async def send_chat_message(self, event):
@@ -501,13 +541,33 @@ class EventConsumer(AsyncWebsocketConsumer):
             })
         )
 
-    async def send_game_object(self, event):
+    async def send_game_end(self, event):
         await self.send(text_data=json.dumps({
-            'type': 'game_object',
-            'object': event['object'],
-            'x': event['x'],
-            'y': event['y'],
-            'z': event['z'],
+            'type': 'game_end',
+            })
+        )
+        await self.leave_game_channel({})
+
+    async def send_game_state(self, event):
+        event['SCORE'] = {'left': 0, 'right': 0}
+
+        # Select which camera to send based on the profile
+        if self.profile.pk == event['PLAYER_0']:
+            event['CAMERA'] = event['CAMERA_0']
+            event['SCORE']['left'] = event['PLAYER_SCORE']['0']
+            event['SCORE']['right'] = event['PLAYER_SCORE']['1']
+        else:
+            event['CAMERA'] = event['CAMERA_1']
+            event['SCORE']['left'] = event['PLAYER_SCORE']['1']
+            event['SCORE']['right'] = event['PLAYER_SCORE']['0']
+        await self.send(text_data=json.dumps({
+            'type': 'game_state',
+            'BALL': event['BALL'],
+            'CAMERA': event['CAMERA'],
+            'PAD_0': event['PAD_0'],
+            'PAD_1': event['PAD_1'],
+            'TIMER': event['TIMER'],
+            'SCORE': event['SCORE'],
             })
         )
 
@@ -522,6 +582,18 @@ class EventConsumer(AsyncWebsocketConsumer):
 
     async def leave_friend_channel(self, friend_pk):
         await self.channel_layer.group_discard(self.private_groups[friend_pk], self.channel_name)
+
+    async def join_game_channel(self, event):
+        await database_sync_to_async(self.profile.refresh_from_db)()
+        if self.profile.actual_game_id != None:
+            await self.send_chat_message({'name': 'debug', 'message': f'game id: {self.profile.actual_game_id}'})
+            self.game_group = "game_" + str(self.profile.actual_game_id)
+            await self.channel_layer.group_add(self.game_group, self.channel_name)
+
+    async def leave_game_channel(self, event):
+        if self.game_group != None:
+            await self.channel_layer.group_discard(self.game_group, self.channel_name)
+            self.game_group = None
 
 # Database access from consumers
 @database_sync_to_async
@@ -737,38 +809,59 @@ def get_profile_group_size(profile):
 
 @database_sync_to_async
 @transaction.atomic
-def create_classic_party(new_group_id, new_group_size):
+def search_classic_game(new_group_id, new_group_size):
     player_ids = []
+    new_group = Group.objects.get(pk=new_group_id)
     group_sizes = {new_group_id: new_group_size}
     queue, created = PartyQueue.objects.get_or_create(mode='CLASSIC')
 
+    for member in list(new_group.members.all()):
+        if member.is_in_game:
+            return None, None
     if new_group_size != 2:
         if hasattr(queue, 'groups') and len(queue.groups.all()) != 0:
             group = queue.groups.first()
             group_sizes[group.pk] = len(group.members.all())
         else:
-            new_group = Group.objects.get(pk=new_group_id)
             new_group.party_queue = queue
             new_group.save(update_fields=['party_queue'])
 
     player_quantity = sum(group_sizes.values())
     if player_quantity == 2:
-        already_ig = False
         for group_id in group_sizes:
             group = Group.objects.get(pk=group_id)
             group.party_queue = None
             group.save(update_fields=['party_queue'])
             for member in list(group.members.all()):
                 player_ids.append(member.pk)
-                if member.status == 'IG':
-                    already_ig = True
                 member.status = 'IG'
-                member.save(update_fields=['status'])
-        if not already_ig:
-            player_ids = []
-            # classic_game.delay(player_ids)
+                member.is_in_game = True
+                member.save(update_fields=['status', 'is_in_game'])
 
-    return player_ids
+        game_history = GameHistory.objects.create()
+
+        for player_id in player_ids:
+            player = Profile.objects.get(pk=player_id)
+            game_history.players.add(player)
+            player.actual_game_id = game_history.pk
+            player.save(update_fields=['actual_game_id'])
+            async_to_sync(channel_layer.group_send)(
+                'notifications_' + str(player.pk),
+                {'type': 'join.game.channel'}
+            )
+        
+        return game_history.pk, player_ids
+
+    return None, None
+
+        # async_to_sync(channel_layer.send)(
+        #     'engine-server',
+        #     {
+        #         'type': 'classic.game',
+        #         'game_id': game_history.pk,
+        #         'player_ids': player_ids,
+        #     }
+        # )
 
 @database_sync_to_async
 @transaction.atomic
