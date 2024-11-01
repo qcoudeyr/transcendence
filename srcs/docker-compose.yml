@@ -173,7 +173,7 @@ services:
       - django
       - channels
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=engineworker
       - SECRET_PATH=engineworker
       - DATABASE_NAME=${DATABASE_NAME}
@@ -206,7 +206,7 @@ services:
       - django
       - channels
     environment:
-      - VAULT_ADDR=http://vault:8300
+      - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=updateworker
       - SECRET_PATH=updateworker
       - DATABASE_NAME=${DATABASE_NAME}
