@@ -145,7 +145,9 @@ class PongEngine:
                 await cache.aset(self.game_channel, self.game_state)
 
         # Send game results (as frame message ?)
-        # Update profiles status and player things (is_game_ready, movement...)
+        # Update profiles status and player things
+        await update_players_exit_game(player_ids)
+
         # Send game end
         await channel_layer.group_send(
             self.game_channel,
@@ -217,3 +219,12 @@ class EngineConsumer(AsyncConsumer):
             asyncio.create_task(engine.game_loop())
         except Exception:
             logging.error(traceback.format_exc())
+
+@database_sync_to_async
+def update_players_exit_game(profile_ids):
+    for profile_id in profile_ids:
+        profile = Profile.objects.get(pk=profile_id)
+        profile.is_in_game = False
+        profile.is_game_ready = False
+        profile.actual_game_id = None
+        profile.save(update_field=['is_in_game', 'is_game_ready', 'actual_game_id'])
