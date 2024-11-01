@@ -227,4 +227,4 @@ def update_players_exit_game(profile_ids):
         profile.is_in_game = False
         profile.is_game_ready = False
         profile.actual_game_id = None
-        profile.save(update_field=['is_in_game', 'is_game_ready', 'actual_game_id'])
+        profile.save(update_fields=['is_in_game', 'is_game_ready', 'actual_game_id'])
