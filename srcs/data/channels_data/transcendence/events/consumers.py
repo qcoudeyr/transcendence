@@ -417,6 +417,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             elif content['direction'] == 'right':
                 game_state[pad]['z'] += direction * MOVE_DIST
 
+            await cache.aset(self.game_group, game_state)
             self.last_move_time = time.time()
 
     # group_send functions here
