@@ -158,7 +158,7 @@ class PongEngine:
         self.direction = 1
         self.speed = 5
         self.game_state = {
-            'type': 'game_state',
+            'type': 'send.game.state',
             'PLAYER_0': self.player_ids[0],
             'PLAYER_1': self.player_ids[1],
             'BALL': {'x': DEFAULT_BALL_X, 'y': DEFAULT_BALL_Y, 'z': DEFAULT_BALL_Z},
