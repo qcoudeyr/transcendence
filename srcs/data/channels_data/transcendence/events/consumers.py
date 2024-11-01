@@ -546,7 +546,9 @@ class EventConsumer(AsyncWebsocketConsumer):
             'type': 'game_end',
             })
         )
+        await update_profile_status(self.profile, 'ON')
         await self.leave_game_channel({})
+        await database_sync_to_async(self.profile.refresh_from_db)()
 
     async def send_game_state(self, event):
         event['SCORE'] = {'left': 0, 'right': 0}
