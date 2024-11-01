@@ -34,5 +34,5 @@
 
 export function gameEnd()
 {
-	
+	//show frame you lost or you won then make the button leave apear on top
 }

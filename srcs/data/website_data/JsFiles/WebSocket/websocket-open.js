@@ -112,10 +112,15 @@ function openWebsocket(socketurl){
 			{
 				gameEnd();
 			}
-			if(content.type === 'game_object')
+			if(content.type === 'game_state')
 			{
-				mooveBall(content.object, content.x, content.y, content.z);
+				mooveBall(content.BALL);
+				scoreUpdate(content.SCORE);
 			}
+			//if(content.type === 'game_frame_message')
+			// {
+					// frameUpdate(content.message);
+			// }
 			// if(content.type === 'game_score')
 			// {
 			// 	//scoreUpdate(content.score_1, content.score_2);
