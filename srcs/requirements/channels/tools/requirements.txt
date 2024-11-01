@@ -9,4 +9,4 @@ djangorestframework-simplejwt>=5.3.1
 django-channels-jwt
 pillow
 elastic-apm>=6.23.0
-celery
+django-redis

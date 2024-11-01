@@ -1,10 +1,26 @@
-SHELL := /bin/bash
+# Color and formatting definitions
+YELLOW := $(shell printf "\033[33m")
+GREEN := $(shell printf "\033[32m")
+RED := $(shell printf "\033[31m")
+BLUE := $(shell printf "\033[34m")
+NC := $(shell printf "\033[0m")
 
-all: create-data-dirs init-vault build-and-up init-portainer
+# Environment variables
+ENABLE_DEVOPS ?= false
+DEV=1
+CERT_SOURCE_DIR := ./srcs/data/certbot/certificates/pong-br.com
+BACKUP_DIR := ./.backup/data/certbot/certificates/pong-br.com
+# Existing variables
+SHELL := /bin/bash
+NETWORK_NAME = tr_network
+NETWORK_SUBNET = 10.0.10.0/24
+NETWORK_DRIVER = bridge
+
+all:  create-data-dirs init-network ssl-cert init-vault build-and-up init-portainer
+
 
 create-data-dirs:
-	@echo "Creating data directories if they do not exist..."
-
+	$(call log_info,"Creating data directories...")
 	@mkdir -p ./srcs/data/django_data \
 		./srcs/data/portainer_data \
 		./srcs/data/postgres_data \
@@ -15,14 +31,61 @@ create-data-dirs:
 		./srcs/data/apm_server_data \
 		./srcs/data/fleet_server_data \
 		./srcs/data/grafana_data \
-		./srcs/data/logs
+		./srcs/data/logs \
+		./srcs/data/certbot \
+		./srcs/data/certbot/logs \
+		./srcs/data/certificates \
+		./srcs/data/certbot/certificates/pong-br.com/ \
+		> /dev/null 2>&1 || true
+	$(call log_success,"Data directories created successfully")
 
-	@echo "Data directories created."
+init-network:
+	@echo "🔍 Checking for existing Docker network $(NETWORK_NAME)..."
+	@if docker network inspect $(NETWORK_NAME) >/dev/null 2>&1; then \
+		echo "ℹ️  Network $(NETWORK_NAME) already exists"; \
+	else \
+		echo "🌐 Creating new Docker network: $(NETWORK_NAME)"; \
+		echo "📝 Configuration:"; \
+		echo "   • Driver: $(NETWORK_DRIVER)"; \
+		echo "   • Subnet: $(NETWORK_SUBNET)"; \
+		if docker network create --driver $(NETWORK_DRIVER) --subnet $(NETWORK_SUBNET) $(NETWORK_NAME) >/dev/null 2>&1; then \
+			echo "✅ Network created successfully!"; \
+		else \
+			echo "❌ Failed to create network"; \
+			exit 1; \
+		fi; \
+	fi
 
 build-and-up:
-	@cd ./srcs && docker compose up setup && docker compose up -d
-	@sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true
-	@echo "Build Complete !"
+	@echo "🔐 Starting TLS setup..."
+	@docker compose -f ./srcs/docker-compose.yml up tls; \
+	R_VALUE=$$?; \
+	if [ $$R_VALUE -eq 0 ]; then \
+		echo "✅ TLS setup completed successfully"; \
+		rm -rf srcs/data/certbot/certificates ; \
+		cp ./.backup/data/certbot/ ./srcs/data/ -r; \
+		chmod 777 --recursive ./srcs/data/certbot/certificates/; \
+	else \
+		echo "⚠️  TLS setup failed, waiting 15 seconds..."; \
+		sleep 15; \
+	fi; \
+	echo "🚀 Starting main services..."; \
+	if [ "$(ENABLE_DEVOPS)" = "true" ]; then \
+		echo "⚙️  DevOps services enabled, starting setup..."; \
+		docker compose -f ./srcs/devops-docker-compose.yml up setup && \
+		docker compose -f ./srcs/docker-compose.yml -f ./srcs/devops-docker-compose.yml up -d; \
+	else \
+		echo "ℹ️  DevOps services disabled, starting only main services..."; \
+		docker compose -f ./srcs/docker-compose.yml up -d; \
+	fi;
+#sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true;
+	echo "✨ Build Complete!"
+
+devops:
+	@echo "🚀 Starting DevOps services...";
+	@echo "⚙️  DevOps services enabled, starting setup...";
+	@docker compose -f ./srcs/devops-docker-compose.yml up setup && \
+	 docker compose -f ./srcs/devops-docker-compose.yml up -d;
 
 init-portainer:
 	@echo "Starting of the init scripts..."
@@ -35,35 +98,41 @@ init-portainer:
 		echo "Portainer init script failed with return value $$R_VALUE!"; \
 	fi || true
 
-init-vault:
+init-vault:  init-network
+	@echo "Starting of the tls scripts..."
+	@./srcs/scripts/tls_setup.sh;\
+	R_VALUE=$$?; \
+	if [ $$R_VALUE -eq 0 ]; then \
+		echo "Vault tls done!"; \
+	else \
+		echo "Vault tls script failed with return value $$R_VALUE!"; \
+	fi
 	@echo "Starting Vault container..."
-	@cd ./srcs && docker compose up vault -d
+	@docker compose -f ./srcs/docker-compose.yml up vault -d
 	@echo "Vault container started !"
 	@echo "Vault initialization started..."
-	@cd ./srcs && ./scripts/vault_init.sh; \
+	@DEV=$(DEV) ./srcs/scripts/vault_init.sh; \
 	R_VALUE=$$?; \
 	if [ $$R_VALUE -eq 0 ]; then \
 		echo "Vault init done!"; \
 	else \
 		echo "Vault init script failed with return value $$R_VALUE!"; \
-	fi || true
+	fi
 	@echo "Vault setup started..."
-	@cd ./srcs && ./scripts/vault_setup.sh; \
+	@./srcs/scripts/vault_setup.sh; \
 	R_VALUE=$$?; \
 	if [ $$R_VALUE -eq 0 ]; then \
+		sleep 5 ;\
 		echo "Vault setup done!"; \
 	else \
 		echo "Vault setup script failed with return value $$R_VALUE!"; \
-	fi || true
+	fi
 
 clean-sensitive-data:
 	@echo "Cleaning up sensitive data..."
-
-	# Find the GPG key fingerprint for "vault-key"
-	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10); \
+	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10) && \
 	if [ -n "$$GPG_FINGERPRINT" ]; then \
-		# Remove the GPG private key (secret key) by fingerprint \
-		gpg --batch --yes --delete-secret-keys "$$GPG_FINGERPRINT"; \
+		gpg --batch --yes --delete-secret-keys "$$GPG_FINGERPRINT" && \
 		if [ $$? -eq 0 ]; then \
 			echo "GPG secret key '$$GPG_FINGERPRINT' removed successfully."; \
 		else \
@@ -72,11 +141,9 @@ clean-sensitive-data:
 	else \
 		echo "No GPG secret key found for 'vault-key'."; \
 	fi
-
-	# Check if the public key exists separately
-	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10); \
+	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10) && \
 	if [ -n "$$GPG_FINGERPRINT" ]; then \
-		gpg --batch --yes --delete-keys "$$GPG_FINGERPRINT"; \
+		gpg --batch --yes --delete-keys "$$GPG_FINGERPRINT" && \
 		if [ $$? -eq 0 ]; then \
 			echo "GPG public key '$$GPG_FINGERPRINT' removed successfully."; \
 		else \
@@ -85,19 +152,31 @@ clean-sensitive-data:
 	else \
 		echo "No GPG public key found for 'vault-key'."; \
 	fi
-	# Remove the encrypted root token file
-	@cd ./srcs/ && rm -f vault_root_token.gpg
-	@if [ $$? -eq 0 ]; then echo "Encrypted file 'vault_root_token.gpg' removed successfully."; else echo "Failed to remove 'root_token.gpg'."; fi
+	@rm -rf ./srcs/vault_root_token.gpg \
+	./srcs/requirements/vault/certs/ ./srcs/requirements/tls/certs/ && \
+	if [ $$? -eq 0 ]; then \
+		echo "Encrypted file 'vault_root_token.gpg' removed successfully."; \
+	else \
+		echo "Failed to remove 'root_token.gpg'."; \
+	fi
 
+clean-ssl:
+	@echo "Cleaning up ssl certificates..."
+	@find ./srcs/data -type d -name 'certs' -exec rm -rf {} + && \
+	if [ $$? -eq 0 ]; then \
+		echo "All 'certs' directories removed successfully."; \
+	else \
+		echo "Failed to remove some 'certs' directories."; \
+	fi
+	@rm -rf ./srcs/data/certificates/nginx ./srcs/data/certificates/vault ./srcs/data/certificates/root-ca.*
 	@echo "Sensitive data cleanup complete."
 
-
-fclean: clean-data clean-sensitive-data
+fclean: clean-data clean-sensitive-data clean-ssl
 	@echo "Removing migrations..."
 	@docker exec tr_django remove_migrations.sh || true
 	@docker exec tr_channels remove_migrations.sh || true
 	@echo "Stopping and removing all Docker containers..."
-	@cd ./srcs &&  docker compose down --volumes --remove-orphans || true
+	@docker compose -f ./srcs/docker-compose.yml -f ./srcs/devops-docker-compose.yml down --volumes --remove-orphans || true
 	@docker stop $$(docker ps -q) || true
 	@docker rm $$(docker ps -a -q) || true
 	@echo "Removing all Docker images..."
@@ -113,41 +192,10 @@ fclean: clean-data clean-sensitive-data
 	@sudo rm -rf ./srcs/data/fleet_server_data
 	@echo "Cleanup complete."
 
-stop-docker:
-	@echo "Stopping Docker daemon and all containers..."
-	@sudo systemctl stop docker* > /dev/null 2>&1
-	@echo "All Docker containers stopped!"
-
-start-docker:
-	@echo "Starting Docker daemon..."
-	@sudo systemctl start docker.service docker.socket > /dev/null 2>&1
-	@echo "Docker daemon started!"
-
 clean-data:
 	@echo "Cleaning of the data folder..."
 	@sudo find srcs/data -mindepth 1 -maxdepth 1 ! -name 'django_data' ! -name 'media_data' ! -name 'website_data' ! -name 'channels_data' -exec rm -rf {} +
 	@echo "Cleaning done !"
-
-restart-docker:
-	@if [ -z "$(container)" ]; then \
-		echo "Restarting all Docker containers..."; \
-		docker restart $$(docker ps -q) > /dev/null 2>&1; \
-		echo "All Docker containers have been restarted."; \
-	else \
-		if docker ps -a --format '{{.Names}}' | grep -q "^$(container)$$"; then \
-			echo "Restarting Docker container '$(container)'..."; \
-			docker restart $(container) > /dev/null 2>&1; \
-			echo "Docker container '$(container)' has been restarted."; \
-		else \
-			echo "Error: Docker container '$(container)' not found."; \
-			echo "Here is the list of available containers to restart:"; \
-			docker ps -a --format '{{.Names}}'; \
-			exit 1; \
-		fi \
-	fi
-%:
-	@$(MAKE) restart-docker container=$@
-
 
 
 # Add this to your existing Makefile
@@ -170,6 +218,74 @@ show-vault-token:
 	}
 
 
+
+# Generate SSL certificates if not present
+ssl-cert: create-data-dirs
+	@echo "🔍 Checking for existing SSL certificates..."
+	@if [ -d "./srcs/data/certbot/certificates/pong-br.com/" ]; then \
+		echo "✅ SSL certificates already exist. Skipping generation."; \
+	else \
+		if [ -d ".backup/data/certbot/certificates/pong-br.com" ]; then \
+			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
+			echo "📁 Restoring backup SSL certificates..."; \
+			sleep 5 && cp ./.backup/data/certbot/ ./srcs/data/ -r; \
+			chmod 777 --recursive ./srcs/data/certbot/certificates/ \
+		else \
+			echo "🔐 Generating new SSL certificates..."; \
+			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
+			echo "⏳ Waiting for certbot container to initialize..."; \
+			sleep 2; \
+			echo "🔑 Running certificate generation..."; \
+			docker exec tr_certbot /bin/sh -c "certbot certonly \
+			--dns-luadns \
+			--dns-luadns-credentials /.secrets/certbot/luadns.ini \
+			--email admin@pong-br.com \
+			--agree-tos \
+			--no-eff-email \
+			-d pong-br.com \
+			-d *.pong-br.com"; \
+			if [ $$? -ne 0 ]; then \
+				echo "❌ Certificate generation failed"; \
+				exit 1; \
+			fi; \
+			echo "📂 Setting permissions on certificate files..."; \
+			chmod 777 --recursive ./data/certbot/certificates/ || { echo "❌ Failed to set permissions"; exit 1; }; \
+			echo "✅ SSL certificate generation completed successfully."; \
+		fi; \
+	fi
+
+backup:
+	@echo "${BLUE}🔍 Checking for files to backup...${NC}"
+	@if [ ! -d "$(CERT_SOURCE_DIR)" ]; then \
+		echo "${RED}❌ Error: Source directory $(CERT_SOURCE_DIR) does not exist!${NC}"; \
+		echo "${YELLOW}ℹ️  Please ensure the certificates are generated first.${NC}"; \
+		exit 1; \
+	fi
+	@echo "${BLUE}📂 Source directory found. Preparing backup...${NC}"
+	@if [ ! -d "$(BACKUP_DIR)" ]; then \
+		echo "${YELLOW}📁 Creating backup directory structure...${NC}"; \
+		mkdir -p "$(BACKUP_DIR)" 2>/dev/null || \
+		{ echo "${RED}❌ Error: Failed to create backup directory!${NC}"; exit 1; }; \
+	fi
+	@echo "${BLUE}📦 Starting backup process...${NC}"
+	@cp -r "$(CERT_SOURCE_DIR)/." "$(BACKUP_DIR)/" 2>/dev/null || \
+		{ echo "${RED}❌ Error: Failed to copy files!${NC}"; \
+		  echo "${YELLOW}ℹ️  Please check permissions and disk space.${NC}"; \
+		  exit 1; }
+	@if [ -d "$(BACKUP_DIR)" ] && [ "$$(ls -A "$(BACKUP_DIR)" 2>/dev/null)" ]; then \
+		echo "${GREEN}✅ Backup completed successfully!${NC}"; \
+		echo "${BLUE}📍 Backup location: $(BACKUP_DIR)${NC}"; \
+		echo "${YELLOW}ℹ️  Total files backed up: $$(find "$(BACKUP_DIR)" -type f | wc -l)${NC}"; \
+	else \
+		echo "${RED}❌ Error: Backup appears to be empty or incomplete!${NC}"; \
+		exit 1; \
+	fi
+
+# Force renewal of certificates
+ssl-renew:
+	docker compose -f ./srcs/docker-compose.yml run --rm certbot certbot renew --force-renewal
+
 re: fclean all
 
-.PHONY: all build-and-up fclean re restart-docker stop-docker start-docker setup show-vault-token
+.PHONY: all build-and-up ssl-cert ssl-renew fclean re show-vault-token
+

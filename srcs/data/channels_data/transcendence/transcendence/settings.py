@@ -33,9 +33,12 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'pong-br.com']
 
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -163,6 +166,17 @@ REST_FRAMEWORK = {
 # Media config
 MEDIA_URL = '/media/'
 
+# Redis cache config
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
 # LOGGING = {
 #     'version': 1,
 #     'disable_existing_loggers': True,
@@ -205,12 +219,5 @@ MEDIA_URL = '/media/'
 ELASTIC_APM = {
 	'SERVICE_NAME': 'channel',
 	'SECRET_TOKEN': '',
-	'SERVER_URL': 'http://apm-server:8200'
+	'SERVER_URL': 'https://apm-server:8200'
 }
-
-# Celery config
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
