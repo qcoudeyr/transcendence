@@ -27,6 +27,7 @@ DEFAULT_BALL_Z = 0
 # PAD
 PAD_LENGTH = 0.3
 PAD_MOVE_DISTANCE = 0.12
+PAD_MAX_MOVE = MAP_WIDTH / 2 - PAD_LENGTH / 2
 DEFAULT_PAD_0_X = MAP_LENGTH / 2
 DEFAULT_PAD_0_Y = MAP_HEIGHT
 DEFAULT_PAD_0_Z = 0
@@ -213,8 +214,8 @@ class PongEngine:
     async def move_pad(self, pad, direction):
         if self.game_movement[pad] == 'left':
             move_distance = abs(self.game_state[pad]['z'] - direction * PAD_MOVE_DISTANCE)
-            if move_distance >= MAP_WIDTH / 2:
-                self.game_state[pad]['z'] = -direction * MAP_WIDTH / 2
+            if move_distance >= PAD_MAX_MOVE:
+                self.game_state[pad]['z'] = -direction * PAD_MAX_MOVE
             else:
                 self.game_state[pad]['z'] -= direction * PAD_MOVE_DISTANCE
 
@@ -222,8 +223,8 @@ class PongEngine:
             await cache.aset(self.game_channel + '_movement', self.game_movement)
         elif self.game_movement[pad] == 'right':
             move_distance = abs(self.game_state[pad]['z'] + direction * PAD_MOVE_DISTANCE)
-            if move_distance >= MAP_WIDTH / 2:
-                self.game_state[pad]['z'] = direction * MAP_WIDTH / 2
+            if move_distance >= PAD_MAX_MOVE:
+                self.game_state[pad]['z'] = direction * PAD_MAX_MOVE
             else:
                 self.game_state[pad]['z'] += direction * PAD_MOVE_DISTANCE
 
