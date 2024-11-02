@@ -42,4 +42,4 @@ srcs/requirements/tls/certs/ca/ca.srl
 srcs/data/certbot/logs/letsencrypt.log.1
 srcs/data/django_data/transcendence/game/migrations/__init__.py
 *luadns.ini*
-
+*initial.py

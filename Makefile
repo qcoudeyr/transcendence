@@ -242,6 +242,7 @@ ssl-cert: create-data-dirs
 				-d pong-br.com \
 				-d portainer.pong-br.com \
 				-d vault.pong-br.com \
+				-d grafana.pong-br.com \
 				-d kibana.pong-br.com " && \
 			echo "📂 Setting permissions on certificate files..." && \
 			chmod 777 --recursive ./srcs/data/certbot/certificates/ || { echo "❌ Failed to set permissions"; exit 1; } && \
