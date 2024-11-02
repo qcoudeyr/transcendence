@@ -74,8 +74,8 @@ const data = {
         nov: 55,
         dec: 65
     }
-};
-
+	};
+	const ctx = document.getElementById('hoursPlayedChart').getContext('2d');
 	const hoursPlayedChart = new Chart(ctx, {
 		type: 'bar',
 		data: {
