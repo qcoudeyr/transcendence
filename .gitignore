@@ -22,7 +22,8 @@ srcs/data/django_data/my_env/*
 **/.env.local
 db.sqlite3
 srcs/data/redis_data/*
-*__init__.py
+srcs/data/django_data/transcendence/profiles/migrations/__init__.py
+srcs/data/django_data/transcendence/profiles/migrations/0001_initial.py
 srcs/data/apm_server_data/*
 srcs/data/elasticsearch_data/*
 srcs/data/fleet_server_data/*
@@ -40,5 +41,6 @@ srcs/data/credentials/
 srcs/requirements/tls/certs/ca/ca.srl
 srcs/data/certbot/logs/letsencrypt.log.1
 srcs/data/django_data/transcendence/game/migrations/__init__.py
-*luadns.ini*
-*initial.py
+srcs/data/django_data/transcendence/game/migrations/0001_initial.py
+srcs/requirements/certbot/luadns.ini
+srcs/data/certbot/logs/letsencrypt.log.2

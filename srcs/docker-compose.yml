@@ -7,7 +7,7 @@ services:
     container_name: tr_certbot
     volumes:
         - ./requirements/certbot/luadns.ini:/.secrets/certbot/luadns.ini:ro
-        - certificates:/etc/letsencrypt/archive
+        - ./data/certbot/certificates/:/etc/letsencrypt/archive
         - ./data/certbot/logs:/var/log/letsencrypt
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
@@ -337,12 +337,6 @@ volumes:
       o: "bind"
       device: "./data/media_data/"
 
-  certificates:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "./data/certbot/certificates/"
 ########################
 ########NETWORKS########
 ########################

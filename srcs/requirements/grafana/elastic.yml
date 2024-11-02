@@ -4,7 +4,7 @@ datasources:
   - name: elasticsearch-v7-filebeat
     type: elasticsearch
     access: proxy
-    url: https://elasticsearch:9200
+    url: http://elasticsearch:9200
     jsonData:
       index: '[filebeat-]YYYY.MM.DD'
       interval: Daily
