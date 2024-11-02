@@ -44,4 +44,13 @@ document.addEventListener("DOMContentLoaded", function () {
 		websocketConnect();
 		};
 	}
+
+	const boxes = document.querySelectorAll('.play-section-box');
+
+        boxes.forEach(box => {
+            box.addEventListener('click', () => {
+                boxes.forEach(b => b.classList.remove('clicked'));
+                box.classList.add('clicked');
+            });
+        });
 });

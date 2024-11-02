@@ -196,3 +196,15 @@
 	border: 1px solid rgba(255, 0, 88, 0.4);
 	box-shadow: 0 1px 15px rgba(1, 1, 1, 0.2);
   }
+
+  .play-section-container .play-section-box.clicked:before,
+    .play-section-container .play-section-box.clicked:after {
+        transform: skewX(0deg);
+        left: 20px;
+        width: calc(100% - 90px);
+    }
+
+    .play-section-container .play-section-box.clicked .play-section-content {
+        left: -25px;
+        padding: 60px 40px;
+    }
