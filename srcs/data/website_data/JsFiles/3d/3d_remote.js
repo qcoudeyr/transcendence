@@ -24,13 +24,13 @@ remoteCamera.lookAt(new THREE.Vector3(0, 0, 0));
 // Scene for remote control
 const remoteScene = new THREE.Scene();
 
-// Raycaster and mouse vector for hover detection
+// Raycaster and mouse vector for interaction
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-const initialRotation = { x: 0, y: 0 };
 let remoteController; // Declare the remoteController variable
 let isHovered = false; // Variable to track hover state
+let isClicked = false; // Variable to track click state
 
 // Load the GLTF model
 const gltfLoader = new GLTFLoader();
@@ -89,7 +89,7 @@ function onWindowResizeRemote() {
   remoteRenderer.setSize(newWidth, newHeight);
 }
 
-// Function to handle mouse movement for hover effect and rotation
+// Function to handle mouse movement for hover effect
 function onMouseMove(event) {
   const rect = remoteContainer.getBoundingClientRect();
   mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -103,40 +103,39 @@ function onMouseMove(event) {
     const intersects = raycaster.intersectObject(remoteController, true);
 
     if (intersects.length > 0) {
-      // Hovered, update rotation and scale
-      updateRemoteControllerRotation(event);
       if (!isHovered) {
         isHovered = true;
-        animateRemoteControllerScale(1.2);
+        // Optionally, add a hover effect
       }
     } else {
-      if (isHovered) {
-        isHovered = false;
-        animateRemoteControllerScale(1.0);
-      }
+      isHovered = false;
     }
   }
 }
 
-// Function to animate the scale of the remoteController
-function animateRemoteControllerScale(scaleFactor) {
-  if (remoteController) {
-    remoteController.scale.lerp(
-      new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor),
-      0.1
-    );
-  }
-}
+// Function to handle mouse click
+function onClick(event) {
+  const rect = remoteContainer.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-// Function to update rotation based on mouse position
-function updateRemoteControllerRotation(event) {
-  const rotationSpeed = 0.005;
-  initialRotation.x += event.movementY * rotationSpeed;
-  initialRotation.y += event.movementX * rotationSpeed;
+  // Update the raycaster with the mouse coordinates
+  raycaster.setFromCamera(mouse, remoteCamera);
 
+  // Check if the ray intersects with the remoteController
   if (remoteController) {
-    remoteController.rotation.x = initialRotation.x;
-    remoteController.rotation.y = initialRotation.y;
+    const intersects = raycaster.intersectObject(remoteController, true);
+
+    if (intersects.length > 0) {
+      isClicked = !isClicked; // Toggle the clicked state
+      if (isClicked) {
+        // Apply a clicked effect, e.g., change color or scale
+        remoteController.scale.set(12, 12, 12);
+      } else {
+        // Revert to the original state
+        remoteController.scale.set(10, 10, 10);
+      }
+    }
   }
 }
 
@@ -149,6 +148,7 @@ function animateRemote() {
 // Add event listeners for interaction
 window.addEventListener('resize', onWindowResizeRemote);
 remoteContainer.addEventListener('mousemove', onMouseMove);
+remoteContainer.addEventListener('click', onClick);
 
 // Start animation loop
 animateRemote();
