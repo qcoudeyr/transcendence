@@ -59,7 +59,9 @@ export function getPad1() {
 }
 
 export function initScene() {
-	scene.add(cameraPad0);
+    cameraPad0.position.set(-2.82, 1.11, 15.26);
+    cameraPad0.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
+
     scene = new THREE.Scene();
     ball.position.y = 0.15;
     pad0.position.set(5, 0.15, 0);
