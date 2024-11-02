@@ -31,7 +31,7 @@ canvas {
 	top: 0%;
 }
 
-.hexagon {
+.scoreboard-hexagon {
 	position: relative;
 	width: 100px;
 	height: 58px;
@@ -46,7 +46,7 @@ canvas {
 	border: 2px solid white;
 }
 
-.hexagon.large {
+.scoreboard-hexagon.large {
 	width: 150px;
 	height: 87px;
 	z-index: 100;
