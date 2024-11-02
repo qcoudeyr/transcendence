@@ -1,4 +1,5 @@
 import { initScene } from "../3d/3d.js";
+import { notificationReset, queueNotification } from "../WebSocket/notifications-displays.js";
 import { getWebsocket } from "../WebSocket/websocket-open.js";
 
 export function navigateToSection(sections, links) {
@@ -108,6 +109,7 @@ export function leaveQueue(clickSound)
         console.log("Leaving the queue");
 		button.style.display = "none";
 		boxes.forEach(b => b.classList.remove('clicked'));
+		notificationReset()
 
     clickSound.play();
 }
@@ -121,6 +123,7 @@ export function playButtonSetup(clickSound) {
             'mode': 'CLASSIC'
         }));
         console.log("Joining the queue");
+		queueNotification();
 		button.style.display = "block";
         button.textContent = "EXIT";
 
