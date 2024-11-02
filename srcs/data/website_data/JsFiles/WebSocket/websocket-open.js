@@ -130,6 +130,10 @@ function openWebsocket(socketurl){
 			{
 				fillStats(content);
 			}
+			if (content.type === 'game_history')
+			{
+				setHistory(content);
+			}
 			//if(content.type === 'game_frame_message')
 			// {
 					// frameUpdate(content.message);
