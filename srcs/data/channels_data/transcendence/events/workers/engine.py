@@ -26,6 +26,7 @@ DEFAULT_BALL_Z = 0
 
 # PAD
 PAD_LENGTH = 0.3
+PAD_MOVE_DISTANCE = 0.03
 DEFAULT_PAD_0_X = MAP_LENGTH / 2
 DEFAULT_PAD_0_Y = MAP_HEIGHT
 DEFAULT_PAD_0_Z = 0
@@ -171,11 +172,26 @@ class PongEngine:
             'TIMER': self.game_timer,
             'PLAYER_SCORE': self.score,
             'ENDED': not self.game_continue,
+            'MOVEMENT': {'PAD_0': '', 'PAD_1': ''}
         }
         await cache.aset(self.game_channel, self.game_state)
     
     async def apply_physic(self, lap_duration):
         x = self.game_state['BALL']['x']
+
+        # PAD MOVEMENTS
+        if self.game_state['MOVEMENT']['PAD_0'] == 'left':
+            self.game_state['PAD_0'] -= -PAD_MOVE_DISTANCE
+            self.game_state['MOVEMENT']['PAD_0'] = ''
+        elif self.game_state['MOVEMENT']['PAD_0'] == 'right':
+            self.game_state['PAD_0'] += -PAD_MOVE_DISTANCE
+            self.game_state['MOVEMENT']['PAD_0'] = ''
+        if self.game_state['MOVEMENT']['PAD_1'] == 'left':
+            self.game_state['PAD_1'] -= PAD_MOVE_DISTANCE
+            self.game_state['MOVEMENT']['PAD_1'] = ''
+        elif self.game_state['MOVEMENT']['PAD_1'] == 'right':
+            self.game_state['PAD_1'] += PAD_MOVE_DISTANCE
+            self.game_state['MOVEMENT']['PAD_1'] = ''
 
         if x >= MAP_LENGTH / 2:
             self.direction = -1

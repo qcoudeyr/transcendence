@@ -413,9 +413,11 @@ class EventConsumer(AsyncWebsocketConsumer):
                 direction = 1
 
             if content['direction'] == 'left':
-                game_state[pad]['z'] -= direction * MOVE_DIST
+                game_state['MOVEMENT'][pad] = 'left'
+                # game_state[pad]['z'] -= direction * MOVE_DIST
             elif content['direction'] == 'right':
-                game_state[pad]['z'] += direction * MOVE_DIST
+                game_state['MOVEMENT'][pad] = 'right'
+                # game_state[pad]['z'] += direction * MOVE_DIST
 
             await cache.aset(self.game_group, game_state)
             self.last_move_time = time.time()
