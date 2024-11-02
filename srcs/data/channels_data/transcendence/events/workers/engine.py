@@ -247,7 +247,7 @@ class PongEngine:
 
     async def pad_bounce(self):
         for pad in ['PAD_0', 'PAD_1']:
-            if (abs(self.game_state['BALL']['x']) + BALL_RADIUS >= abs(self.game_state[pad]['x']) and 
+            if (abs(self.game_state['BALL']['x']) + BALL_RADIUS + PAD_LENGTH / 2 >= abs(self.game_state[pad]['x']) and 
                 self.game_state['BALL']['z'] <= self.game_state[pad]['z'] + PAD_WIDTH / 2 and
                 self.game_state['BALL']['z'] >= self.game_state[pad]['z'] - PAD_WIDTH / 2):
                 self.ball_speed['x'] *= -1
