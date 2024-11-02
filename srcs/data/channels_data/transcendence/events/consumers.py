@@ -892,7 +892,7 @@ def create_classic_game(group_sizes):
             member.is_in_game = True
             member.save(update_fields=['status', 'is_in_game'])
 
-    game_history = GameHistory.objects.create(player_0=player_ids[0], player_1=player_ids[1])
+    game_history = GameHistory.objects.create(player_0_id=player_ids[0], player_1_id=player_ids[1])
 
     for player_id in player_ids:
         player = Profile.objects.get(pk=player_id)
