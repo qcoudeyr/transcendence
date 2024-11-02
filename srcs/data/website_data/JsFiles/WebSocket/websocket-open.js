@@ -9,6 +9,7 @@ import { mooveBall, mooveCamera1, moovePad, moovePad2 } from "./Game/ballMovemen
 import { showPlayingSection } from "../Modules/navigation.js";
 import { scoreboardFill } from "./Game/updateScore.js";
 import { fillStats } from "./Statistiques.js";
+import { createMatchHistory } from "./historyDisplay.js";
 
 let socket;
 
@@ -132,7 +133,7 @@ function openWebsocket(socketurl){
 			}
 			if (content.type === 'game_history')
 			{
-				setHistory(content);
+				createMatchHistory(content);
 			}
 			//if(content.type === 'game_frame_message')
 			// {
