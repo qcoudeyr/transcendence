@@ -185,23 +185,11 @@ class PongEngine:
         x = self.game_state['BALL']['x']
 
         # PAD MOVEMENTS
-        if self.game_movement['PAD_0'] == 'left':
-            self.game_state['PAD_0']['z'] -= -PAD_MOVE_DISTANCE
-            self.game_movement['PAD_0'] = ''
-            await cache.aset(self.game_channel + '_movement', self.game_movement)
-        elif self.game_movement['PAD_0'] == 'right':
-            self.game_state['PAD_0']['z'] += -PAD_MOVE_DISTANCE
-            self.game_movement['PAD_0'] = ''
-            await cache.aset(self.game_channel + '_movement', self.game_movement)
-        if self.game_movement['PAD_1'] == 'left':
-            self.game_state['PAD_1']['z'] -= PAD_MOVE_DISTANCE
-            self.game_movement['PAD_1'] = ''
-            await cache.aset(self.game_channel + '_movement', self.game_movement)
-        elif self.game_movement['PAD_1'] == 'right':
-            self.game_state['PAD_1']['z'] += PAD_MOVE_DISTANCE
-            self.game_movement['PAD_1'] = ''
-            await cache.aset(self.game_channel + '_movement', self.game_movement)
-
+        if self.game_movement['PAD_0'] in ['left', 'right']:
+            await self.move_pad('PAD_0')
+        if self.game_movement['PAD_1'] in ['left', 'right']:
+            await self.move_pad('PAD_1')
+            
         if x >= MAP_LENGTH / 2:
             self.direction = -1
         elif x <= -MAP_LENGTH / 2:
@@ -221,6 +209,16 @@ class PongEngine:
             self.game_continue = False
             self.game_state['ENDED'] = True
             return
+
+    async def move_pad(self, pad):
+        if self.game_movement[pad] == 'left':
+            self.game_state[pad]['z'] -= -PAD_MOVE_DISTANCE
+            self.game_movement[pad] = ''
+            await cache.aset(self.game_channel + '_movement', self.game_movement)
+        elif self.game_movement[pad] == 'right':
+            self.game_state[pad]['z'] += -PAD_MOVE_DISTANCE
+            self.game_movement[pad] = ''
+            await cache.aset(self.game_channel + '_movement', self.game_movement)
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
