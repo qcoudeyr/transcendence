@@ -163,7 +163,7 @@ class PongEngine:
 
     async def reset_physic(self):
         self.direction = 1
-        self.ball_speed = {'x': -self.ball_speed['x'], 'z': 0}
+        self.ball_speed = {'x': -self.ball_speed['x'], 'z': self.ball_speed['z']}
         self.game_state = {
             'type': 'send.game.state',
             'PLAYER_0': self.player_ids[0],
@@ -249,7 +249,7 @@ class PongEngine:
         for pad in ['PAD_0', 'PAD_1']:
             if (abs(self.game_state['BALL']['x']) >= abs(self.game_state[pad]['x']) and 
                 self.game_state['BALL']['z'] <= self.game_state[pad]['z'] + PAD_LENGTH / 2 and
-                self.game_state['BALL']['z'] <= self.game_state[pad]['z'] - PAD_LENGTH / 2):
+                self.game_state['BALL']['z'] >= self.game_state[pad]['z'] - PAD_LENGTH / 2):
                 self.ball_speed['x'] *= -1
                 return
 
