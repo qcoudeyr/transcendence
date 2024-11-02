@@ -14,8 +14,8 @@ from profiles.models import Profile, FriendRequest, GroupRequest, Group
 from game.models import PartyQueue, GameHistory
 
 # PAD MOVE
-MIN_MOVE_TIME_DELTA = 1.0 / 128
-MOVE_DIST = 0.03
+MIN_MOVE_TIME_DELTA = 1.0 / 256
+MOVE_DIST = 0.3
 
 channel_layer = get_channel_layer()
 
