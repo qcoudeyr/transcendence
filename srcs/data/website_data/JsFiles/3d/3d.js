@@ -59,6 +59,7 @@ export function getPad1() {
 }
 
 export function initScene() {
+	scene.add(cameraPad0);
     scene = new THREE.Scene();
     ball.position.y = 0.15;
     pad0.position.set(5, 0.15, 0);
