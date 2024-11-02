@@ -5,7 +5,7 @@ import { isUnloaded } from '../Modules/navigation.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { getWebsocket } from '../WebSocket/websocket-open.js';
 
-let scene, camera, renderer, controls, animationId;
+let scene, renderer, controls, animationId;
 const geometry = new THREE.SphereGeometry(0.1, 32, 32);
 
 // Create a material for the ball with realistic properties
@@ -26,7 +26,7 @@ const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
 const pad0 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 const pad1 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 
-const camera = new THREE.PerspectiveCamera(
+let camera = new THREE.PerspectiveCamera(
 	45, // Field of view
 	window.innerWidth / window.innerHeight, // Aspect ratio
 	0.1, // Near clipping plane
