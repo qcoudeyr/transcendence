@@ -26,21 +26,32 @@ canvas {
 
   /* Scoreboard styling */
   
-  .scoreboard {
-	position: absolute;
-	top: 25%;
-	left: 90%;
-	transform: translateX(-50%);
-	background-color: #111;
-	color: #fff;
-	padding: 30px;
-	border-radius: 15px;
-	box-shadow: 0 0 20px rgba(31, 29, 29, 0.7);
-	text-align: center;
-	border: 2px solid #ff00ff;
-	z-index: 1;
-  }
-  
+.scoreboard {
+	display: flex;
+	top: 0%;
+}
+
+.hexagon {
+	position: relative;
+	width: 100px;
+	height: 58px;
+	background-color: #1111111a;
+	margin: -20px;
+	clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: rgb(110, 207, 255);
+	font-size: 24px;
+	border: 2px solid white;
+}
+
+.hexagon.large {
+	width: 150px;
+	height: 87px;
+	z-index: 100;
+
+}
 .frame-container {
 	top: 50%;
 	background-color: #ff4c4c;
