@@ -124,8 +124,9 @@ class PongEngine:
             while (self.round_continue):
                 lap_duration = time.time() - lap_start_time
 
-                # Retrieve game state
+                # Retrieve game state and players movement requests
                 self.game_state = await cache.aget(self.game_channel)
+                self.game_movement = await cache.aget(self.game_channel + '_movement')
 
                 # Apply physic (update objects and apply game rules)
                 await self.apply_physic(lap_duration)
