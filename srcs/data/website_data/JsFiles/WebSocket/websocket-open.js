@@ -8,6 +8,7 @@ import { gameEnd ,gameReadySoStart} from "./Game/gameStartAndEnd.js"
 import { mooveBall, mooveCamera1, moovePad, moovePad2 } from "./Game/ballMovement.js"
 import { showPlayingSection } from "../Modules/navigation.js";
 import { scoreboardFill } from "./Game/updateScore.js";
+import { fillStats } from "./Statistiques.js";
 
 let socket;
 
@@ -121,7 +122,10 @@ function openWebsocket(socketurl){
 				moovePad2(content);
 				mooveCamera1(content);
 				scoreboardFill(content);
-				// scoreUpdate(content.SCORE);
+			}
+			if (content.type === 'statistics')
+			{
+				fillStats(content);
 			}
 			//if(content.type === 'game_frame_message')
 			// {
