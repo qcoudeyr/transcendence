@@ -242,12 +242,12 @@ class PongEngine:
         self.game_state['BALL']['z'] += self.ball_speed['z'] * lap_duration
 
     async def wall_bounce(self):
-        if abs(self.game_state['BALL']['z']) >= MAP_WIDTH / 2:
+        if abs(self.game_state['BALL']['z']) + BALL_RADIUS >= MAP_WIDTH / 2:
             self.ball_speed['z'] *= -1
 
     async def pad_bounce(self):
         for pad in ['PAD_0', 'PAD_1']:
-            if (abs(self.game_state['BALL']['x']) >= abs(self.game_state[pad]['x']) and 
+            if (abs(self.game_state['BALL']['x']) + BALL_RADIUS >= abs(self.game_state[pad]['x']) and 
                 self.game_state['BALL']['z'] <= self.game_state[pad]['z'] + PAD_LENGTH / 2 and
                 self.game_state['BALL']['z'] >= self.game_state[pad]['z'] - PAD_LENGTH / 2):
                 self.ball_speed['x'] *= -1
