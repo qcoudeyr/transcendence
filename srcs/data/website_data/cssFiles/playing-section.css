@@ -27,6 +27,7 @@ canvas {
   /* Scoreboard styling */
   
 .scoreboard {
+	position: fixed;
 	display: flex;
 	top: 0%;
 	left: 50%;
@@ -68,12 +69,6 @@ canvas {
 	text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
   }
   
-  .scores {
-	display: flex;
-	justify-content: space-around;
-	margin-bottom: 30px;
-  }
-  
   .player {
 	display: flex;
 	flex-direction: column;
@@ -84,19 +79,6 @@ canvas {
 	font-size: 1.5rem;
 	color: #ff4c4c;
 	text-shadow: 0 0 5px #ff4c4c, 0 0 10px #ff4c4c;
-  }
-  
-  .score {
-	font-size: 3.5rem;
-	margin: 10px 0;
-	width: 100px;
-	text-align: center;
-	background-color: #222;
-	border-radius: 10px;
-	padding: 15px;
-	color: #ff4c4c;
-	text-shadow: 0 0 10px #ff4c4c, 0 0 20px #ff4c4c, 0 0 30px #ff4c4c;
-	border: 2px solid #ff4c4c;
   }
   
   button {
