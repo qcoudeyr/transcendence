@@ -57,4 +57,48 @@ document.addEventListener("DOMContentLoaded", function () {
                 box.classList.add('clicked');
             });
         });
+	//stats script hours played
+	const ctx = document.getElementById('hoursPlayedChart').getContext('2d');
+    const hoursPlayedChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Hours Played',
+                data: [20, 30, 50, 40, 60, 80, 90, 75, 85, 70, 55, 65], // Example data for each month
+                backgroundColor: 'rgba(255, 0, 255, 0.6)',
+                borderColor: '#ff00ff',
+                borderWidth: 1,
+                hoverBackgroundColor: 'rgb(0, 255, 255)', // Neon cyan on hover
+                hoverBorderColor: '#ff00ff' // Neon pink border on hover
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 0, 255, 0.6)'// Faint neon gridlines
+                    },
+                    ticks: {
+                        color: '#ff00ff' // Neon green y-axis labels
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 0, 255, 0.6)' // Faint neon gridlines
+                    },
+                    ticks: {
+                        color: '#ff00ff' // Neon green x-axis labels
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false // Hide legend to focus on the chart itself
+                }
+            }
+        }
+    });
 });
