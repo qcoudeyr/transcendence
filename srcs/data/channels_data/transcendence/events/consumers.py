@@ -82,6 +82,9 @@ class EventConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+        # Test history list
+        await self.history_list({})
+
     async def disconnect(self, close_code):
         await update_profile_status(self.profile, 'OF')
         group = await get_profile_group(self.profile)
