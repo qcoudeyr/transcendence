@@ -211,11 +211,11 @@ class PongEngine:
             return
 
     async def move_pad(self, pad, direction):
-        if self.game_movement[pad] == 'left':
+        if self.game_movement[pad] == 'left' and self.game_state[pad]['z'] - direction * PAD_MOVE_DISTANCE >= direction * MAP_WIDTH / 2:
             self.game_state[pad]['z'] -= direction * PAD_MOVE_DISTANCE
             self.game_movement[pad] = ''
             await cache.aset(self.game_channel + '_movement', self.game_movement)
-        elif self.game_movement[pad] == 'right':
+        elif self.game_movement[pad] == 'right' and self.game_state[pad]['z'] + direction * PAD_MOVE_DISTANCE <= direction * MAP_WIDTH / 2:
             self.game_state[pad]['z'] += direction * PAD_MOVE_DISTANCE
             self.game_movement[pad] = ''
             await cache.aset(self.game_channel + '_movement', self.game_movement)
