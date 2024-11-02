@@ -8,7 +8,7 @@ export function createMatchHistory(data) {
         matchDiv.classList.add("game", "lost");
     else
         matchDiv.classList.add("game", "won");
-    matchDiv.setAttribute('onclick', `selectMatch('${data.result}', '${data.score}')`);
+		matchDiv.setAttribute('onclick', `selectMatch('${data.result}', '${data.score.left + '-' + data.score.right}')`);
     const matchText = document.createElement('p');
     matchText.textContent = 'Match ' + data.id;
     matchDiv.appendChild(matchText);
