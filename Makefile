@@ -13,9 +13,7 @@ BACKUP_DIR := ./.backup/data/certbot/certificates/pong-br.com
 # Existing variables
 SHELL := /bin/bash
 NETWORK_NAME = tr_network
-NETWORK_DEVOPS_NAME = tr_devops_network
-NETWORK_SUBNET = 10.0.10.0/27
-NETWORK_DEVOPS_SUBNET = 10.0.10.32/27
+NETWORK_SUBNET = 10.0.10.0/24
 NETWORK_DRIVER = bridge
 
 all:  create-data-dirs init-network ssl-cert backup init-vault build-and-up init-portainer
@@ -51,25 +49,9 @@ init-network:
 		echo "   • Driver: $(NETWORK_DRIVER)"; \
 		echo "   • Subnet: $(NETWORK_SUBNET)"; \
 		if docker network create --driver $(NETWORK_DRIVER) --subnet $(NETWORK_SUBNET) $(NETWORK_NAME) >/dev/null 2>&1; then \
-			echo "✅ Network $(NETWORK_NAME) created successfully!"; \
+			echo "✅ Network created successfully!"; \
 		else \
-			echo "❌ Failed to create network $(NETWORK_NAME)"; \
-			exit 1; \
-		fi; \
-	fi
-
-	@echo "🔍 Checking for existing Docker network $(NETWORK_DEVOPS_NAME)..."
-	@if docker network inspect $(NETWORK_DEVOPS_NAME) >/dev/null 2>&1; then \
-		echo "ℹ️  Network $(NETWORK_DEVOPS_NAME) already exists"; \
-	else \
-		echo "🌐 Creating new Docker network: $(NETWORK_DEVOPS_NAME)"; \
-		echo "📝 Configuration:"; \
-		echo "   • Driver: $(NETWORK_DRIVER)"; \
-		echo "   • Subnet: $(NETWORK_DEVOPS_SUBNET)"; \
-		if docker network create --driver $(NETWORK_DRIVER) --subnet $(NETWORK_DEVOPS_SUBNET) $(NETWORK_DEVOPS_NAME) >/dev/null 2>&1; then \
-			echo "✅ Network $(NETWORK_DEVOPS_NAME) created successfully!"; \
-		else \
-			echo "❌ Failed to create network $(NETWORK_DEVOPS_NAME)"; \
+			echo "❌ Failed to create network"; \
 			exit 1; \
 		fi; \
 	fi

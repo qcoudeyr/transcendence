@@ -21,7 +21,7 @@ services:
       - SECRET_PATH=setup
       - VAULT_ADDR=${VAULT_ADDR}
     networks:
-      - devops
+      - transcendence
     depends_on:
       - elasticsearch
 
@@ -61,8 +61,8 @@ services:
       - LS_JAVA_OPTS=-Xms256m -Xmx512m
     hostname: elasticsearch
     networks:
-      devops:
-        ipv4_address: 10.0.10.34
+      transcendence:
+        ipv4_address: 10.0.10.13
     restart: unless-stopped
     entrypoint: ["/vault/entrypoint/entrypoint.sh", "/bin/tini","--","/usr/local/bin/docker-entrypoint.sh"]
     command: "eswrapper"
@@ -94,8 +94,8 @@ services:
       - SECRET_PATH=logstash
       - LS_JAVA_OPTS=-Xms256m -Xmx256m
     networks:
-      devops:
-        ipv4_address: 10.0.10.35
+      transcendence:
+        ipv4_address: 10.0.10.14
     hostname: logstash
     depends_on:
       - elasticsearch
@@ -128,8 +128,8 @@ services:
       - SECRET_PATH=kibana
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
     networks:
-      devops:
-        ipv4_address: 10.0.10.36
+      transcendence:
+        ipv4_address: 10.0.10.15
     hostname: kibana
     depends_on:
       - elasticsearch
@@ -168,8 +168,8 @@ services:
       - SECRET_PATH=filebeat
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
     networks:
-      devops:
-        ipv4_address: 10.0.10.37
+      transcendence:
+        ipv4_address: 10.0.10.22
     entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/bin/tini","--","/usr/local/bin/docker-entrypoint"]
     command: ["-environment", "container", -e, --strict.perms=false]
 
@@ -195,8 +195,8 @@ services:
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
     hostname: curator
     networks:
-      devops:
-        ipv4_address: 10.0.10.38
+      transcendence:
+        ipv4_address: 10.0.10.16
     depends_on:
 
       - elasticsearch
@@ -250,9 +250,10 @@ services:
     hostname: fleet-server
     restart: on-failure
     networks:
-      devops:
-        ipv4_address: 10.0.10.39
+      transcendence:
+        ipv4_address: 10.0.10.18
     depends_on:
+
       - elasticsearch
       - kibana
     entrypoint: ["/vault/entrypoint/entrypoint.sh", "/usr/bin/tini" ,"--" ,"/usr/local/bin/docker-entrypoint"]
@@ -292,8 +293,8 @@ services:
     hostname: apm-server
     restart: on-failure
     networks:
-      devops:
-        ipv4_address: 10.0.10.45
+      transcendence:
+        ipv4_address: 10.0.10.19
     depends_on:
       - elasticsearch
       - kibana
@@ -321,8 +322,8 @@ services:
       - SECRET_PATH=heartbeat
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
     networks:
-      devops:
-        ipv4_address: 10.0.10.41
+      transcendence:
+        ipv4_address: 10.0.10.20
     hostname: heartbeat
     depends_on:
       - elasticsearch
@@ -368,8 +369,8 @@ services:
       SECRET_PATH : "metricbeat"
       ES_JAVA_OPTS : "-Xms256m -Xmx256m"
     networks:
-      devops:
-        ipv4_address: 10.0.10.42
+      transcendence:
+        ipv4_address: 10.0.10.21
     hostname: metricbeat
     depends_on:
       - elasticsearch
@@ -387,8 +388,8 @@ services:
     ports:
       - "9090:9090"
     networks:
-      devops:
-        ipv4_address: 10.0.10.43
+      transcendence:
+        ipv4_address: 10.0.10.30
     restart: always
     hostname: prometheus
     extra_hosts:
@@ -411,8 +412,8 @@ services:
     ports:
       - "3001:3001"
     networks:
-      devops:
-        ipv4_address: 10.0.10.44
+      transcendence:
+        ipv4_address: 10.0.10.31
     depends_on:
       - prometheus
     restart: always
@@ -458,7 +459,4 @@ volumes:
 networks:
   transcendence:
     name: tr_network
-    external: true
-  devops:
-    name: tr_devops_network
     external: true
