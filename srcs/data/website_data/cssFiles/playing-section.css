@@ -36,6 +36,7 @@ canvas {
 	transform: translateX(-50%);
 	transform: translateY(-50%);
 	background-color: #e230b8;
+	display: none;
 	z-index: 1000;
 }
 
