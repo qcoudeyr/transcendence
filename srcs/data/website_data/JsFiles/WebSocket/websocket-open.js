@@ -136,6 +136,10 @@ function openWebsocket(socketurl){
 			{
 				createMatchHistory(content);
 			}
+			if(content.type === 'game_tournament')
+			{
+				fillTournament(content);
+			}
 			//if(content.type === 'game_frame_message')
 			// {
 					// frameUpdate(content.message);
