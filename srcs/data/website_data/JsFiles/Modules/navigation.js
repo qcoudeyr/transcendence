@@ -96,6 +96,20 @@ export function isUnloaded()
 	isInitialized = false;
 }
 
+export function leaveQueue(clickSound)
+{
+	const button = document.getElementById("playbuttontext");
+    let socket = getWebsocket();
+
+        socket.send(JSON.stringify({
+            'type': 'game_leave_queue',
+        }));
+        console.log("Leaving the queue");
+		button.style.display = "none";
+
+    clickSound.play();
+}
+
 export function playButtonSetup(clickSound) {
     const button = document.getElementById("playbuttontext");
     let socket = getWebsocket();
