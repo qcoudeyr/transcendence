@@ -62,7 +62,7 @@
 .play-section-container .play-section-box:nth-child(1):before,
 .play-section-container .play-section-box:nth-child(1):after
 {
-  background: linear-gradient(315deg, #ffbc00, #ff0058);
+  background: linear-gradient(315deg, #ff00fb, #ff0058);
 }
 
 .play-section-container .play-section-box:nth-child(2):before,
