@@ -432,6 +432,7 @@ footer {
     will-change: transform;
     transform: translateY(-4px);
     transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+	display: none;
 }
 @media (min-width: 768px) {
     .button-82-front {

@@ -18,6 +18,7 @@
 	<link rel="stylesheet" type="text/css" href="cssFiles/friends.css">
 	<link rel="stylesheet" type="text/css" href="cssFiles/notifications.css">
 	<link rel="stylesheet" type="text/css" href="cssFiles/history.css">
+	<link rel="stylesheet" type="text/css" href="cssFiles/playSection.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P|VT323|Nova+Square&display=swap">
 	<script type="importmap">
 		{
@@ -85,12 +86,20 @@
     </section>
 	<section id="play" class="play-section">
 		<div class="play-content">
-			<div class="blob-container">
-				<div id="remoteContainer" class="image-stack">
-				  <!-- The Three.js or Spline viewer will be injected here -->
+			<div class="play-section-container">
+				<div id="classic-box" class="play-section-box">
+				  <span></span>
+				  <div class="play-section-content">
+					<h2>Classic</h2>
+					<p>Ready for a challenge? Launch a 1v1 game of our thrilling 3D Pong version and show off your skills!</p>
+				  </div>
 				</div>
-				<div id="robotContainer" class="image-stack">
-				  <!-- Ensure the Spline viewer is placed within the correct div -->
+				<div class="play-section-box"> <!-- Corrected this line -->
+				  <span></span>
+				  <div class="play-section-content">
+					<h2>Tournament</h2>
+					<p>Join the competition! Sign up for our tournament and battle it out in the 3D Pong version to show off your skills!</p>
+				  </div>
 				</div>
 			  </div>
 
@@ -123,7 +132,7 @@
     </section>
 	<section id="history" class="history-section">
 		<div class="history-wrapper"> <!-- New wrapper div -->
-			<div class="match_history_container">
+			<div id="match-history-container" class="match_history_container">
 				<div class="history_title">
 					<h2>HISTORY</h2>
 				</div>
@@ -137,6 +146,12 @@
 				<div id="game_3" class="game lost" onclick="selectMatch('lost', '8-15')">
 					<p>Match 3</p>
 				</div>
+				<script>
+					function selectMatch(status, score) {
+	document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
+	document.getElementById('match_score').innerText = `Score: ${score}`;
+}
+					</script>
 				<!-- Add more matches as needed -->
 			</div>
 			<div class="current_match_selected_info">
@@ -145,12 +160,6 @@
 				<p id="match_score"></p>
 			</div>
 		</div>
-		<script>
-			function selectMatch(status, score) {
-				document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
-				document.getElementById('match_score').innerText = `Score: ${score}`;
-			}
-		</script>
 	</section>
     <section id="tournaments" class="tournaments-section">
 		<h3 class="tournament_desc">Compete in the very first game ever with enhanced graphics and maybe win the Tournament !!</h3>
@@ -239,27 +248,27 @@
 </script>
 			<div class="box total-wins">
 				<h2>Total Wins</h2>
-				<p>128 Wins</p>
+				<p id="total-wins">No data found</p>
 			</div>
 			<div class="box total-losses">
 				<h2>Total Losses</h2>
-				<p>45 Losses</p>
+				<p id="total-losses">No data found</p>
 			</div>
 			<div class="box best-streak">
 				<h2>Best Streak</h2>
-				<p>12 Wins in a Row</p>
+				<p id="top-streak">No data found</p>
 			</div>
 			<div class="box games-played">
 				<h2>Games Played</h2>
-				<p>173 Games</p>
+				<p id="games-played">No data found</p>
 			</div>
 			<div class="box play-time">
 				<h2>Total Points Scored</h2>
-				<p>649</p>
+				<p id="play-time">No data found</p>
 			</div>
 			<div class="box skills-mastered">
-				<h2>Skills Mastered</h2>
-				<p>Having Fun</p>
+				<h2>Current Streak</h2>
+				<p id="current-streak">No data found</p>
 			</div>
 
     </section>
@@ -437,13 +446,12 @@
 	<script type="module" src="/JsFiles/WebSocket/friendDisplay.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/groupRequests.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/Game/ballMovement.js"></script>
+	<script type="module" src="/JsFiles/WebSocket/historyDisplay.js"></script>
 	<script type="module" src="/JsFiles/WebSocket/Game/gameStartAndEnd.js"></script>
 	<script type="module" src="/JsFiles/Modules/navigation.js"></script>
 	<script src="/JsFiles/Pages/profile.js"></script>
 	<script src="/JsFiles/WebSocket/friendsButtons.js"></script>
 	<script src="JsFiles/Pages/login.js"></script>
     <script type="module" src="JsFiles/3d/3d.js"></script>
-	<script type="module" src="JsFiles/3d/3d_remote.js"></script>
-	<script type="module" src="JsFiles/3d/3d_robot.js"></script>
 </body>
 </html>

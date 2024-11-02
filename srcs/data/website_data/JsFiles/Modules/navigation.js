@@ -1,4 +1,5 @@
 import { initScene } from "../3d/3d.js";
+import { notificationReset, queueNotification } from "../WebSocket/notifications-displays.js";
 import { getWebsocket } from "../WebSocket/websocket-open.js";
 
 export function navigateToSection(sections, links) {
@@ -96,6 +97,23 @@ export function isUnloaded()
 	isInitialized = false;
 }
 
+export function leaveQueue(clickSound)
+{
+	const button = document.getElementById("playbuttontext");
+	const boxes = document.querySelectorAll('.play-section-box');
+    let socket = getWebsocket();
+
+        socket.send(JSON.stringify({
+            'type': 'game_leave_queue',
+        }));
+        console.log("Leaving the queue");
+		button.style.display = "none";
+		boxes.forEach(b => b.classList.remove('clicked'));
+		notificationReset()
+
+    clickSound.play();
+}
+
 export function playButtonSetup(clickSound) {
     const button = document.getElementById("playbuttontext");
     let socket = getWebsocket();
@@ -105,6 +123,8 @@ export function playButtonSetup(clickSound) {
             'mode': 'CLASSIC'
         }));
         console.log("Joining the queue");
+		queueNotification();
+		button.style.display = "block";
         button.textContent = "EXIT";
 
     clickSound.play();

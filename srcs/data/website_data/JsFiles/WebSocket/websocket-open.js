@@ -8,6 +8,8 @@ import { gameEnd ,gameReadySoStart} from "./Game/gameStartAndEnd.js"
 import { mooveBall, mooveCamera1, moovePad, moovePad2 } from "./Game/ballMovement.js"
 import { showPlayingSection } from "../Modules/navigation.js";
 import { scoreboardFill } from "./Game/updateScore.js";
+import { fillStats } from "./Statistiques.js";
+import { createMatchHistory } from "./historyDisplay.js";
 
 let socket;
 
@@ -56,6 +58,9 @@ function openWebsocket(socketurl){
         }));
 		socket.send(JSON.stringify({
             'type': 'group_list',
+        }));
+		socket.send(JSON.stringify({
+            'type': 'statistics',
         }));
 	};
 	socket.onmessage = function(event) {
@@ -121,7 +126,14 @@ function openWebsocket(socketurl){
 				moovePad2(content);
 				mooveCamera1(content);
 				scoreboardFill(content);
-				// scoreUpdate(content.SCORE);
+			}
+			if (content.type === 'statistics')
+			{
+				fillStats(content);
+			}
+			if (content.type === 'game_history')
+			{
+				createMatchHistory(content);
 			}
 			//if(content.type === 'game_frame_message')
 			// {
