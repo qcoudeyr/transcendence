@@ -199,13 +199,15 @@
   }
 
   .play-section-container .play-section-box.clicked:before,
-    .play-section-container .play-section-box.clicked:after {
-        transform: skewX(0deg);
-        left: 20px;
-        width: calc(100% - 90px);
-    }
-
-    .play-section-container .play-section-box.clicked .play-section-content {
-        left: -25px;
-        padding: 60px 40px;
-    }
+  .play-section-container .play-section-box.clicked:after {
+	  transform: skewX(0deg);
+	  left: 20px;
+	  width: calc(100% - 90px);
+  }
+  
+  .play-section-container .play-section-box.clicked .play-section-content {
+	  left: -25px;
+	  padding: 60px 40px; /* Same padding as on hover */
+	  transform: scale(1.05); /* Scale up when clicked */
+	  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Optional: Add shadow for clicked state */
+  }
