@@ -12,7 +12,7 @@ export function scoreboardFill(data)
 {
 	if (data && data.TIMER) {
         // Get the ball mesh from your existing function
-        const time = Document.getElementById("scoreboard-timer")
+        const time = document.getElementById("scoreboard-timer")
         time.textContent = data.TIMER.minutes + ":" + data.TIMER.secondes;
 	}
 	if (data && data.SCORE) {
