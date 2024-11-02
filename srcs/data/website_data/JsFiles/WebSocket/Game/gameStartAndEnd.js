@@ -41,7 +41,10 @@ function sendGameMove(direction) {
 }
 
 export function gameEnd() {
-    
+	const endFrame = document.getElementById("end-frame");
+	endFrame.textContent = "you lost!";
+	const endButton = document.getElementById("unloadButton");
+	endButton.style.display = "block";
 }
 
 function handleKeyPress(event) {

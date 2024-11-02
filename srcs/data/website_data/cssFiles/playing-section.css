@@ -26,6 +26,17 @@ canvas {
 
   /* Scoreboard styling */
   
+.frames
+{
+	padding: 50px;
+	position: fixed;
+	display: flex;
+	left: 50%;
+	top: 50%;
+	background-color: #e230b8;
+	z-index: 1000;
+}
+
 .scoreboard {
 	margin-top: 10px;
 	position: fixed;
@@ -120,6 +131,7 @@ canvas {
 	cursor: pointer;
 	border-radius: 10px;
 	text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+	display: none; /* Hide button initially */
   }
   
   #unloadButton:hover {
