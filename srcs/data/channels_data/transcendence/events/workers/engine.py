@@ -14,7 +14,7 @@ from profiles.models import Profile
 TICK_RATE = 1.0 / 128
 
 # GAME RULES
-BOUNCE_SPEED_BOOST = 1.2
+BOUNCE_SPEED_BOOST = 1.01
 
 # MAP
 MAP_LENGTH = 10
@@ -84,7 +84,7 @@ class PongEngine:
         self.game_time_left = DEFAULT_GAME_TIMER_MINUTES * 60 + DEFAULT_GAME_TIMER_SECONDS
         self.game_timer = {'minutes': DEFAULT_GAME_TIMER_MINUTES, 'seconds': DEFAULT_GAME_TIMER_SECONDS}
         self.game_state = {'PLAYER_SCORE': {'0': 0, '1': 0}}
-        self.ball_speed = {'x': 3, 'z': 3.0 / 5}
+        self.ball_speed = {'x': 3, 'z': 0.1}
 
         # Set game state
         await self.reset_physic()
