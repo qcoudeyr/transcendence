@@ -181,16 +181,16 @@ class PongEngine:
 
         # PAD MOVEMENTS
         if self.game_state['MOVEMENT']['PAD_0'] == 'left':
-            self.game_state['PAD_0'] -= -PAD_MOVE_DISTANCE
+            self.game_state['PAD_0']['z'] -= -PAD_MOVE_DISTANCE
             self.game_state['MOVEMENT']['PAD_0'] = ''
         elif self.game_state['MOVEMENT']['PAD_0'] == 'right':
-            self.game_state['PAD_0'] += -PAD_MOVE_DISTANCE
+            self.game_state['PAD_0']['z'] += -PAD_MOVE_DISTANCE
             self.game_state['MOVEMENT']['PAD_0'] = ''
         if self.game_state['MOVEMENT']['PAD_1'] == 'left':
-            self.game_state['PAD_1'] -= PAD_MOVE_DISTANCE
+            self.game_state['PAD_1']['z'] -= PAD_MOVE_DISTANCE
             self.game_state['MOVEMENT']['PAD_1'] = ''
         elif self.game_state['MOVEMENT']['PAD_1'] == 'right':
-            self.game_state['PAD_1'] += PAD_MOVE_DISTANCE
+            self.game_state['PAD_1']['z'] += PAD_MOVE_DISTANCE
             self.game_state['MOVEMENT']['PAD_1'] = ''
 
         if x >= MAP_LENGTH / 2:
