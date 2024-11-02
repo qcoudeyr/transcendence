@@ -146,6 +146,12 @@
 				<div id="game_3" class="game lost" onclick="selectMatch('lost', '8-15')">
 					<p>Match 3</p>
 				</div>
+				<script>
+					function selectMatch(status, score) {
+	document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
+	document.getElementById('match_score').innerText = `Score: ${score}`;
+}
+					</script>
 				<!-- Add more matches as needed -->
 			</div>
 			<div class="current_match_selected_info">
