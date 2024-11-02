@@ -172,26 +172,34 @@ class PongEngine:
             'TIMER': self.game_timer,
             'PLAYER_SCORE': self.score,
             'ENDED': not self.game_continue,
-            'MOVEMENT': {'PAD_0': '', 'PAD_1': ''}
+        }
+        self.game_movement = {
+            'PAD_0': '',
+            'PAD_1': '',
         }
         await cache.aset(self.game_channel, self.game_state)
+        await cache.aset(self.game_channel + '_movement', self.game_movement)
     
     async def apply_physic(self, lap_duration):
         x = self.game_state['BALL']['x']
 
         # PAD MOVEMENTS
-        if self.game_state['MOVEMENT']['PAD_0'] == 'left':
+        if self.game_movement['PAD_0'] == 'left':
             self.game_state['PAD_0']['z'] -= -PAD_MOVE_DISTANCE
-            self.game_state['MOVEMENT']['PAD_0'] = ''
-        elif self.game_state['MOVEMENT']['PAD_0'] == 'right':
+            self.game_movement['PAD_0'] = ''
+            await cache.aset(self.game_channel + '_movement', self.game_movement)
+        elif self.game_movement['PAD_0'] == 'right':
             self.game_state['PAD_0']['z'] += -PAD_MOVE_DISTANCE
-            self.game_state['MOVEMENT']['PAD_0'] = ''
-        if self.game_state['MOVEMENT']['PAD_1'] == 'left':
+            self.game_movement['PAD_0'] = ''
+            await cache.aset(self.game_channel + '_movement', self.game_movement)
+        if self.game_movement['PAD_1'] == 'left':
             self.game_state['PAD_1']['z'] -= PAD_MOVE_DISTANCE
-            self.game_state['MOVEMENT']['PAD_1'] = ''
-        elif self.game_state['MOVEMENT']['PAD_1'] == 'right':
+            self.game_movement['PAD_1'] = ''
+            await cache.aset(self.game_channel + '_movement', self.game_movement)
+        elif self.game_movement['PAD_1'] == 'right':
             self.game_state['PAD_1']['z'] += PAD_MOVE_DISTANCE
-            self.game_state['MOVEMENT']['PAD_1'] = ''
+            self.game_movement['PAD_1'] = ''
+            await cache.aset(self.game_channel + '_movement', self.game_movement)
 
         if x >= MAP_LENGTH / 2:
             self.direction = -1
