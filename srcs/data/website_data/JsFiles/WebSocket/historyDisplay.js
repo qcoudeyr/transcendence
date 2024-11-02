@@ -1,27 +1,24 @@
-
-
-export function createMatchHistory(data) {
-		const matchHistoryContainer = document.getElementById("match-history-container");
-
-		data.forEach((match, index) => {
-			const matchDiv = document.createElement('div');
-			matchDiv.id = `game_${index + 1}`;
-			matchDiv.classList.add('game', match.result === 'win' ? 'won' : 'lost');
-			matchDiv.onclick = () => selectMatch(match.result, match.score);
-
-			const matchParagraph = document.createElement('p');
-			matchParagraph.textContent = `Match ${index + 1}`;
-			matchDiv.appendChild(matchParagraph);
-
-			matchHistoryContainer.appendChild(matchDiv);
-		});
-}
-				
 // Function to handle match selection
 function selectMatch(status, score) {
 	document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
 	document.getElementById('match_score').innerText = `Score: ${score}`;
 }
+
+
+export function createMatchHistory(data) {
+    const matchDiv = document.createElement('div');
+    matchDiv.id = data.id;
+    if (data.result === "LOSE")
+        matchDiv.classList.add("game", "lost");
+    else
+        matchDiv.classList.add("game", "won");
+    matchDiv.setAttribute('onclick', `selectMatch('${data.result}', '${data.score}')`);
+    const matchText = document.createElement('p');
+    matchText.textContent = 'Match ' + data.id;
+    matchDiv.appendChild(matchText);
+    document.body.appendChild(matchDiv);
+}
+
 
 // Example WebSocket data
 // const websocketData = [
