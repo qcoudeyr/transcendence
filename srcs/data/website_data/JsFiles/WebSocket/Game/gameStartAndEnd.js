@@ -23,21 +23,21 @@ document.addEventListener("keydown", handleKeyPress);
 }
 
 
-let lastMoveTime = 0;
-const moveCooldown = 5;
+// let lastMoveTime = Date.now();
+// const moveCooldown = 1;
 
 function sendGameMove(direction) {
     let socket = getWebsocket();
-    const now = Date.now();
+    // const now = Date.now();
 
-    if (now - lastMoveTime >= moveCooldown) {
+    // if (now - lastMoveTime >= moveCooldown) {
         const message = {
             type: "game_move_pad",
             direction: direction
         };
         socket.send(JSON.stringify(message));
-        lastMoveTime = now; 
-    }
+        // lastMoveTime = now; 
+    // }
 }
 
 export function gameEnd() {

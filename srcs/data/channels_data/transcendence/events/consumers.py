@@ -14,8 +14,8 @@ from profiles.models import Profile, FriendRequest, GroupRequest, Group
 from game.models import PartyQueue, GameHistory
 
 # PAD MOVE
-MIN_MOVE_TIME_DELTA = 1.0 / 128
-MOVE_DIST = 0.03
+MIN_MOVE_TIME_DELTA = 1.0 / 256
+MOVE_DIST = 0.3
 
 channel_layer = get_channel_layer()
 
@@ -403,21 +403,21 @@ class EventConsumer(AsyncWebsocketConsumer):
     async def game_move_pad(self, content):
         move_time_delta = time.time() - self.last_move_time
         if 'direction' in content and move_time_delta > MIN_MOVE_TIME_DELTA and self.profile.is_in_game and self.game_group != None:
+        # if 'direction' in content and self.profile.is_in_game and self.game_group != None:
             game_state = await cache.aget(self.game_group)
+            game_movement = await cache.aget(self.game_group + '_movement')
 
             if self.profile.pk == game_state['PLAYER_0']:
                 pad = 'PAD_0'
-                direction = -1
             else:
                 pad = 'PAD_1'
-                direction = 1
 
             if content['direction'] == 'left':
-                game_state[pad]['z'] -= direction * MOVE_DIST
+                game_movement[pad] = 'left'
             elif content['direction'] == 'right':
-                game_state[pad]['z'] += direction * MOVE_DIST
+                game_movement[pad] = 'right'
 
-            await cache.aset(self.game_group, game_state)
+            await cache.aset(self.game_group + '_movement', game_movement)
             self.last_move_time = time.time()
 
     # group_send functions here
