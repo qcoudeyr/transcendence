@@ -1,5 +1,5 @@
 // Function to handle match selection
-function selectMatch(status, score) {
+export function selectMatch(status, score) {
 	document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
 	document.getElementById('match_score').innerText = `Score: ${score}`;
 }
