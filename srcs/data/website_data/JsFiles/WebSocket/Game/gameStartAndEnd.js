@@ -23,7 +23,7 @@ document.addEventListener("keydown", handleKeyPress);
 }
 
 
-let lastMoveTime = 0;
+let lastMoveTime = Date.now();
 const moveCooldown = 1;
 
 function sendGameMove(direction) {
