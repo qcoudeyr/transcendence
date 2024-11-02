@@ -1,7 +1,9 @@
+import { getWebsocket } from "../websocket-open.js";
 
-// export function gameReadySoStart()
-// {
+export function gameReadySoStart()
+{
 
+document.addEventListener("keydown", handleKeyPress);
 // function handleSocketMessage(event) {
 //     const data = JSON.parse(event.data);
 
@@ -14,27 +16,38 @@
 //     }
 // }
 
-// function handleKeyPress(event) {
-//     if (event.key === 'D' || event.key === 'd') {
-//         sendGameMove("right");
-//     } else if (event.key === 'A' || event.key === 'a') {
-//         sendGameMove("left");
-//     }
-// }
 
-// function sendGameMove(direction) {
-//     const message = {
-//         type: "game_move_pad",
-//         direction: direction
-//     };
-//     socket.send(JSON.stringify(message));
-// }
-// 	//start the game
-// }
 
-export function gameEnd()
-{
 
-	//show frame you lost or you won then make the button leave apear on top
+	//start the game
 }
 
+
+let lastMoveTime = 0;
+const moveCooldown = 5;
+
+function sendGameMove(direction) {
+    let socket = getWebsocket();
+    const now = Date.now();
+
+    if (now - lastMoveTime >= moveCooldown) {
+        const message = {
+            type: "game_move_pad",
+            direction: direction
+        };
+        socket.send(JSON.stringify(message));
+        lastMoveTime = now; 
+    }
+}
+
+export function gameEnd() {
+    
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'D' || event.key === 'd') {
+        sendGameMove("right");
+    } else if (event.key === 'A' || event.key === 'a') {
+        sendGameMove("left");
+    }
+}

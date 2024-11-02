@@ -4,8 +4,8 @@ import { displayFriendList, removeReceivedFriend } from "./friendDisplay.js";
 import { displayPrivateMessage } from "./chatSend.js";
 import { friendRequestNotification } from "./notifications-displays.js";
 import { removeFriendFromGroup, removeGroupRequest, groupRequestRevieve, displayGroupList } from "./groupRequests.js";
-import { gameEnd } from "./Game/gameStartAndEnd.js"
-import { mooveBall } from "./Game/ballMovement.js"
+import { gameEnd ,gameReadySoStart} from "./Game/gameStartAndEnd.js"
+import { mooveBall, mooveCamera1, moovePad, moovePad2 } from "./Game/ballMovement.js"
 import { showPlayingSection } from "../Modules/navigation.js";
 
 let socket;
@@ -114,8 +114,12 @@ function openWebsocket(socketurl){
 			}
 			if(content.type === 'game_state')
 			{
-				mooveBall(content.BALL);
-				scoreUpdate(content.SCORE);
+				mooveBall(content);
+				gameReadySoStart();
+				moovePad(content);
+				moovePad2(content);
+				mooveCamera1(content);
+				// scoreUpdate(content.SCORE);
 			}
 			//if(content.type === 'game_frame_message')
 			// {

@@ -5,7 +5,7 @@ import { isUnloaded } from '../Modules/navigation.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { getWebsocket } from '../WebSocket/websocket-open.js';
 
-let scene, camera, renderer, controls, animationId;
+let scene, renderer, controls, animationId;
 const geometry = new THREE.SphereGeometry(0.1, 32, 32);
 
 // Create a material for the ball with realistic properties
@@ -26,7 +26,21 @@ const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
 const pad0 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 const pad1 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 
+let camera = new THREE.PerspectiveCamera(
+	45, // Field of view
+	window.innerWidth / window.innerHeight, // Aspect ratio
+	0.1, // Near clipping plane
+	100 // Far clipping plane
+);
+
+
 let sceneLoaded = false;
+
+export function getCameraPad0()
+{
+	return camera;
+}
+
 
 export function getScene() {
     return scene;
@@ -36,9 +50,16 @@ export function getBall() {
     return ball;
 }
 
+export function getPad0() {
+    return pad0;
+}
+
+export function getPad1() {
+    return pad1;
+}
+
 export function initScene() {
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(-2.82, 1.11, 15.26);
+    camera.position.set(6, 0.30, 0);
     camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
 
     scene = new THREE.Scene();
