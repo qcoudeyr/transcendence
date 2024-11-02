@@ -6,7 +6,7 @@ BLUE := $(shell printf "\033[34m")
 NC := $(shell printf "\033[0m")
 
 # Environment variables
-ENABLE_DEVOPS ?= true
+ENABLE_DEVOPS ?= false
 DEV=1
 CERT_SOURCE_DIR := ./srcs/data/certbot/certificates/pong-br.com
 BACKUP_DIR := ./.backup/data/certbot/certificates/pong-br.com
