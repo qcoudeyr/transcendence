@@ -27,6 +27,7 @@ canvas {
   /* Scoreboard styling */
   
 .scoreboard {
+	margin-top: 10px;
 	position: fixed;
 	display: flex;
 	top: 0%;
@@ -39,7 +40,8 @@ canvas {
 	position: relative;
 	width: 100px;
 	height: 58px;
-	background-color: #11111182;
+	background-color: #1111114e;
+	backdrop-filter: blur(10px);
 	margin: -20px;
 	clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 	display: flex;
