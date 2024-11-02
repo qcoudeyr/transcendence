@@ -58,6 +58,9 @@ function openWebsocket(socketurl){
 		socket.send(JSON.stringify({
             'type': 'group_list',
         }));
+		socket.send(JSON.stringify({
+            'type': 'statistics',
+        }));
 	};
 	socket.onmessage = function(event) {
 		// alert(`[message] Data received from server: ${event.data}`);
