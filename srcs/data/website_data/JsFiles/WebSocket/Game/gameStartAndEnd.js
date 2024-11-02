@@ -24,25 +24,24 @@ document.addEventListener("keydown", handleKeyPress);
 
 
 let lastMoveTime = 0;
-const moveCooldown = 5; // Cooldown time in milliseconds (e.g., 300 ms)
+const moveCooldown = 5;
 
 function sendGameMove(direction) {
     let socket = getWebsocket();
     const now = Date.now();
 
-    // Check if the cooldown period has passed since the last move
     if (now - lastMoveTime >= moveCooldown) {
         const message = {
             type: "game_move_pad",
             direction: direction
         };
         socket.send(JSON.stringify(message));
-        lastMoveTime = now; // Update the last move time
+        lastMoveTime = now; 
     }
 }
 
 export function gameEnd() {
-    // Show frame you lost or won, then make the "Leave" button appear on top
+    
 }
 
 function handleKeyPress(event) {
@@ -52,6 +51,3 @@ function handleKeyPress(event) {
         sendGameMove("left");
     }
 }
-
-// Add event listener for keypresses if not already set up
-document.addEventListener('keydown', handleKeyPress);

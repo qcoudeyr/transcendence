@@ -1,4 +1,4 @@
-import { getBall, getPad0, getPad1 } from "../../3d/3d.js";
+import { getBall, getPad0, getPad1, getCameraPad0 } from "../../3d/3d.js";
 
 export function mooveBall(data) {
     // Ensure the data contains "BALL" information
@@ -21,7 +21,7 @@ export function moovePad(data) {
         pad0.position.y = data.PAD_0.y;
         pad0.position.z = data.PAD_0.z;
     } else {
-        console.error("No BALL data found.");
+        console.error("No pad data found.");
     }
 }
 
@@ -33,6 +33,19 @@ export function moovePad2(data) {
         pad1.position.y = data.PAD_1.y;
         pad1.position.z = data.PAD_1.z;
     } else {
-        console.error("No BALL data found.");
+        console.error("No pad data found.");
+    }
+}
+
+export function mooveCamera1(data)
+{
+	if (data && data.CAMERA) {
+        // Get the ball mesh from your existing function
+        const cam = getCameraPad0();
+        cam.position.x = data.CAMERA.x;
+        cam.position.y = data.CAMERA.y;
+        cam.position.z = data.CAMERA.z;
+    } else {
+        console.error("No camera data found.");
     }
 }
