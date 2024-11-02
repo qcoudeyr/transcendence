@@ -216,7 +216,7 @@ class PongEngine:
             if move_distance >= MAP_WIDTH / 2:
                 self.game_state[pad]['z'] = -direction * MAP_WIDTH / 2
             else:
-                self.game_state[pad]['z'] -= direction * move_distance
+                self.game_state[pad]['z'] -= direction * PAD_MOVE_DISTANCE
 
             self.game_movement[pad] = ''
             await cache.aset(self.game_channel + '_movement', self.game_movement)
