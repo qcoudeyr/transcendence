@@ -80,8 +80,8 @@ class PongEngine:
         # Initialize game timer and score
         self.game_time_left = DEFAULT_GAME_TIMER_MINUTES * 60 + DEFAULT_GAME_TIMER_SECONDS
         self.game_timer = {'minutes': DEFAULT_GAME_TIMER_MINUTES, 'seconds': DEFAULT_GAME_TIMER_SECONDS}
-        self.score = {'0': 0, '1': 0}
-        self.ball_speed = {'x': 5, 'z': 1}
+        self.game_state = {'PLAYER_SCORE': {'0': 0, '1': 0}}
+        self.ball_speed = {'x': 4, 'z': 1}
 
         # Set game state
         await self.reset_physic()
@@ -174,7 +174,7 @@ class PongEngine:
             'PAD_0': {'x': DEFAULT_PAD_0_X, 'y': DEFAULT_PAD_0_Y, 'z': DEFAULT_PAD_0_Z, },
             'PAD_1': {'x': DEFAULT_PAD_1_X, 'y': DEFAULT_PAD_1_Y, 'z': DEFAULT_PAD_1_Z, },
             'TIMER': self.game_timer,
-            'PLAYER_SCORE': self.score,
+            'PLAYER_SCORE': self.game_state['PLAYER_SCORE'],
             'ENDED': not self.game_continue,
         }
         self.game_movement = {
