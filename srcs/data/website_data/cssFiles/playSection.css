@@ -175,10 +175,6 @@
 	color: #ff00fb; /* Change text color to pink for the second box */
   }
   
-  .play-section-container .play-section-box:nth-child(2) .play-section-content h2 {
-	color: #ff00fb; /* Change heading color to pink for the second box */
-  }
-  
   .play-section-container .play-section-box:nth-child(2) .play-section-content p {
 	color: #ff00fb; /* Change paragraph color to pink for the second box */
   }
