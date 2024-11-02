@@ -29,6 +29,7 @@ canvas {
 .scoreboard {
 	display: flex;
 	top: 0%;
+	left: 50%;
 }
 
 .scoreboard-hexagon {
@@ -44,6 +45,7 @@ canvas {
 	color: rgb(110, 207, 255);
 	font-size: 24px;
 	border: 2px solid white;
+	z-index: 99;
 }
 
 .scoreboard-hexagon.large {
