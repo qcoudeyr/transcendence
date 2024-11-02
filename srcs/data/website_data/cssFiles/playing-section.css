@@ -26,21 +26,53 @@ canvas {
 
   /* Scoreboard styling */
   
-  .scoreboard {
-	position: absolute;
-	top: 25%;
-	left: 90%;
+.frames
+{
+	padding: 50px;
+	position: fixed;
+	display: flex;
+	left: 50%;
+	top: 50%;
 	transform: translateX(-50%);
-	background-color: #111;
-	color: #fff;
-	padding: 30px;
-	border-radius: 15px;
-	box-shadow: 0 0 20px rgba(31, 29, 29, 0.7);
-	text-align: center;
-	border: 2px solid #ff00ff;
-	z-index: 1;
-  }
-  
+	transform: translateY(-50%);
+	background-color: #e230b8;
+	display: none;
+	z-index: 1000;
+}
+
+.scoreboard {
+	margin-top: 10px;
+	position: fixed;
+	display: flex;
+	top: 0%;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 98;
+}
+
+.scoreboard-hexagon {
+	position: relative;
+	width: 100px;
+	height: 58px;
+	background-color: #1111114e;
+	backdrop-filter: blur(10px);
+	margin: -20px;
+	clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: rgb(110, 207, 255);
+	font-size: 24px;
+	border: 2px solid white;
+	z-index: 99;
+}
+
+.scoreboard-hexagon.large {
+	width: 150px;
+	height: 87px;
+	z-index: 100;
+
+}
 .frame-container {
 	top: 50%;
 	background-color: #ff4c4c;
@@ -55,12 +87,6 @@ canvas {
 	text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
   }
   
-  .scores {
-	display: flex;
-	justify-content: space-around;
-	margin-bottom: 30px;
-  }
-  
   .player {
 	display: flex;
 	flex-direction: column;
@@ -71,19 +97,6 @@ canvas {
 	font-size: 1.5rem;
 	color: #ff4c4c;
 	text-shadow: 0 0 5px #ff4c4c, 0 0 10px #ff4c4c;
-  }
-  
-  .score {
-	font-size: 3.5rem;
-	margin: 10px 0;
-	width: 100px;
-	text-align: center;
-	background-color: #222;
-	border-radius: 10px;
-	padding: 15px;
-	color: #ff4c4c;
-	text-shadow: 0 0 10px #ff4c4c, 0 0 20px #ff4c4c, 0 0 30px #ff4c4c;
-	border: 2px solid #ff4c4c;
   }
   
   button {
@@ -121,6 +134,7 @@ canvas {
 	cursor: pointer;
 	border-radius: 10px;
 	text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+	display: none; /* Hide button initially */
   }
   
   #unloadButton:hover {

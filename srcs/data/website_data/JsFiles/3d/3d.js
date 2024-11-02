@@ -231,13 +231,16 @@ function goHome() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const unloadButton = document.getElementById('unloadButton');
+  const frame = document.getElementById("frames");
   if (unloadButton) {
     unloadButton.addEventListener('click', () => {
       if (isSceneLoaded()) {
         unloadScene();
 		enableNavBar();
 		goHome();
+		frame.style.display = "none";
 		console.log('scene unloaded and tried to nav');
+		location.reload();
 		
       } else {
         console.log('Scene is not loaded');
