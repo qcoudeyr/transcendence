@@ -6,11 +6,9 @@ class PartyQueue(models.Model):
 
 class GameHistory(models.Model):
     players = models.ManyToManyField("profiles.Profile")
-    winner = models.OneToOneField(
-        "profiles.Profile",
-        on_delete=models.PROTECT,
-        related_name='game_history_winner',
-        null=True,
-    )
+    winner_id = models.IntegerField(null=True, default=None)
+    player_0_id = models.IntegerField(null=True)
+    player_1_id = models.IntegerField(null=True)
     score_0 = models.IntegerField(default=0)
     score_1 = models.IntegerField(default=0)
+    is_in_progress = models.BooleanField(default=True)

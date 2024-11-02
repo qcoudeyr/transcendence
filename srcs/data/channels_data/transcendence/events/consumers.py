@@ -420,6 +420,39 @@ class EventConsumer(AsyncWebsocketConsumer):
             await cache.aset(self.game_group + '_movement', game_movement)
             self.last_move_time = time.time()
 
+    async def history_list(self, content):
+        historys = await get_profile_historys(self.profile)
+        for history in historys:
+            # Handle result
+            if history.is_in_progress:
+                result = 'UNKNOWN'
+            elif history.winner_id is None:
+                result = 'DRAW'
+            elif history.winner_id == self.profile.pk:
+                result = 'WIN'
+            else:
+                result = 'LOSE'
+
+            # Handle score
+            score = {'left': 0, 'right': 0}
+            if not history.is_in_progress:
+                if history.player_0_id == self.profile.pk:
+                    score['left'] = history.score_0
+                    score['right'] = history.score_1
+                else:
+                    score['left'] = history.score_1
+                    score['right'] = history.score_0
+
+            await self.channel_layer.group_send(
+                self.notifications_group,
+                {
+                    'type': 'send.history',
+                    'result': result,
+                    'score': score,
+                    'history_id': history.pk,
+                }
+            )
+
     # group_send functions here
     async def send_chat_message(self, event):
         message = event['message'].strip()
@@ -570,6 +603,15 @@ class EventConsumer(AsyncWebsocketConsumer):
             'PAD_1': event['PAD_1'],
             'TIMER': event['TIMER'],
             'SCORE': event['SCORE'],
+            })
+        )
+
+    async def send_history(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'game_history',
+            'result': event['result'],
+            'score': event['score'],
+            'history_id': event['history_id'],
             })
         )
 
@@ -812,7 +854,6 @@ def get_profile_group_size(profile):
 @database_sync_to_async
 @transaction.atomic
 def search_classic_game(new_group_id, new_group_size):
-    player_ids = []
     new_group = Group.objects.get(pk=new_group_id)
     group_sizes = {new_group_id: new_group_size}
     queue, created = PartyQueue.objects.get_or_create(mode='CLASSIC')
@@ -830,40 +871,36 @@ def search_classic_game(new_group_id, new_group_size):
 
     player_quantity = sum(group_sizes.values())
     if player_quantity == 2:
-        for group_id in group_sizes:
-            group = Group.objects.get(pk=group_id)
-            group.party_queue = None
-            group.save(update_fields=['party_queue'])
-            for member in list(group.members.all()):
-                player_ids.append(member.pk)
-                member.status = 'IG'
-                member.is_in_game = True
-                member.save(update_fields=['status', 'is_in_game'])
-
-        game_history = GameHistory.objects.create()
-
-        for player_id in player_ids:
-            player = Profile.objects.get(pk=player_id)
-            game_history.players.add(player)
-            player.actual_game_id = game_history.pk
-            player.save(update_fields=['actual_game_id'])
-            async_to_sync(channel_layer.group_send)(
-                'notifications_' + str(player.pk),
-                {'type': 'join.game.channel'}
-            )
-        
-        return game_history.pk, player_ids
+        return create_classic_game(group_sizes)
 
     return None, None
 
-        # async_to_sync(channel_layer.send)(
-        #     'engine-server',
-        #     {
-        #         'type': 'classic.game',
-        #         'game_id': game_history.pk,
-        #         'player_ids': player_ids,
-        #     }
-        # )
+def create_classic_game(group_sizes):
+    player_ids = []
+
+    for group_id in group_sizes:
+        group = Group.objects.get(pk=group_id)
+        group.party_queue = None
+        group.save(update_fields=['party_queue'])
+        for member in list(group.members.all()):
+            player_ids.append(member.pk)
+            member.status = 'IG'
+            member.is_in_game = True
+            member.save(update_fields=['status', 'is_in_game'])
+
+    game_history = GameHistory.objects.create(player_0=player_ids[0], player_1=player_ids[1])
+
+    for player_id in player_ids:
+        player = Profile.objects.get(pk=player_id)
+        game_history.players.add(player)
+        player.actual_game_id = game_history.pk
+        player.save(update_fields=['actual_game_id'])
+        async_to_sync(channel_layer.group_send)(
+            'notifications_' + str(player.pk),
+            {'type': 'join.game.channel'}
+        )
+
+    return game_history.pk, player_ids
 
 @database_sync_to_async
 @transaction.atomic
