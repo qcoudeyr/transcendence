@@ -4,7 +4,7 @@ import { getMailAndUsername, getNameBioAndAvatar } from './Modules/API/getProfil
 import { websocketConnect } from './WebSocket/websocket-open.js';
 // import { checkToken } from './Modules/API/auth.js';
 
-
+let hoursPlayedChart;
 document.addEventListener("DOMContentLoaded", function () {
 	hidePreloaderAfterLoad();
 
@@ -76,7 +76,7 @@ const data = {
     }
 	};
 	const ctx = document.getElementById('hoursPlayedChart').getContext('2d');
-	const hoursPlayedChart = new Chart(ctx, {
+	hoursPlayedChart = new Chart(ctx, {
 		type: 'bar',
 		data: {
 			labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
