@@ -26,7 +26,7 @@ const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
 const pad0 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 const pad1 = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
 
-const cameraPad0 = new THREE.PerspectiveCamera(
+const camera = new THREE.PerspectiveCamera(
 	45, // Field of view
 	window.innerWidth / window.innerHeight, // Aspect ratio
 	0.1, // Near clipping plane
@@ -38,7 +38,7 @@ let sceneLoaded = false;
 
 export function getCameraPad0()
 {
-	return cameraPad0;
+	return camera;
 }
 
 
@@ -59,8 +59,8 @@ export function getPad1() {
 }
 
 export function initScene() {
-    cameraPad0.position.set(-2.82, 1.11, 15.26);
-    cameraPad0.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
+    camera.position.set(-2.82, 1.11, 15.26);
+    camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
 
     scene = new THREE.Scene();
     ball.position.y = 0.15;
