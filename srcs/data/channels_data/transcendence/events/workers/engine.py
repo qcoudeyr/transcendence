@@ -9,6 +9,7 @@ from channels.db import database_sync_to_async
 from django.core.cache import cache
 
 from profiles.models import Profile
+from game.models import GameHistory
 
 # SERVER
 TICK_RATE = 1.0 / 128
@@ -163,6 +164,7 @@ class PongEngine:
         )
 
         # Save game history
+        await self.save_game_history()
 
     async def reset_physic(self):
         self.direction = 1
@@ -267,6 +269,23 @@ class PongEngine:
         elif self.game_state['BALL']['x'] < -MAP_LENGTH / 2:
             self.game_state['PLAYER_SCORE']['0'] += 1
             self.round_continue = False
+
+    @database_sync_to_async
+    def save_game_history(self):
+        history = GameHistory.objects.get(pk=self.game_id)
+        history.score_0 = self.game_state['PLAYER_SCORE']['0']
+        history.score_1 = self.game_state['PLAYER_SCORE']['1']
+
+        if self.game_state['PLAYER_SCORE']['0'] > self.game_state['PLAYER_SCORE']['1']:
+            history.winner_id = self.game_state['PLAYER_0']
+        elif self.game_state['PLAYER_SCORE']['1'] > self.game_state['PLAYER_SCORE']['0']:
+            history.winner_id = self.game_state['PLAYER_1']
+        else:
+            history.winner_id = None
+
+        history.is_in_progress = False
+
+        history.save(update_fields=['score_0', 'score_1', 'winner_id'])
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
