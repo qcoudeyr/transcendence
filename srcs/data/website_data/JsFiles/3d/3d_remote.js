@@ -105,35 +105,34 @@ function onMouseMove(event) {
     if (intersects.length > 0) {
       if (!isHovered) {
         isHovered = true;
-        // Optionally, add a hover effect
+        remoteController.scale.set(12, 12, 12); // Scale up on hover
       }
     } else {
-      isHovered = false;
+      if (isHovered && !isClicked) {
+        isHovered = false;
+        remoteController.scale.set(10, 10, 10); // Reset scale if not clicked
+      }
     }
   }
 }
 
-// Function to handle mouse click
-function onClick(event) {
+// Function to handle mouse click for click effect and state toggle
+function onMouseClick(event) {
   const rect = remoteContainer.getBoundingClientRect();
   mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
   mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-  // Update the raycaster with the mouse coordinates
   raycaster.setFromCamera(mouse, remoteCamera);
 
-  // Check if the ray intersects with the remoteController
   if (remoteController) {
     const intersects = raycaster.intersectObject(remoteController, true);
 
     if (intersects.length > 0) {
-      isClicked = !isClicked; // Toggle the clicked state
+      isClicked = !isClicked; // Toggle clicked state
       if (isClicked) {
-        // Apply a clicked effect, e.g., change color or scale
-        remoteController.scale.set(12, 12, 12);
+        remoteController.material.color.set(0xff0000); // Change color on click
       } else {
-        // Revert to the original state
-        remoteController.scale.set(10, 10, 10);
+        remoteController.material.color.set(0xffffff); // Reset color on second click
       }
     }
   }
@@ -148,7 +147,7 @@ function animateRemote() {
 // Add event listeners for interaction
 window.addEventListener('resize', onWindowResizeRemote);
 remoteContainer.addEventListener('mousemove', onMouseMove);
-remoteContainer.addEventListener('click', onClick);
+remoteContainer.addEventListener('click', onMouseClick);
 
 // Start animation loop
 animateRemote();
