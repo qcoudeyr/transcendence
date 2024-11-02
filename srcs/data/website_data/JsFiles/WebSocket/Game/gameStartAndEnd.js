@@ -24,7 +24,7 @@ document.addEventListener("keydown", handleKeyPress);
 
 
 let lastMoveTime = 0;
-const moveCooldown = 5;
+const moveCooldown = 1;
 
 function sendGameMove(direction) {
     let socket = getWebsocket();

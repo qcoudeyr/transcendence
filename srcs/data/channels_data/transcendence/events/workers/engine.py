@@ -13,6 +13,9 @@ from profiles.models import Profile
 # SERVER
 TICK_RATE = 1.0 / 128
 
+# GAME RULES
+BOUNCE_SPEED_BOOST = 1.2
+
 # MAP
 MAP_LENGTH = 10
 MAP_HEIGHT = 0.15
@@ -35,7 +38,6 @@ DEFAULT_PAD_0_Z = 0
 DEFAULT_PAD_1_X = -MAP_LENGTH / 2
 DEFAULT_PAD_1_Y = MAP_HEIGHT
 DEFAULT_PAD_1_Z = 0
-PAD_BOUNCE_SPEED_BOOST = 1.2
 
 # CAMERA
 CAMERA_DISTANCE_X = 4
@@ -82,7 +84,7 @@ class PongEngine:
         self.game_time_left = DEFAULT_GAME_TIMER_MINUTES * 60 + DEFAULT_GAME_TIMER_SECONDS
         self.game_timer = {'minutes': DEFAULT_GAME_TIMER_MINUTES, 'seconds': DEFAULT_GAME_TIMER_SECONDS}
         self.game_state = {'PLAYER_SCORE': {'0': 0, '1': 0}}
-        self.ball_speed = {'x': 3, 'z': 1}
+        self.ball_speed = {'x': 3, 'z': 3.0 / 5}
 
         # Set game state
         await self.reset_physic()
@@ -245,6 +247,8 @@ class PongEngine:
     async def wall_bounce(self):
         if abs(self.game_state['BALL']['z']) + BALL_RADIUS >= MAP_WIDTH / 2:
             self.ball_speed['z'] *= -1
+            self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
+            self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
 
     async def pad_bounce(self):
         for pad in ['PAD_0', 'PAD_1']:
@@ -252,8 +256,8 @@ class PongEngine:
                 self.game_state['BALL']['z'] <= self.game_state[pad]['z'] + PAD_WIDTH / 2 and
                 self.game_state['BALL']['z'] >= self.game_state[pad]['z'] - PAD_WIDTH / 2):
                 self.ball_speed['x'] *= -1
-                self.ball_speed['x'] *= PAD_BOUNCE_SPEED_BOOST
-                self.ball_speed['z'] *= PAD_BOUNCE_SPEED_BOOST
+                self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
+                self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
                 return
 
     async def ball_scored(self):
