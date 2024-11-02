@@ -254,8 +254,12 @@ class PongEngine:
                 return
 
     async def ball_scored(self):
-        # if self.game_state['BALL']['x'] > MAP_LENGTH / 2:
-        pass
+        if self.game_state['BALL']['x'] > MAP_LENGTH / 2:
+            self.game_state['PLAYER_SCORE']['1'] += 1
+            self.round_continue = False
+        elif self.game_state['BALL']['x'] < -MAP_LENGTH / 2:
+            self.game_state['PLAYER_SCORE']['0'] += 1
+            self.round_continue = False
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
