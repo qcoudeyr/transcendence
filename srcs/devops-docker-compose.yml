@@ -243,8 +243,6 @@ services:
       KIBANA_FLEET_SETUP: '1'
       ELASTICSEARCH_USERNAME: elastic
       ES_JAVA_OPTS: -Xms256m -Xmx256m
-      KIBANA_HOST: https://kibana:5601
-      KIBANA_CA: /usr/share/elastic-agent/ca.crt
     ports:
       - 8220:8220
     hostname: fleet-server
@@ -286,8 +284,6 @@ services:
       ELASTICSEARCH_CA: /usr/share/elastic-agent/ca.crt
       ELASTICSEARCH_USERNAME: elastic
       ES_JAVA_OPTS: -Xms256m -Xmx256m
-      KIBANA_HOST: https://kibana:5601
-      KIBANA_CA: /usr/share/elastic-agent/ca.crt
     ports:
       - 8200:8200
     hostname: apm-server
@@ -404,13 +400,10 @@ services:
     image: grafana/grafana:latest
     volumes:
       - grafana_data:/usr/share/grafana/
-      - ./requirements/grafana/conf:/usr/share/grafana/conf/provisioning/datasources
-      - ./data/certbot/certificates/pong-br.com/fullchain1.pem:/etc/grafana/grafana.crt
-      - ./data/certbot/certificates/pong-br.com/privkey1.pem:/etc/grafana/grafana.key
-      - ./requirements/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./requirements/grafana:/usr/share/grafana/conf/provisioning/datasources
     container_name: tr_grafana
     ports:
-      - "3001:3001"
+      - "3001:3000"
     networks:
       transcendence:
         ipv4_address: 10.0.10.31
