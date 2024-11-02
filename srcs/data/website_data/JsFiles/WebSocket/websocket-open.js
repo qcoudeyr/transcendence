@@ -8,7 +8,7 @@ import { gameEnd ,gameReadySoStart} from "./Game/gameStartAndEnd.js"
 import { mooveBall, mooveCamera1, moovePad, moovePad2 } from "./Game/ballMovement.js"
 import { showPlayingSection } from "../Modules/navigation.js";
 import { scoreboardFill } from "./Game/updateScore.js";
-import { fillStats } from "./Statistiques.js";
+import { fillStats, createHoursPlayedChart} from "./Statistiques.js";
 import { createMatchHistory } from "./historyDisplay.js";
 
 let socket;
@@ -130,10 +130,15 @@ function openWebsocket(socketurl){
 			if (content.type === 'statistics')
 			{
 				fillStats(content);
+				createHoursPlayedChart(content);
 			}
 			if (content.type === 'game_history')
 			{
 				createMatchHistory(content);
+			}
+			if(content.type === 'game_tournament')
+			{
+				fillTournament(content);
 			}
 			//if(content.type === 'game_frame_message')
 			// {

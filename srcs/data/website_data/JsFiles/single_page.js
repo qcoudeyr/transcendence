@@ -4,7 +4,6 @@ import { getMailAndUsername, getNameBioAndAvatar } from './Modules/API/getProfil
 import { websocketConnect } from './WebSocket/websocket-open.js';
 // import { checkToken } from './Modules/API/auth.js';
 
-
 document.addEventListener("DOMContentLoaded", function () {
 	hidePreloaderAfterLoad();
 
@@ -57,4 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 box.classList.add('clicked');
             });
         });
+	//stats script hours played
+	// Assuming `data.hours_played` is an object with month properties
 });
