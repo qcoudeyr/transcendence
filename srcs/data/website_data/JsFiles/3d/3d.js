@@ -240,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		goHome();
 		frame.style.display = "none";
 		console.log('scene unloaded and tried to nav');
+		location.reload();
 		
       } else {
         console.log('Scene is not loaded');
