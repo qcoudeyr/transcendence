@@ -186,9 +186,9 @@ class PongEngine:
 
         # PAD MOVEMENTS
         if self.game_movement['PAD_0'] in ['left', 'right']:
-            await self.move_pad('PAD_0')
+            await self.move_pad('PAD_0', -1)
         if self.game_movement['PAD_1'] in ['left', 'right']:
-            await self.move_pad('PAD_1')
+            await self.move_pad('PAD_1', 1)
             
         if x >= MAP_LENGTH / 2:
             self.direction = -1
@@ -210,13 +210,13 @@ class PongEngine:
             self.game_state['ENDED'] = True
             return
 
-    async def move_pad(self, pad):
+    async def move_pad(self, pad, direction):
         if self.game_movement[pad] == 'left':
-            self.game_state[pad]['z'] -= -PAD_MOVE_DISTANCE
+            self.game_state[pad]['z'] -= direction * PAD_MOVE_DISTANCE
             self.game_movement[pad] = ''
             await cache.aset(self.game_channel + '_movement', self.game_movement)
         elif self.game_movement[pad] == 'right':
-            self.game_state[pad]['z'] += -PAD_MOVE_DISTANCE
+            self.game_state[pad]['z'] += direction * PAD_MOVE_DISTANCE
             self.game_movement[pad] = ''
             await cache.aset(self.game_channel + '_movement', self.game_movement)
 
