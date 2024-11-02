@@ -911,3 +911,9 @@ def create_classic_game(group_sizes):
 def update_profile_game_ready(profile, is_game_ready):
     profile.is_game_ready = is_game_ready
     profile.save(update_fields=['is_game_ready'])
+
+@database_sync_to_async
+@transaction.atomic
+def get_profile_historys(profile):
+    historys = list(profile.gamehistory_set.all())
+    return historys
