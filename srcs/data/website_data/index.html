@@ -148,9 +148,9 @@
 				</div>
 				<script>
 					function selectMatch(status, score) {
-	document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
-	document.getElementById('match_score').innerText = `Score: ${score}`;
-}
+						document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
+						document.getElementById('match_score').innerText = `Score: ${score}`;
+					}
 					</script>
 				<!-- Add more matches as needed -->
 			</div>
@@ -162,30 +162,42 @@
 		</div>
 	</section>
     <section id="tournaments" class="tournaments-section">
-		<h3 class="tournament_desc">Compete in the very first game ever with enhanced graphics and maybe win the Tournament !!</h3>
         <div class="bracket">
-            <div class="round">
-                <div class="match">
-                    <div class="team">_team_name_1_</div>
-                    <div class="team">_team_name_2_</div>
-                </div>
-                <div class="match">
-                    <div class="team">_team_name_3_</div>
-                    <div class="team">_team_name_4_</div>
-                </div>
-            </div>
-            <div class="round">
-                <div class="match">
-                    <div class="team">Winner Match 1</div>
-                    <div class="team">Winner Match 2</div>
-                </div>
-            </div>
-            <div class="round">
-                <div class="final">
-                    <div class="team">Final Winner</div>
-                </div>
-            </div>
-        </div>
+			<div class="round">
+				<div class="match">
+					<div class="team">Team Red</div>
+					<div class="team">Team Blue</div>
+				</div>
+				<div class="match">
+					<div class="team">Team Yellow</div>
+					<div class="team">Team Black</div>
+				</div>
+				<div class="match">
+					<div class="team">Team White</div>
+					<div class="team">Team Pink</div>
+				</div>
+				<div class="match">
+					<div class="team">Team Green</div>
+					<div class="team">Team Indigo</div>
+				</div>
+			</div>
+			<div class="round">
+				<div class="match">
+					<div class="team">Team Red</div>
+					<div class="team">Team Black</div>
+				</div>
+				<div class="match">
+					<div class="team">Team White</div>
+					<div class="team">Team Indigo</div>
+				</div>
+			</div>
+			<div class="round">
+				<div class="match">
+					<div class="team">Team Red</div>
+					<div class="team">Team Indigo</div>
+				</div>
+			</div>
+		</div>
 		<img src="../images/trophy.png" class="trophy_image">
     </section>
     <section id="statistics" class="statistiques-section">

@@ -62,6 +62,9 @@ function openWebsocket(socketurl){
 		socket.send(JSON.stringify({
             'type': 'statistics',
         }));
+		socket.send(JSON.stringify({
+			'type': 'history_list'
+		}))
 	};
 	socket.onmessage = function(event) {
 		// alert(`[message] Data received from server: ${event.data}`);
