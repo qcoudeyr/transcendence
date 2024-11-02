@@ -24,13 +24,13 @@ remoteCamera.lookAt(new THREE.Vector3(0, 0, 0));
 // Scene for remote control
 const remoteScene = new THREE.Scene();
 
-// Raycaster and mouse vector for interaction
+// Raycaster and mouse vector for hover detection
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
+const initialRotation = { x: 0, y: 0 };
 let remoteController; // Declare the remoteController variable
 let isHovered = false; // Variable to track hover state
-let isClicked = false; // Variable to track click state
 
 // Load the GLTF model
 const gltfLoader = new GLTFLoader();
@@ -89,7 +89,7 @@ function onWindowResizeRemote() {
   remoteRenderer.setSize(newWidth, newHeight);
 }
 
-// Function to handle mouse movement for hover effect
+// Function to handle mouse movement for hover effect and rotation
 function onMouseMove(event) {
   const rect = remoteContainer.getBoundingClientRect();
   mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -103,51 +103,114 @@ function onMouseMove(event) {
     const intersects = raycaster.intersectObject(remoteController, true);
 
     if (intersects.length > 0) {
+      // Hovered, update rotation and scale
+      updateRemoteControllerRotation(event);
       if (!isHovered) {
         isHovered = true;
-        remoteController.scale.set(12, 12, 12); // Scale up on hover
+        animateScaleRemoteController(1.2); // Increase size
       }
     } else {
-      if (isHovered && !isClicked) {
+      // Not hovered, reset rotation and scale
+      animateRotationToInitial();
+      if (isHovered) {
         isHovered = false;
-        remoteController.scale.set(10, 10, 10); // Reset scale if not clicked
+        animateScaleRemoteController(1.0); // Return to original size
       }
     }
   }
 }
 
-// Function to handle mouse click for click effect and state toggle
-function onMouseClick(event) {
+// Function to update the rotation of the remote controller based on mouse movement
+function updateRemoteControllerRotation(event) {
+  if (!remoteController) return; // Check if remoteController is loaded
+
   const rect = remoteContainer.getBoundingClientRect();
-  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  const x = ((event.clientX - rect.left) / remoteContainer.clientWidth) * 2 - 1;
+  const y = -((event.clientY - rect.top) / remoteContainer.clientHeight) * 2 + 1;
 
-  raycaster.setFromCamera(mouse, remoteCamera);
+  const rotationRange = Math.PI / 4; // 45 degrees
 
-  if (remoteController) {
-    const intersects = raycaster.intersectObject(remoteController, true);
+  // Calculate target rotations
+  const targetRotationY = x * rotationRange;
+  const targetRotationX = -y * rotationRange;
 
-    if (intersects.length > 0) {
-      isClicked = !isClicked; // Toggle clicked state
-      if (isClicked) {
-        remoteController.material.color.set(0xff0000); // Change color on click
-      } else {
-        remoteController.material.color.set(0xffffff); // Reset color on second click
-      }
+  // Smoothly interpolate the current rotation towards the target rotation
+  const smoothingFactor = 0.1; // Adjust this value for more or less smoothing
+  remoteController.rotation.y += (targetRotationY - remoteController.rotation.y) * smoothingFactor;
+  remoteController.rotation.x += (targetRotationX - remoteController.rotation.x) * smoothingFactor;
+}
+
+// Function to animate the scaling of the remote controller
+function animateScaleRemoteController(targetScale) {
+  if (!remoteController) return;
+
+  // Animate scaling using requestAnimationFrame
+  const animationDuration = 300; // Duration in milliseconds
+  const startScale = remoteController.scale.x;
+  const targetScaleValue = 10 * targetScale;
+  const startTime = performance.now();
+
+  function animateScale(time) {
+    const elapsedTime = time - startTime;
+    const progress = Math.min(elapsedTime / animationDuration, 1);
+
+    // Interpolate the scale
+    const currentScale = THREE.MathUtils.lerp(startScale, targetScaleValue, progress);
+    remoteController.scale.set(currentScale, currentScale, currentScale);
+
+    if (progress < 1) {
+      requestAnimationFrame(animateScale);
     }
+  }
+
+  requestAnimationFrame(animateScale);
+}
+
+// Function to smoothly animate rotation back to the initial state
+function animateRotationToInitial() {
+  if (!remoteController) return;
+
+  // Smoothly interpolate the current rotation back to the initial rotation
+  const smoothingFactor = 0.05; // Adjust this value for more or less smoothing
+  remoteController.rotation.x += (initialRotation.x - remoteController.rotation.x) * smoothingFactor;
+  remoteController.rotation.y += (initialRotation.y - remoteController.rotation.y) * smoothingFactor;
+
+  // Continue animation if not close enough to the initial rotation
+  if (Math.abs(initialRotation.x - remoteController.rotation.x) > 0.01 || Math.abs(initialRotation.y - remoteController.rotation.y) > 0.01) {
+    requestAnimationFrame(animateRotationToInitial);
   }
 }
 
-// Animation loop for rendering
-function animateRemote() {
-  requestAnimationFrame(animateRemote);
-  remoteRenderer.render(remoteScene, remoteCamera);
-}
 
-// Add event listeners for interaction
+function onMouseClick(event) {
+	const rect = remoteContainer.getBoundingClientRect();
+	mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+	mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  
+	raycaster.setFromCamera(mouse, remoteCamera);
+  
+	if (remoteController) {
+	  const intersects = raycaster.intersectObject(remoteController, true);
+  
+	  if (intersects.length > 0) {
+		remoteController.traverse((child) => {
+		  if (child.isMesh) {
+			child.material.color.set(0x808080); // Set to gray
+		  }
+		});
+	  }
+	}
+  }
+
+  window.addEventListener('click', onMouseClick);
+// Event listener for mouse movement
+window.addEventListener('mousemove', onMouseMove);
+
+// Event listener for window resize
 window.addEventListener('resize', onWindowResizeRemote);
-remoteContainer.addEventListener('mousemove', onMouseMove);
-remoteContainer.addEventListener('click', onMouseClick);
 
 // Start animation loop
-animateRemote();
+function animateRemote() {
+  remoteRenderer.render(remoteScene, remoteCamera);
+}
+remoteRenderer.setAnimationLoop(animateRemote);
