@@ -105,6 +105,7 @@ export function playButtonSetup(clickSound) {
             'mode': 'CLASSIC'
         }));
         console.log("Joining the queue");
+		button.style.display = "block";
         button.textContent = "EXIT";
 
     clickSound.play();

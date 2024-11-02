@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	// if (localStorage.getItem()) {
 	// 	checkToken();
 	// }
-	const playButton = document.getElementById("playButton");
+	const playButton = document.getElementById("classic-box");
     playButton.addEventListener("click", function () {
         playButtonSetup(clickSound); // Pass clickSound if necessary
     });
