@@ -25,9 +25,10 @@ DEFAULT_BALL_Y = MAP_HEIGHT
 DEFAULT_BALL_Z = 0
 
 # PAD
-PAD_LENGTH = 0.3
+PAD_LENGTH = 0.1
+PAD_WIDTH = 0.3
 PAD_MOVE_DISTANCE = 0.12
-PAD_MAX_MOVE = MAP_WIDTH / 2 - PAD_LENGTH / 2
+PAD_MAX_MOVE = MAP_WIDTH / 2 - PAD_WIDTH / 2
 DEFAULT_PAD_0_X = MAP_LENGTH / 2
 DEFAULT_PAD_0_Y = MAP_HEIGHT
 DEFAULT_PAD_0_Z = 0
@@ -80,6 +81,7 @@ class PongEngine:
         self.game_time_left = DEFAULT_GAME_TIMER_MINUTES * 60 + DEFAULT_GAME_TIMER_SECONDS
         self.game_timer = {'minutes': DEFAULT_GAME_TIMER_MINUTES, 'seconds': DEFAULT_GAME_TIMER_SECONDS}
         self.score = {'0': 0, '1': 0}
+        self.ball_speed = {'x': 5, 'z': 1}
 
         # Set game state
         await self.reset_physic()
@@ -161,7 +163,7 @@ class PongEngine:
 
     async def reset_physic(self):
         self.direction = 1
-        self.speed = 5
+        self.ball_speed = {'x': -self.ball_speed['x'], 'z': 0}
         self.game_state = {
             'type': 'send.game.state',
             'PLAYER_0': self.player_ids[0],
@@ -183,19 +185,23 @@ class PongEngine:
         await cache.aset(self.game_channel + '_movement', self.game_movement)
     
     async def apply_physic(self, lap_duration):
-        x = self.game_state['BALL']['x']
-
         # PAD MOVEMENTS
         if self.game_movement['PAD_0'] in ['left', 'right']:
             await self.move_pad('PAD_0', -1)
         if self.game_movement['PAD_1'] in ['left', 'right']:
             await self.move_pad('PAD_1', 1)
+
+        # BALL MOVEMENT
+        await self.move_ball(lap_duration)
             
-        if x >= MAP_LENGTH / 2:
-            self.direction = -1
-        elif x <= -MAP_LENGTH / 2:
-            self.direction = 1
-        self.game_state['BALL']['x'] = x + self.direction * self.speed * lap_duration
+        # BALL WALL BOUNCE
+        await self.wall_bounce()
+
+        # BALL PAD BOUNCE
+        await self.pad_bounce()
+
+        # BALL SCORED
+        await self.ball_scored()
 
     async def update_game_timer(self, lap_duration):
         self.game_time_left -= lap_duration
@@ -230,6 +236,25 @@ class PongEngine:
 
             self.game_movement[pad] = ''
             await cache.aset(self.game_channel + '_movement', self.game_movement)
+
+    async def move_ball(self, lap_duration):
+        self.game_state['BALL']['x'] += self.ball_speed['x'] * lap_duration
+        self.game_state['BALL']['z'] += self.ball_speed['z'] * lap_duration
+
+    async def wall_bounce(self):
+        if abs(self.game_state['BALL']['z']) >= MAP_WIDTH / 2:
+            self.ball_speed['z'] *= -1
+
+    async def pad_bounce(self):
+        for pad in ['PAD_0', 'PAD_1']:
+            if (abs(self.game_state['BALL']['x']) >= abs(self.game_state[pad]['x']) and 
+                self.game_state['BALL']['z'] <= self.game_state[pad]['z'] + PAD_LENGTH / 2 and
+                self.game_state['BALL']['z'] <= self.game_state[pad]['z'] - PAD_LENGTH / 2):
+                self.ball_speed['z'] *= -1
+
+    async def ball_scored(self):
+        # if self.game_state['BALL']['x'] > MAP_LENGTH / 2:
+        pass
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
