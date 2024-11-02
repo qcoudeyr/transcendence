@@ -401,8 +401,9 @@ class EventConsumer(AsyncWebsocketConsumer):
         await database_sync_to_async(self.profile.refresh_from_db)()
 
     async def game_move_pad(self, content):
-        move_time_delta = time.time() - self.last_move_time
-        if 'direction' in content and move_time_delta > MIN_MOVE_TIME_DELTA and self.profile.is_in_game and self.game_group != None:
+        # move_time_delta = time.time() - self.last_move_time
+        # if 'direction' in content and move_time_delta > MIN_MOVE_TIME_DELTA and self.profile.is_in_game and self.game_group != None:
+        if 'direction' in content and self.profile.is_in_game and self.game_group != None:
             game_state = await cache.aget(self.game_group)
 
             if self.profile.pk == game_state['PLAYER_0']:
@@ -420,7 +421,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                 # game_state[pad]['z'] += direction * MOVE_DIST
 
             await cache.aset(self.game_group, game_state)
-            self.last_move_time = time.time()
+            # self.last_move_time = time.time()
 
     # group_send functions here
     async def send_chat_message(self, event):
