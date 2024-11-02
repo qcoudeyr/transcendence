@@ -250,7 +250,7 @@ class PongEngine:
             if (abs(self.game_state['BALL']['x']) >= abs(self.game_state[pad]['x']) and 
                 self.game_state['BALL']['z'] <= self.game_state[pad]['z'] + PAD_LENGTH / 2 and
                 self.game_state['BALL']['z'] <= self.game_state[pad]['z'] - PAD_LENGTH / 2):
-                self.ball_speed['z'] *= -1
+                self.ball_speed['x'] *= -1
                 return
 
     async def ball_scored(self):
