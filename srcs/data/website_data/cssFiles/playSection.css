@@ -69,12 +69,7 @@
 .play-section-container .play-section-box:nth-child(2):after
 {
   background: linear-gradient(315deg, rgb(0, 255, 255), #77f4fd);
-}
-
-.play-section-container .play-section-box:nth-child(3):before,
-.play-section-container .play-section-box:nth-child(3):after
-{
-  background: linear-gradient(315deg, #4dff03, #00d0ff);
+	color: #ff00fb;
 }
 
 .play-section-container .play-section-box span
