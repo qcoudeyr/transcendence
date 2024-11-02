@@ -52,7 +52,7 @@ services:
       - 5432
     networks:
       transcendence:
-        ipv4_address: 10.0.10.12
+        ipv4_address: 10.0.10.3
     hostname: postgresql
     environment:
       - VAULT_ADDR=${VAULT_ADDR}
@@ -93,7 +93,8 @@ services:
       - postgresql
     networks:
       transcendence:
-        ipv4_address: 10.0.10.10
+        ipv4_address: 10.0.10.4
+      devops:
     environment:
       - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=django
@@ -133,7 +134,7 @@ services:
       - "8002:8002"
     networks:
       transcendence:
-        ipv4_address: 10.0.10.11
+        ipv4_address: 10.0.10.5
     depends_on:
       - vault
       - redis
@@ -165,7 +166,7 @@ services:
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
     networks:
       transcendence:
-        ipv4_address: 10.0.10.9
+        ipv4_address: 10.0.10.6
     depends_on:
       - vault
       - redis
@@ -198,7 +199,7 @@ services:
       - ./requirements/entrypoint/:/vault/entrypoint/:ro
     networks:
       transcendence:
-        ipv4_address: 10.0.10.8
+        ipv4_address: 10.0.10.7
     depends_on:
       - vault
       - redis
@@ -227,7 +228,7 @@ services:
     hostname: redis
     networks:
       transcendence:
-        ipv4_address: 10.0.10.70
+        ipv4_address: 10.0.10.8
     restart: always
     environment:
       - VAULT_ADDR=${VAULT_ADDR}
@@ -250,7 +251,7 @@ services:
       VAULT_ADDR: ${VAULT_ADDR}
     networks:
       transcendence:
-        ipv4_address: 10.0.10.40
+        ipv4_address: 10.0.10.25
     hostname: portainer
     restart: always
 
@@ -275,6 +276,8 @@ services:
     networks:
       transcendence:
         ipv4_address: 10.0.10.2
+      devops:
+        ipv4_address: 10.0.10.50
     hostname: nginx
     restart: unless-stopped
     environment:
@@ -307,7 +310,9 @@ services:
       - IPC_LOCK
     networks:
       transcendence:
-        ipv4_address: 10.0.10.69
+        ipv4_address: 10.0.10.30
+      devops:
+        ipv4_address: 10.0.10.62
     hostname: vault
     restart: always
     entrypoint: vault server -config /vault/config/config.hcl
@@ -349,4 +354,7 @@ volumes:
 networks:
   transcendence:
     name: tr_network
+    external: true
+  devops:
+    name: tr_devops_network
     external: true
