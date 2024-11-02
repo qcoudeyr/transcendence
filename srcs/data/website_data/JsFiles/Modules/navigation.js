@@ -99,6 +99,7 @@ export function isUnloaded()
 export function leaveQueue(clickSound)
 {
 	const button = document.getElementById("playbuttontext");
+	const boxes = document.querySelectorAll('.play-section-box');
     let socket = getWebsocket();
 
         socket.send(JSON.stringify({
@@ -106,6 +107,7 @@ export function leaveQueue(clickSound)
         }));
         console.log("Leaving the queue");
 		button.style.display = "none";
+		boxes.forEach(b => b.classList.remove('clicked'));
 
     clickSound.play();
 }
