@@ -1,3 +1,9 @@
+.tournaments-section
+{
+	display: none;
+	z-index: 10000;
+}
+
 .bracket {
 	display: flex;
 	content: center;
