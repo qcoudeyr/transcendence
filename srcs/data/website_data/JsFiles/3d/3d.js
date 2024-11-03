@@ -58,11 +58,8 @@ export function getPad1() {
     return pad1;
 }
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
-export async function initScene() {
+export function initScene() {
     camera.position.set(6, 0.30, 0);
     camera.quaternion.setFromEuler(new THREE.Euler(0.13, 0, 0));
 
@@ -116,7 +113,6 @@ export async function initScene() {
 
         if (loadPercentage === 100) {
             let socket = getWebsocket();
-			await sleep(200);
 			socket.send(JSON.stringify({
 				'type': 'game_ready',
 			}));

@@ -19,11 +19,11 @@ export function removeFrame()
 	frame.style.display = "none";
 }
 
-export function frameCreated()
+export function frameCreated(message)
 {
 	const frame = document.getElementById("frames")
+	frame.textContent = message;
 	frame.style.display = "block";
-	frame.textContent = data.messages;
 }
 
 export function removeExitGameButton()

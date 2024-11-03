@@ -5,7 +5,7 @@ import { displayPrivateMessage } from "./chatSend.js";
 import { friendRequestNotification } from "./notifications-displays.js";
 import { removeFriendFromGroup, removeGroupRequest, groupRequestRevieve, displayGroupList } from "./groupRequests.js";
 import { gameEnd ,gameReadySoStart} from "./Game/gameStartAndEnd.js"
-import { mooveBall, removeExitGameButton, removeFrame, mooveCamera1, moovePad, moovePad2 } from "./Game/ballMovement.js"
+import { mooveBall, removeExitGameButton, frameCreated, removeFrame, mooveCamera1, moovePad, moovePad2 } from "./Game/ballMovement.js"
 import { showPlayingSection, showTournamentSection } from "../Modules/navigation.js";
 import { scoreboardFill } from "./Game/updateScore.js";
 import { fillStats, createHoursPlayedChart} from "./Statistiques.js";
@@ -146,6 +146,14 @@ function openWebsocket(socketurl){
 			{
 				fillTournament(content);
 				showTournamentSection(content);
+			}
+			if(content.type === 'frame_remove')
+			{
+				removeFrame();
+			}
+			if (content.type === 'game_frame_message')
+			{
+				frameCreated(data.message);
 			}
 			//if(content.type === 'game_frame_message')
 			// {
