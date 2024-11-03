@@ -285,7 +285,7 @@ class PongEngine:
 
         history.is_in_progress = False
 
-        history.save(update_fields=['score_0', 'score_1', 'winner_id'])
+        history.save(update_fields=['score_0', 'score_1', 'winner_id', 'is_in_progress'])
 
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
