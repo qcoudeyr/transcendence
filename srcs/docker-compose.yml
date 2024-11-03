@@ -95,6 +95,7 @@ services:
       transcendence:
         ipv4_address: 10.0.10.4
       devops:
+        ipv4_address: 10.0.10.48
     environment:
       - VAULT_ADDR=https://vault:8300
       - SERVICE_NAME=django
