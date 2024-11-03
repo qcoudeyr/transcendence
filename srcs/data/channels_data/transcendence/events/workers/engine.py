@@ -94,8 +94,11 @@ class PongEngine:
         await self.reset_physic()
 
         # Wait for players
+        timeout_count = 0
         players_ready = False
         while (not players_ready):
+            if timeout_count > 50:
+                break
             players_ready = True
             for player_id in self.player_ids:
                 player = await database_sync_to_async(Profile.objects.get)(pk=player_id)
@@ -103,6 +106,7 @@ class PongEngine:
                     players_ready = False
 
             await asyncio.sleep(0.1)
+            timeout_count += 1
 
         # Subscribe players to periodic game updates
         await channel_layer.send(
