@@ -6,11 +6,11 @@ BLUE := $(shell printf "\033[34m")
 NC := $(shell printf "\033[0m")
 
 # Environment variables
-ENABLE_DEVOPS ?= false
+ENABLE_DEVOPS ?= true
 DEV=1
 CERT_SOURCE_DIR := ./srcs/data/certbot/certificates/pong-br.com
 BACKUP_DIR := ./.backup/data/certbot/certificates/pong-br.com
-# Existing variables
+PROJECT_IMAGES := tr_django tr_nginx tr_postgres tr_redis tr_vault tr_channels tr_certbot tr_portainer tr_elasticsearch tr_apm-server tr_fleet-server tr_grafana
 SHELL := /bin/bash
 NETWORK_NAME = tr_network
 NETWORK_DEVOPS_NAME = tr_devops_network
@@ -20,6 +20,13 @@ NETWORK_DRIVER = bridge
 
 all:  create-data-dirs init-network ssl-cert backup init-vault build-and-up init-portainer
 
+define check_directory
+	@if [ ! -d "$(1)" ]; then \
+		echo "$(RED)❌ Directory $(1) not found!$(NC)"; \
+		echo "$(YELLOW)ℹ️  Creating directory...$(NC)"; \
+		mkdir -p $(1) || { echo "$(RED)❌ Failed to create directory$(NC)"; exit 1; }; \
+	fi
+endef
 
 create-data-dirs:
 	$(call log_info,"Creating data directories...")
@@ -57,7 +64,6 @@ init-network:
 			exit 1; \
 		fi; \
 	fi
-
 	@echo "🔍 Checking for existing Docker network $(NETWORK_DEVOPS_NAME)..."
 	@if docker network inspect $(NETWORK_DEVOPS_NAME) >/dev/null 2>&1; then \
 		echo "ℹ️  Network $(NETWORK_DEVOPS_NAME) already exists"; \
@@ -74,142 +80,47 @@ init-network:
 		fi; \
 	fi
 
-build-and-up:
-	@echo "🔐 Starting TLS setup..."
-	@docker compose -f ./srcs/docker-compose.yml up tls; \
-	R_VALUE=$$?; \
-	if [ $$R_VALUE -eq 0 ]; then \
-		echo "✅ TLS setup completed successfully"; \
-	else \
-		echo "⚠️  TLS setup failed, waiting 15 seconds..."; \
-		sleep 15; \
-	fi; \
-	echo "🚀 Starting main services..."; \
-	if [ "$(ENABLE_DEVOPS)" = "true" ]; then \
-		echo "⚙️  DevOps services enabled, starting setup..."; \
-		docker compose -f ./srcs/devops-docker-compose.yml up setup && \
-		docker compose -f ./srcs/docker-compose.yml -f ./srcs/devops-docker-compose.yml up -d; \
-	else \
-		echo "ℹ️  DevOps services disabled, starting only main services..."; \
-		docker compose -f ./srcs/docker-compose.yml up -d; \
-	fi;
-	echo "✨ Build Complete!"
+init-vault: init-network
+	@echo "🔐 Starting Vault initialization process..."
+	@echo "📝 Configuration:"
+	@echo "   • Dev Mode: $(DEV)"
+	@echo "   • Scripts Path: ./srcs/scripts/"
 
-devops:
-	@echo "🚀 Starting DevOps services...";
-	@echo "⚙️  DevOps services enabled, starting setup...";
-	@docker compose -f ./srcs/devops-docker-compose.yml up setup && \
-	 docker compose -f ./srcs/devops-docker-compose.yml up -d;
-
-init-portainer:
-	@echo "Starting of the init scripts..."
-	@echo "Portainer init started..."
-	@./srcs/scripts/portainer_init.sh; \
-	R_VALUE=$$?; \
-	if [ $$R_VALUE -eq 0 ]; then \
-		echo "Portainer init done!"; \
-	else \
-		echo "Portainer init script failed with return value $$R_VALUE!"; \
-	fi || true
-
-init-vault:  init-network
-	@echo "Starting of the tls scripts..."
-	@./srcs/scripts/tls_setup.sh;\
-	R_VALUE=$$?; \
-	if [ $$R_VALUE -eq 0 ]; then \
-		echo "Vault tls done!"; \
-	else \
-		echo "Vault tls script failed with return value $$R_VALUE!"; \
-	fi
-	@echo "Starting Vault container..."
-	@docker compose -f ./srcs/docker-compose.yml up vault -d
-	@echo "Vault container started !"
-	@echo "Vault initialization started..."
-	@DEV=$(DEV) ./srcs/scripts/vault_init.sh; \
-	R_VALUE=$$?; \
-	if [ $$R_VALUE -eq 0 ]; then \
-		echo "Vault init done!"; \
-	else \
-		echo "Vault init script failed with return value $$R_VALUE!"; \
-	fi
-	@echo "Vault setup started..."
-	@./srcs/scripts/vault_setup.sh; \
-	R_VALUE=$$?; \
-	if [ $$R_VALUE -eq 0 ]; then \
-		sleep 5 ;\
-		echo "Vault setup done!"; \
-	else \
-		echo "Vault setup script failed with return value $$R_VALUE!"; \
-	fi
-
-clean-sensitive-data:
-	@echo "Cleaning up sensitive data..."
-	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10) && \
-	if [ -n "$$GPG_FINGERPRINT" ]; then \
-		gpg --batch --yes --delete-secret-keys "$$GPG_FINGERPRINT" && \
-		if [ $$? -eq 0 ]; then \
-			echo "GPG secret key '$$GPG_FINGERPRINT' removed successfully."; \
-		else \
-			echo "Failed to remove GPG secret key."; \
+	@# Vérification des scripts nécessaires
+	@for script in tls_setup.sh vault_init.sh vault_setup.sh; do \
+		if [ ! -f "./srcs/scripts/$$script" ]; then \
+			echo "$(RED)❌ Required script $$script not found!$(NC)"; \
+			exit 1; \
 		fi; \
-	else \
-		echo "No GPG secret key found for 'vault-key'."; \
-	fi
-	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10) && \
-	if [ -n "$$GPG_FINGERPRINT" ]; then \
-		gpg --batch --yes --delete-keys "$$GPG_FINGERPRINT" && \
-		if [ $$? -eq 0 ]; then \
-			echo "GPG public key '$$GPG_FINGERPRINT' removed successfully."; \
-		else \
-			echo "Failed to remove GPG public key."; \
-		fi; \
-	else \
-		echo "No GPG public key found for 'vault-key'."; \
-	fi
-	@rm -rf ./srcs/vault_root_token.gpg \
-	./srcs/requirements/vault/certs/ ./srcs/requirements/tls/certs/ && \
-	if [ $$? -eq 0 ]; then \
-		echo "Encrypted file 'vault_root_token.gpg' removed successfully."; \
-	else \
-		echo "Failed to remove 'root_token.gpg'."; \
-	fi
+	done
 
-clean-ssl:
-	@echo "Cleaning up ssl certificates..."
-	@find ./srcs/data -type d -name 'certs' -exec rm -rf {} + && \
-	if [ $$? -eq 0 ]; then \
-		echo "All 'certs' directories removed successfully."; \
-	else \
-		echo "Failed to remove some 'certs' directories."; \
-	fi
-	@rm -rf ./srcs/data/certificates/nginx ./srcs/data/certificates/vault ./srcs/data/certificates/root-ca.*
-	@echo "Sensitive data cleanup complete."
+	@echo "🔒 Setting up TLS..."
+	@./srcs/scripts/tls_setup.sh || { \
+		echo "$(RED)❌ TLS setup failed$(NC)"; \
+		exit 1; \
+	}
 
-fclean: clean-data clean-sensitive-data clean-ssl
-	@echo "Removing migrations..."
-	@docker exec tr_django remove_migrations.sh || true
-	@docker exec tr_channels remove_migrations.sh || true
-	@echo "Stopping and removing all Docker containers..."
-	@docker compose -f ./srcs/docker-compose.yml -f ./srcs/devops-docker-compose.yml down --volumes --remove-orphans || true
-	@docker stop $$(docker ps -q) || true
-	@docker rm $$(docker ps -a -q) || true
-	@echo "Removing all Docker images..."
-	@docker rmi $$(docker images -q) || true
-	@echo "Removing all Docker volumes..."
-	@docker volume rm $$(docker volume ls -q) || true
-	@echo "Removing all Docker networks..."
-	@docker network rm $$(docker network ls -q) || true
-	@echo "Removing database..."
-	@sudo rm -rf ./srcs/data/postgres_data
-	@sudo rm -rf ./srcs/data/elasticsearch_data
-	@sudo rm -rf ./srcs/data/apm_server_data
-	@sudo rm -rf ./srcs/data/fleet_server_data
-	@echo "Cleanup complete."
+	@echo "🚀 Starting Vault container..."
+	@docker compose -f ./srcs/docker-compose.yml up vault -d || { \
+		echo "$(RED)❌ Failed to start Vault container$(NC)"; \
+		exit 1; \
+	}
 
-clean-data:
-	@echo "Cleaning of the data folder..."
-	@sudo find srcs/data -mindepth 1 -maxdepth 1 ! -name 'django_data' ! -name 'media_data' ! -name 'website_data' ! -name 'channels_data' -exec rm -rf {} +
-	@echo "Cleaning done !"
+	@echo "⚙️  Initializing Vault..."
+	@DEV=$(DEV) ./srcs/scripts/vault_init.sh || { \
+		echo "$(RED)❌ Vault initialization failed$(NC)"; \
+		exit 1; \
+	}
+
+	@echo "🔧 Configuring Vault..."
+	@./srcs/scripts/vault_setup.sh || { \
+		echo "$(RED)❌ Vault setup failed$(NC)"; \
+		exit 1; \
+	}
+
+	@echo "$(GREEN)✅ Vault initialization completed successfully!$(NC)"
+
+
 
 
 # Add this to your existing Makefile
@@ -297,6 +208,160 @@ backup:
 # Force renewal of certificates
 ssl-renew:
 	docker compose -f ./srcs/docker-compose.yml run --rm certbot certbot renew --force-renewal
+
+
+build-and-up:
+	@echo "🔐 Starting TLS setup..."
+	@docker compose -f ./srcs/docker-compose.yml up tls; \
+	R_VALUE=$$?; \
+	if [ $$R_VALUE -eq 0 ]; then \
+		echo "✅ TLS setup completed successfully"; \
+	else \
+		echo "⚠️  TLS setup failed, waiting 15 seconds..."; \
+		sleep 15; \
+	fi; \
+	echo "🚀 Starting main services..."; \
+	if [ "$(ENABLE_DEVOPS)" = "true" ]; then \
+		echo "⚙️  DevOps services enabled, starting setup..."; \
+		docker compose -f ./srcs/devops-docker-compose.yml up setup && \
+		docker compose -f ./srcs/docker-compose.yml -f ./srcs/devops-docker-compose.yml up -d; \
+	else \
+		echo "ℹ️  DevOps services disabled, starting only main services..."; \
+		docker compose -f ./srcs/docker-compose.yml up -d; \
+	fi;
+	@echo "✨ Build Complete!"
+
+devops:
+	@echo "🚀 Starting DevOps services...";
+	@echo "⚙️  DevOps services enabled, starting setup...";
+	@docker compose -f ./srcs/devops-docker-compose.yml up setup && \
+	 docker compose -f ./srcs/devops-docker-compose.yml up -d;
+
+init-portainer:
+	@echo "Starting of the init scripts..."
+	@echo "Portainer init started..."
+	@./srcs/scripts/portainer_init.sh; \
+	R_VALUE=$$?; \
+	if [ $$R_VALUE -eq 0 ]; then \
+		echo "Portainer init done!"; \
+	else \
+		echo "Portainer init script failed with return value $$R_VALUE!"; \
+	fi || true
+
+clean-sensitive-data:
+	@echo "Cleaning up sensitive data..."
+	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10) && \
+	if [ -n "$$GPG_FINGERPRINT" ]; then \
+		gpg --batch --yes --delete-secret-keys "$$GPG_FINGERPRINT" && \
+		if [ $$? -eq 0 ]; then \
+			echo "GPG secret key '$$GPG_FINGERPRINT' removed successfully."; \
+		else \
+			echo "Failed to remove GPG secret key."; \
+		fi; \
+	else \
+		echo "No GPG secret key found for 'vault-key'."; \
+	fi
+	@GPG_FINGERPRINT=$$(gpg --list-keys --with-colons "vault-key" | grep "^fpr" | cut -d':' -f10) && \
+	if [ -n "$$GPG_FINGERPRINT" ]; then \
+		gpg --batch --yes --delete-keys "$$GPG_FINGERPRINT" && \
+		if [ $$? -eq 0 ]; then \
+			echo "GPG public key '$$GPG_FINGERPRINT' removed successfully."; \
+		else \
+			echo "Failed to remove GPG public key."; \
+		fi; \
+	else \
+		echo "No GPG public key found for 'vault-key'."; \
+	fi
+	@rm -rf ./srcs/vault_root_token.gpg \
+	./srcs/requirements/vault/certs/ ./srcs/requirements/tls/certs/ && \
+	if [ $$? -eq 0 ]; then \
+		echo "Encrypted file 'vault_root_token.gpg' removed successfully."; \
+	else \
+		echo "Failed to remove 'root_token.gpg'."; \
+	fi
+
+clean-ssl:
+	@echo "Cleaning up ssl certificates..."
+	@find ./srcs/data -type d -name 'certs' -exec rm -rf {} + && \
+	if [ $$? -eq 0 ]; then \
+		echo "All 'certs' directories removed successfully."; \
+	else \
+		echo "Failed to remove some 'certs' directories."; \
+	fi
+	@rm -rf ./srcs/data/certificates/nginx ./srcs/data/certificates/vault ./srcs/data/certificates/root-ca.*
+	@echo "Sensitive data cleanup complete."
+
+fclean: clean-data clean-sensitive-data clean-ssl
+	@echo "🧹 Starting cleanup process..."
+
+	@echo "🗑️  Removing migrations..."
+	@docker exec tr_django remove_migrations.sh 2>/dev/null || echo "$(YELLOW)⚠️  Django container not running$(NC)"
+	@docker exec tr_channels remove_migrations.sh 2>/dev/null || echo "$(YELLOW)⚠️  Channels container not running$(NC)"
+
+	@echo "🚀 Cleaning project Docker resources in parallel..."
+	@{ \
+		echo "🛑 Stopping containers..." && \
+		docker compose -f ./srcs/docker-compose.yml -f ./srcs/devops-docker-compose.yml down --volumes --remove-orphans & \
+		echo "🗑️  Removing project containers..." && \
+		docker ps -a --format '{{.Names}}' | grep '^tr_' | xargs -r docker rm -f & \
+		echo "🗑️  Removing project images..." && \
+		for img in $(PROJECT_IMAGES); do docker rmi -f $$img 2>/dev/null & done && \
+		echo "🗑️  Removing project volumes..." && \
+		docker volume ls --format '{{.Name}}' | grep '^tr_' | xargs -r docker volume rm -f & \
+		echo "🌐 Removing project networks..." && \
+		docker network rm $(NETWORK_NAME) $(NETWORK_DEVOPS_NAME) & \
+		wait; \
+	} 2>/dev/null || true
+
+	@echo "🗑️  Removing data directories..."
+	@for dir in postgres_data elasticsearch_data apm_server_data fleet_server_data; do \
+		if [ -d "./srcs/data/$$dir" ]; then \
+			sudo rm -rf "./srcs/data/$$dir" & \
+		fi \
+	done
+	@wait
+
+	@echo "$(GREEN)✅ Project cleanup completed successfully!$(NC)"
+
+clean-data:
+	@echo "🧹 Starting data cleanup process..."
+	@echo "📝 Preserving directories:"
+	@echo "   • django_data"
+	@echo "   • media_data"
+	@echo "   • website_data"
+	@echo "   • channels_data"
+
+	@# Vérification du répertoire srcs/data
+	@if [ ! -d "srcs/data" ]; then \
+		echo "$(YELLOW)⚠️  Data directory not found, nothing to clean$(NC)"; \
+		exit 0; \
+	fi
+
+	@echo "🗑️  Removing unnecessary data..."
+	@sudo find srcs/data -mindepth 1 -maxdepth 1 \
+		! -name 'django_data' \
+		! -name 'media_data' \
+		! -name 'website_data' \
+		! -name 'channels_data' \
+		-exec rm -rf {} + || { \
+		echo "$(RED)❌ Failed to clean data directory$(NC)"; \
+		exit 1; \
+	}
+
+	@echo "$(GREEN)✅ Data cleanup completed successfully!$(NC)"
+
+docker-clean-all:
+	@echo "🚀 Starting-fast Docker cleanup..."
+	@{ \
+		docker kill $$(docker ps -q) & \
+		docker rm -f $$(docker ps -a -q) & \
+		docker rmi -f $$(docker images -q) & \
+		docker volume rm -f $$(docker volume ls -q) & \
+		docker network rm $$(docker network ls -q) & \
+		wait; \
+	} 2>/dev/null || true
+	@docker system prune -af --volumes > /dev/null 2>&1 || true
+	@echo "$(GREEN)✅ Fast cleanup finished!$(NC)"
 
 re: fclean all
 

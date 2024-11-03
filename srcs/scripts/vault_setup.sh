@@ -12,36 +12,55 @@ NC='\033[0m' # No Color
 # Logger function
 log() {
     local level=$1
-    shift
-    local message=$@
+    local message=$2
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     case $level in
         "INFO")
-            echo -e "${GREEN}[INFO]${NC} ${timestamp} - $message"
+            echo -e "🔵 ${GREEN}[INFO]${NC} ${timestamp} - $message"
             ;;
         "WARN")
-            echo -e "${YELLOW}[WARN]${NC} ${timestamp} - $message"
+            echo -e "⚠️  ${YELLOW}[WARN]${NC} ${timestamp} - $message"
             ;;
         "ERROR")
-            echo -e "${RED}[ERROR]${NC} ${timestamp} - $message"
+            echo -e "❌ ${RED}[ERROR]${NC} ${timestamp} - $message"
+            ;;
+        "SUCCESS")
+            echo -e "✅ ${GREEN}[SUCCESS]${NC} ${timestamp} - $message"
             ;;
     esac
 }
 
 # Create required directories
 setup_directories() {
-    log "INFO" "Creating required directories..."
+    local dirs=(
+        "./srcs/data/certificates/vault"
+        "./srcs/data/vault_data/data"
+        "./srcs/data/vault_data/logs"
+        "./srcs/data/vault_data/file"
+        "./srcs/requirements/vault/certs"
+        "./srcs/data/credentials"
+    )
 
-    mkdir -p ./srcs/data/certificates/vault
-    mkdir -p ./srcs/data/vault_data/{data,logs,file}
-    mkdir -p ./srcs/requirements/vault/certs
+    log "INFO" "🗂️  Creating required directories..."
 
-    # Set proper permissions
-    chmod 644 ./srcs/data/certificates/vault
-    chmod 644 ./srcs/data/vault_data/{data,logs,file}
+    # Création parallèle des répertoires
+    for dir in "${dirs[@]}"; do
+        mkdir -p "$dir" &
+    done
+    wait
 
-	mkdir -p ./srcs/data/credentials
-    chmod 766 ./srcs/data/credentials
+    # Vérification des permissions
+    for dir in "${dirs[@]}"; do
+        if [ ! -d "$dir" ]; then
+            log "ERROR" "Failed to create directory: $dir"
+            return 1
+        fi
+
+        chmod 644 "$dir" &
+    done
+    wait
+
+    log "SUCCESS" "Directories created and permissions set"
 }
 
 # Function to parse env file into associative array
@@ -329,33 +348,59 @@ generate_service_cert() {
     local service=$1
     local domain=$2
 
-    log "INFO" "Generating certificate for $service..."
+    log "INFO" "🔐 Generating certificate for $service..."
 
-    # Create service directory
-    mkdir -p "./srcs/data/certificates/$service"
+    # Vérification du répertoire
+    local cert_dir="./srcs/data/certificates/$service"
+    mkdir -p "$cert_dir"
 
-    # Generate certificate using Vault
-    docker exec tr_vault vault write -format=json \
-        pki_int/issue/$service \
-        common_name="$domain" \
-        alt_names="localhost,$domain" \
-        ip_sans="127.0.0.1" \
-        ttl="72h" > "./srcs/data/certificates/$service/$service-cert.json"
+    if [ ! -d "$cert_dir" ]; then
+        log "ERROR" "Failed to create certificate directory for $service"
+        return 1
+    fi
 
-    # Extract certificate components
-    jq -r '.data.certificate' "./srcs/data/certificates/$service/$service-cert.json" > "./srcs/data/certificates/$service/$service.crt"
-    jq -r '.data.private_key' "./srcs/data/certificates/$service/$service-cert.json" > "./srcs/data/certificates/$service/$service.key"
-    jq -r '.data.issuing_ca' "./srcs/data/certificates/$service/$service-cert.json" > "./srcs/data/certificates/$service/ca.crt"
+    # Génération parallèle des composants du certificat
+    {
+        docker exec tr_vault vault write -format=json \
+            pki_int/issue/$service \
+            common_name="$domain" \
+            alt_names="localhost,$domain" \
+            ip_sans="127.0.0.1" \
+            ttl="72h" > "$cert_dir/$service-cert.json"
+    } &
 
-    # Create combined PEM file
-    cat "./srcs/data/certificates/$service/$service.crt" "./srcs/data/certificates/$service/$service.key" > "./srcs/data/certificates/$service/$service.pem"
+    wait
 
-    # Set permissions
-    chmod 644 "./srcs/data/certificates/$service/$service.crt"
-    chmod 600 "./srcs/data/certificates/$service/$service.key"
-    chmod 644 "./srcs/data/certificates/$service/$service.pem"
+    # Vérification du fichier généré
+    if [ ! -f "$cert_dir/$service-cert.json" ]; then
+        log "ERROR" "Certificate generation failed for $service"
+        return 1
+    fi
 
-    log "INFO" "Certificate generated for $service"
+    # Extraction parallèle des composants
+    {
+        jq -r '.data.certificate' "$cert_dir/$service-cert.json" > "$cert_dir/$service.crt"
+        jq -r '.data.private_key' "$cert_dir/$service-cert.json" > "$cert_dir/$service.key"
+        jq -r '.data.issuing_ca' "$cert_dir/$service-cert.json" > "$cert_dir/ca.crt"
+    } &
+    wait
+
+    # Vérification des fichiers extraits
+    local files=("$cert_dir/$service.crt" "$cert_dir/$service.key" "$cert_dir/ca.crt")
+    for file in "${files[@]}"; do
+        if [ ! -f "$file" ]; then
+            log "ERROR" "Failed to extract certificate component: $file"
+            return 1
+        fi
+    done
+
+    # Configuration des permissions
+    chmod 644 "$cert_dir/$service.crt" &
+    chmod 600 "$cert_dir/$service.key" &
+    wait
+
+    log "SUCCESS" "Certificate generated for $service"
+    return 0
 }
 
 # Main execution

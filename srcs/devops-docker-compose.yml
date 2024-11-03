@@ -198,7 +198,6 @@ services:
       devops:
         ipv4_address: 10.0.10.38
     depends_on:
-
       - elasticsearch
 
 ##########################
@@ -404,6 +403,9 @@ services:
     volumes:
       - grafana_data:/usr/share/grafana/
       - ./requirements/grafana/conf:/usr/share/grafana/conf/provisioning/datasources
+      # Ajout des nouveaux volumes
+      - ./requirements/grafana/dashboards:/usr/share/grafana/conf/provisioning/dashboards
+      - ./requirements/grafana/dashboard-definitions:/usr/share/grafana/dashboard-definitions
       - ./data/certbot/certificates/pong-br.com/fullchain1.pem:/etc/grafana/grafana.crt
       - ./data/certbot/certificates/pong-br.com/privkey1.pem:/etc/grafana/grafana.key
       - ./requirements/grafana/grafana.ini:/etc/grafana/grafana.ini

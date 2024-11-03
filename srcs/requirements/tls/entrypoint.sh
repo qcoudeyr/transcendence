@@ -169,7 +169,7 @@ EOF
         rm "${service_dir}/${service_name}.csr" "${service_dir}/${service_name}.conf"
 
 		if [ "${service_name}" == "nginx" ]; then
-			chmod 644 "${service_dir}"/* --recursive
+			chmod 664 "${service_dir}"/* --recursive
 		fi
 
         echo "   ⠿ Created certificates for ${service_name}"

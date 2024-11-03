@@ -220,7 +220,7 @@ main() {
     fi
 
     # Prepare and encrypt keys
-    VAULT_KEYS=$(cat <<EOF
+    VAULT_KEYS=$(cat <<EOF              
 Root Token: $ROOT_TOKEN
 Unseal Key 1: ${UNSEAL_KEYS[0]}
 Unseal Key 2: ${UNSEAL_KEYS[1]}
