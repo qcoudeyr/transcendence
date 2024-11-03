@@ -17,9 +17,12 @@ export function fillTournament(data) {
         const player0 = playerElements[index].player0;
         const player1 = playerElements[index].player1;
 
-        player0.textContent = data[`game_${index}`].player_0;
-        player1.textContent = data[`game_${index}`].player_1;
+        player0.textContent = data[`game_${index}`].player_0.name;
+        player1.textContent = data[`game_${index}`].player_1.name;
 
+
+		player0.className = '';
+        player1.className = '';
         // Set classes based on winner
 		player0.class.clear;
         if (data[`game_${index}`].winner === "player_0") {
