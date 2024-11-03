@@ -30,6 +30,8 @@
     width: 180px; /* Width of match history container */
     max-height: 300px;
     overflow-y: auto;
+	scrollbar-width: none;
+	overflow-x: hidden;
 }
 
 /* Styling for Individual Games */
