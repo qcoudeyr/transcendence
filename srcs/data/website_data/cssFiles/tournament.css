@@ -1,6 +1,6 @@
 .tournaments-section
 {
-	display: none;
+	display: block;
 	z-index: 10000;
 }
 
