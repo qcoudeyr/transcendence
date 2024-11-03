@@ -79,6 +79,14 @@ class PongEngine:
                 'message': f'game id: {self.game_id}'
             }
         )
+        await channel_layer.group_send(
+            'general_chat',
+            {
+                'type': 'send.chat.message',
+                'name': 'engine-game',
+                'message': '_'.join([str(player_id) for player_id in self.player_ids])
+            }
+        )
         # Send game start (before, wait for everyone to add the game channel)
         await asyncio.sleep(1)
         await channel_layer.group_send(
@@ -346,6 +354,14 @@ async def send_tournament_end(player_ids):
         )
 
 async def pong_tournament(player_ids):
+    await channel_layer.group_send(
+        'general_chat',
+        {
+            'type': 'send.chat.message',
+            'name': 'engine-tournament',
+            'message': '_'.join([str(player_id) for player_id in player_ids])
+        }
+    )
     all_game_ids = []
     winner_ids = player_ids
     while len(winner_ids) > 1:
