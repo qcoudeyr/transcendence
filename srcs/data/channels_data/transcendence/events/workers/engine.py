@@ -213,7 +213,7 @@ class PongEngine:
 
     async def reset_physic(self):
         self.direction = 1
-        self.ball_speed = {'x': -self.ball_speed['x'] / abs(self.ball_speed['x']) * BALL_SPEED, 'z': -self.ball_speed['z'] / abs(self.ball_speed['z'])}
+        self.ball_speed = {'x': self.ball_speed['x'] / abs(self.ball_speed['x']) * BALL_SPEED, 'z': -self.ball_speed['z'] / abs(self.ball_speed['z'])}
         self.speed = self.speed
         self.game_state = {
             'type': 'send.game.state',
