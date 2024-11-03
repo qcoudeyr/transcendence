@@ -31,5 +31,10 @@ export function fillTournament(data) {
             player0.classList.add("losed-team");
             player1.classList.add("winner-team");
         }
+		const WINNER = document.getElementById("winner-name")
+		if (data.game_6.winner === "player_0")
+			WINNER.textContent = player0;
+		else
+			WINNER.textContent = player1;
     });
 }
