@@ -1130,7 +1130,7 @@ def search_tournament(new_group_id, new_group_size):
 
     # Test possibilities
     while len(group_sizes) > 0:
-        matched_group_ids = [new_group_id]
+        matched_group_ids = []
         group_size_sum = new_group_size
         for group_id in group_sizes:
             if group_sizes[group_id] + group_size_sum <= 8:
