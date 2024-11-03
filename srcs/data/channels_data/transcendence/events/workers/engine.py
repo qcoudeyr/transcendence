@@ -332,7 +332,6 @@ class PongEngine:
             bounce_angle = normalized * MAX_BOUNCE_ANGLE
             self.ball_speed['x'] = BALL_SPEED * math.cos(bounce_angle)
             self.ball_speed['z'] = BALL_SPEED * -math.sin(bounce_angle)
-            self.ball_speed['x'] *= -1
             self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
             self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
 
