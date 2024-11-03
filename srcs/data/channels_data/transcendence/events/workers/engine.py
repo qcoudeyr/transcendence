@@ -464,6 +464,6 @@ def update_player_is_in_tournament(player_id):
 
 @database_sync_to_async
 @transaction.atomic
-def player_in_game(profile):
+def player_is_in_game(profile):
     profile.is_in_game = True
     profile.save(update_fields=['is_in_game'])
