@@ -13,6 +13,25 @@ export function mooveBall(data) {
     }
 }
 
+export function removeFrame()
+{
+	const frame = document.getElementById("frames")
+	frame.style.display = "none";
+}
+
+export function frameCreated()
+{
+	const frame = document.getElementById("frames")
+	frame.style.display = "block";
+	frame.textContent = data.messages;
+}
+
+export function removeExitGameButton()
+{
+	const endButton = document.getElementById("unloadButton");
+	endButton.style.display = "none";
+}
+
 export function moovePad(data) {
 	if (data && data.PAD_0) {
         // Get the ball mesh from your existing function
