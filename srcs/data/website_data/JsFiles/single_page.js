@@ -1,4 +1,4 @@
-import { navigateToSection, changePages, switchProfileSection, playButtonSetup, leaveQueue, updateNavbar, hidePreloaderAfterLoad } from './Modules/navigation.js';
+import { navigateToSection, changePages, switchProfileSection, playButtonSetup, playTournamentSetup, leaveQueue, updateNavbar, hidePreloaderAfterLoad } from './Modules/navigation.js';
 import { setupLogin, setupRegister, checkAccessToken } from './Modules/API/auth.js';
 import { getMailAndUsername, getNameBioAndAvatar } from './Modules/API/getProfileInfo.js';
 import { websocketConnect } from './WebSocket/websocket-open.js';
@@ -25,6 +25,10 @@ document.addEventListener("DOMContentLoaded", function () {
 	// if (localStorage.getItem()) {
 	// 	checkToken();
 	// }
+	const playButtonTournament = document.getElementById("tournament-box");
+	playButtonTournament.addEventListener("click", function() {
+		playTournamentSetup(clickSound);
+	});
 	const playButton = document.getElementById("classic-box");
     playButton.addEventListener("click", function () {
         playButtonSetup(clickSound); // Pass clickSound if necessary

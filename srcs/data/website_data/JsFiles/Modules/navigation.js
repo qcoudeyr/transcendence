@@ -1,5 +1,5 @@
 import { initScene } from "../3d/3d.js";
-import { notificationReset, queueNotification } from "../WebSocket/notifications-displays.js";
+import { notificationReset, queueNotification, queueNotificationTournament } from "../WebSocket/notifications-displays.js";
 import { getWebsocket } from "../WebSocket/websocket-open.js";
 
 export function navigateToSection(sections, links) {
@@ -124,6 +124,22 @@ export function playButtonSetup(clickSound) {
         }));
         console.log("Joining the queue");
 		queueNotification();
+		button.style.display = "block";
+        button.textContent = "EXIT";
+
+    clickSound.play();
+}
+
+export function playTournamentSetup(clickSound) {
+    const button = document.getElementById("playbuttontext");
+    let socket = getWebsocket();
+
+        socket.send(JSON.stringify({
+            'type': 'game_join_queue',
+            'mode': 'TOURNAMENT'
+        }));
+        console.log("Joining the queue");
+		queueNotificationTournament();
 		button.style.display = "block";
         button.textContent = "EXIT";
 
