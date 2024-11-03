@@ -2,7 +2,12 @@
 
 
 export function createMatchHistory(data) {
-	const historyMatchContainer = document.getElementById("match-history-container");
+    const historyMatchContainer = document.getElementById("match-history-container");
+
+    // Check if an element with the same ID already exists
+    if (document.getElementById(data.history_id)) {
+        return; // Exit the function if it already exists
+    }
 
     const matchDiv = document.createElement('div');
     matchDiv.id = data.history_id;
@@ -11,13 +16,12 @@ export function createMatchHistory(data) {
     else
         matchDiv.classList.add("game", "won");
 
-	matchDiv.setAttribute('onclick', `selectMatch('${data.result}', '${data.score.left + '-' + data.score.right}')`);
+    matchDiv.setAttribute('onclick', `selectMatch('${data.result}', '${data.score.left + '-' + data.score.right}')`);
     const matchText = document.createElement('p');
     matchText.textContent = 'Match ' + data.history_id;
     matchDiv.appendChild(matchText);
     historyMatchContainer.appendChild(matchDiv);
 }
-
 
 // Example WebSocket data
 // const websocketData = [
