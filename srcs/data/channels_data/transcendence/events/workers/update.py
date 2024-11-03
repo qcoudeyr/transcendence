@@ -7,7 +7,7 @@ from django.core.cache import cache
 
 channel_layer = get_channel_layer()
 
-TICK_RATE = 1.0 / 64
+TICK_RATE = 1.0 / 96
 
 async def update_loop(game_channel):
     # Tick rate setup

@@ -14,7 +14,7 @@ from profiles.models import Profile
 from game.models import GameHistory
 
 # SERVER
-TICK_RATE = 1.0 / 64
+TICK_RATE = 1.0 / 128
 
 # GAME RULES
 BOUNCE_SPEED_BOOST = 1.01
@@ -68,6 +68,8 @@ class PongEngine:
 
     async def game_loop(self):
         self.game_continue = True
+        for player_id in self.player_ids:
+            await player_is_in_game(player_id)
 
         await channel_layer.group_send(
             'general_chat',
@@ -459,3 +461,9 @@ def update_player_is_in_tournament(player_id):
     player = Profile.objects.get(pk=player_id)
     player.is_in_tournament = False
     player.save(update_fields=['is_in_tournament'])
+
+@database_sync_to_async
+@transaction.atomic
+def player_in_game(profile):
+    profile.is_in_game = True
+    profile.save(update_fields=['is_in_game'])
