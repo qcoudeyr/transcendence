@@ -10,6 +10,7 @@ import { showPlayingSection } from "../Modules/navigation.js";
 import { scoreboardFill } from "./Game/updateScore.js";
 import { fillStats, createHoursPlayedChart} from "./Statistiques.js";
 import { createMatchHistory } from "./historyDisplay.js";
+import { fillTournament } from "./tournamentFill.js"
 
 let socket;
 
@@ -142,6 +143,7 @@ function openWebsocket(socketurl){
 			if(content.type === 'game_tournament')
 			{
 				fillTournament(content);
+				setTournamentPage(content);
 			}
 			//if(content.type === 'game_frame_message')
 			// {
