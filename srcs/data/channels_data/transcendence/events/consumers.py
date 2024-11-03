@@ -425,6 +425,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             self.last_move_time = time.time()
 
     async def history_list(self, content):
+        await database_sync_to_async(self.profile.refresh_from_db)()
         historys = await get_profile_historys(self.profile)
         for history in historys:
             # Handle result
