@@ -1147,8 +1147,8 @@ def search_tournament(new_group_id, new_group_size):
                 for player_id in player_ids:
                     player = Profile.objects.get(pk=player_id)
                     player.status = 'IG'
-                    player.is_in_game = True
-                    player.save(update_fields=['status', 'is_in_game'])
+                    player.is_in_tournament = True
+                    player.save(update_fields=['status', 'is_in_tournament'])
                 async_to_sync(channel_layer.group_send)(
                     'general_chat',
                     {

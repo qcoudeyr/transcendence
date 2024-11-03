@@ -162,8 +162,8 @@ class PongEngine:
 
         # Send game results (as frame message ?)
         # Update profiles status and player things
-        if not self.is_tournament:
-            await update_players_exit_game(self.player_ids)
+        # if not self.is_tournament:
+        await update_players_exit_game(self.player_ids)
 
         # Send game end
         await channel_layer.group_send(

@@ -101,6 +101,7 @@ class Profile(models.Model):
     )
     is_game_ready = models.BooleanField(default=False)
     is_in_game = models.BooleanField(default=False)
+    is_in_tournament = models.BooleanField(default=False)
     actual_game_id = models.BigIntegerField(null=True, default=None)
     best_streak = models.IntegerField(default=0)
     actual_streak = models.IntegerField(default=0)
