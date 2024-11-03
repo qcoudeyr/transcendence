@@ -722,7 +722,7 @@ class EventConsumer(AsyncWebsocketConsumer):
 
     async def send_frame_remove(self, event):
         await self.send(text_data=json.dumps({
-                'type': 'frame_emove',
+                'type': 'frame_remove',
             })
         )
 
