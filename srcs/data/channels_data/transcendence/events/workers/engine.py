@@ -337,6 +337,7 @@ async def send_tournament_state(player_ids, game_ids):
 
 async def send_tournament_end(player_ids):
     for player_id in player_ids:
+        await update_player_is_in_tournament(player_id)
         await channel_layer.group_send(
             'notifications_' + str(player_id),
             {'type': 'send.tournament.end'}
@@ -451,3 +452,10 @@ def get_history_infos(game_id):
     return {'player_0': {'name': player_0.name, 'avatar': player_0.avatar.url, 'score': history.score_0},
             'player_1': {'name': player_1.name, 'avatar': player_1.avatar.url, 'score': history.score_1},
             'winner': winner}
+
+@database_sync_to_async
+@transaction.atomic
+def update_player_is_in_tournament(player_id):
+    player = Profile.objects.get(pk=player_id)
+    player.is_in_tournament = False
+    player.save(update_fields=['is_in_tournament'])
