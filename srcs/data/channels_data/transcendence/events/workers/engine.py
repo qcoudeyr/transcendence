@@ -135,32 +135,6 @@ class PongEngine:
             # Initialize game objects
             await self.reset_physic()
 
-            # Send round start
-            await channel_layer.group_send(
-                self.game_channel,
-                {
-                    'type': 'send.game.frame.message',
-                    'message': 'Ready ?'
-                }
-            )
-            await asyncio.sleep(3)
-            await channel_layer.group_send(
-                self.game_channel,
-                {'type': 'send.frame.remove'}
-            )
-            await channel_layer.group_send(
-                self.game_channel,
-                {
-                    'type': 'send.game.frame.message',
-                    'message': 'Fight !'
-                }
-            )
-            await asyncio.sleep(3)
-            await channel_layer.group_send(
-                self.game_channel,
-                {'type': 'send.frame.remove'}
-            )
-
             # Tick rate setup
             tick_rate = TICK_RATE
             tick_count = 0
