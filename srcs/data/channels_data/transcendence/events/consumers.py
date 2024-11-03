@@ -701,9 +701,9 @@ class EventConsumer(AsyncWebsocketConsumer):
 
     async def send_game_tournament(self, event):
         event['type'] = 'game_tournament'
-        await self.send(text_data=json.dumps({
+        await self.send(text_data=json.dumps(
                 event
-            })
+            )
         )
 
     async def send_tournament_end(self, event):
