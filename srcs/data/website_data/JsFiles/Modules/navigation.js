@@ -91,6 +91,7 @@ export function navigateToSection(sections, links) {
   }
   
   let isInitialized = false; // Flag to prevent multiple initializations
+  let isInTournament = false;
 
 export function isUnloaded()
 {
@@ -156,6 +157,16 @@ export function playTournamentSetup(clickSound) {
 	  document.querySelector('nav').style.display = 'none';
 	  initScene();
 	}
+
+	export function showTournamentSection() {
+		if (isInTournament) return; // Prevent further calls
+		isInTournament = true; // Set the flag to true
+		  const sections = document.querySelectorAll("section"); // Select all sections
+		  sections.forEach((section) => {
+			section.style.display = section.id === "tournaments" ? "block" : "none";
+		  });
+		  document.querySelector('nav').style.display = 'none';
+		}
 
   export function hidePreloaderAfterLoad() {
         const preloader = document.getElementById('preloader');

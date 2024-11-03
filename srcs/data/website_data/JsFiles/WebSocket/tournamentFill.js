@@ -29,8 +29,3 @@ export function fillTournament(data) {
         }
     });
 }
-
-export function setTournamentPage(data)
-{
-	
-}

@@ -6,7 +6,7 @@ import { friendRequestNotification } from "./notifications-displays.js";
 import { removeFriendFromGroup, removeGroupRequest, groupRequestRevieve, displayGroupList } from "./groupRequests.js";
 import { gameEnd ,gameReadySoStart} from "./Game/gameStartAndEnd.js"
 import { mooveBall, mooveCamera1, moovePad, moovePad2 } from "./Game/ballMovement.js"
-import { showPlayingSection } from "../Modules/navigation.js";
+import { showPlayingSection, showTournamentSection } from "../Modules/navigation.js";
 import { scoreboardFill } from "./Game/updateScore.js";
 import { fillStats, createHoursPlayedChart} from "./Statistiques.js";
 import { createMatchHistory } from "./historyDisplay.js";
@@ -143,7 +143,7 @@ function openWebsocket(socketurl){
 			if(content.type === 'game_tournament')
 			{
 				fillTournament(content);
-				setTournamentPage(content);
+				showTournamentSection(content);
 			}
 			//if(content.type === 'game_frame_message')
 			// {
