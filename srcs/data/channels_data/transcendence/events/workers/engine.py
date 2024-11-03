@@ -327,7 +327,7 @@ class PongEngine:
             # Take care of limits
             self.game_state['BALL']['x'] = self.game_state['PAD_1']['x'] + BALL_RADIUS + PAD_LENGTH
             # Change velocity direction accordingly to relative intersection norm
-            relative_intersection = self.game_state['PAD_0']['z'] - self.game_state['BALL']['z']
+            relative_intersection = self.game_state['PAD_1']['z'] - self.game_state['BALL']['z']
             normalized = relative_intersection / (PAD_WIDTH / 2)
             bounce_angle = normalized * MAX_BOUNCE_ANGLE
             self.ball_speed['x'] = BALL_SPEED * math.cos(bounce_angle)
