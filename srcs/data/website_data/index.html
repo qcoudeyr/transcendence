@@ -136,19 +136,9 @@
 				<div class="history_title">
 					<h2>HISTORY</h2>
 				</div>
-				<!-- List of Old Matches -->
-				<div id="game_1" class="game lost" onclick="selectMatch('lost', '10-15')">
-					<p>Match 1</p>
-				</div>
-				<div id="game_2" class="game won" onclick="selectMatch('won', '15-5')">
-					<p>Match 2</p>
-				</div>
-				<div id="game_3" class="game lost" onclick="selectMatch('lost', '8-15')">
-					<p>Match 3</p>
-				</div>
 				<script>
 					function selectMatch(status, score) {
-						document.getElementById('match_status').innerText = status === 'won' ? 'You Won!' : 'You Lost!';
+						document.getElementById('match_status').innerText = status === 'WIN' ? 'You Won!' : 'You Lost!';
 						document.getElementById('match_score').innerText = `Score: ${score}`;
 					}
 					</script>
