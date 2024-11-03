@@ -7,6 +7,7 @@ from channels.layers import get_channel_layer
 from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
 from django.core.cache import cache
+from django.db import transaction
 
 from profiles.models import Profile
 from game.models import GameHistory
@@ -271,6 +272,7 @@ class PongEngine:
             self.round_continue = False
 
     @database_sync_to_async
+    @transaction.atomic
     def save_game_history(self):
         history = GameHistory.objects.get(pk=self.game_id)
         history.score_0 = self.game_state['PLAYER_SCORE']['0']
