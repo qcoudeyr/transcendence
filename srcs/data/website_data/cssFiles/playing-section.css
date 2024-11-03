@@ -31,11 +31,9 @@ canvas {
 	padding: 50px;
 	position: fixed;
 	display: flex;
-	left: 50%;
+	left: 40%;
 	top: 50%;
-	transform: translateX(-50%);
 	transform: translateY(-50%);
-	background-color: #e230b8;
 	display: none;
 	z-index: 1000;
 }
