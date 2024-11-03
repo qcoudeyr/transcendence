@@ -656,7 +656,7 @@ class EventConsumer(AsyncWebsocketConsumer):
 
     async def send_statistics(self, event):
         await self.send(text_data=json.dumps({
-                'type': 'send.statistics',
+                'type': 'statistics',
                 'hours_played': event['hours_played'],
                 'total_wins': event['total_wins'],
                 'total_loss': event['total_loss'],
