@@ -24,7 +24,6 @@ export function fillTournament(data) {
 		player0.className = '';
         player1.className = '';
         // Set classes based on winner
-		player0.class.clear;
         if (data[`game_${index}`].winner === "player_0") {
             player0.classList.add("winner-team");
             player1.classList.add("loser-team");
