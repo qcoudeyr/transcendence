@@ -16,7 +16,7 @@ NETWORK_NAME = tr_network
 NETWORK_SUBNET = 10.0.10.0/24
 NETWORK_DRIVER = bridge
 
-all:  create-data-dirs init-network ssl-cert init-vault build-and-up init-portainer
+all:  create-data-dirs init-network ssl-cert backup init-vault build-and-up init-portainer
 
 
 create-data-dirs:
@@ -35,7 +35,7 @@ create-data-dirs:
 		./srcs/data/certbot \
 		./srcs/data/certbot/logs \
 		./srcs/data/certificates \
-		./srcs/data/certbot/certificates/pong-br.com/ \
+		./srcs/data/certbot/certificates/ \
 		> /dev/null 2>&1 || true
 	$(call log_success,"Data directories created successfully")
 
@@ -62,9 +62,6 @@ build-and-up:
 	R_VALUE=$$?; \
 	if [ $$R_VALUE -eq 0 ]; then \
 		echo "✅ TLS setup completed successfully"; \
-		rm -rf srcs/data/certbot/certificates ; \
-		cp ./.backup/data/certbot/ ./srcs/data/ -r; \
-		chmod 777 --recursive ./srcs/data/certbot/certificates/; \
 	else \
 		echo "⚠️  TLS setup failed, waiting 15 seconds..."; \
 		sleep 15; \
@@ -218,7 +215,6 @@ show-vault-token:
 	}
 
 
-
 # Generate SSL certificates if not present
 ssl-cert: create-data-dirs
 	@echo "🔍 Checking for existing SSL certificates..."
@@ -226,30 +222,30 @@ ssl-cert: create-data-dirs
 		echo "✅ SSL certificates already exist. Skipping generation."; \
 	else \
 		if [ -d ".backup/data/certbot/certificates/pong-br.com" ]; then \
-			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
-			echo "📁 Restoring backup SSL certificates..."; \
-			sleep 5 && cp ./.backup/data/certbot/ ./srcs/data/ -r; \
-			chmod 777 --recursive ./srcs/data/certbot/certificates/ \
+			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; } && \
+			echo "📁 Restoring backup SSL certificates..." && \
+			sleep 5 && \
+			cp -r ./.backup/data/certbot/ ./srcs/data/ && \
+			chmod 777 --recursive ./srcs/data/certbot/certificates/; \
 		else \
-			echo "🔐 Generating new SSL certificates..."; \
-			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; }; \
-			echo "⏳ Waiting for certbot container to initialize..."; \
-			sleep 2; \
-			echo "🔑 Running certificate generation..."; \
+			echo "🔐 Generating new SSL certificates..." && \
+			docker compose -f ./srcs/docker-compose.yml up certbot -d || { echo "❌ Failed to start certbot container"; exit 1; } && \
+			echo "⏳ Waiting for certbot container to initialize..." && \
+			sleep 2 && \
+			echo "🔑 Running certificate generation..." && \
 			docker exec tr_certbot /bin/sh -c "certbot certonly \
-			--dns-luadns \
-			--dns-luadns-credentials /.secrets/certbot/luadns.ini \
-			--email admin@pong-br.com \
-			--agree-tos \
-			--no-eff-email \
-			-d pong-br.com \
-			-d *.pong-br.com"; \
-			if [ $$? -ne 0 ]; then \
-				echo "❌ Certificate generation failed"; \
-				exit 1; \
-			fi; \
-			echo "📂 Setting permissions on certificate files..."; \
-			chmod 777 --recursive ./data/certbot/certificates/ || { echo "❌ Failed to set permissions"; exit 1; }; \
+				--dns-luadns \
+				--dns-luadns-credentials /.secrets/certbot/luadns.ini \
+				--email admin@pong-br.com \
+				--agree-tos \
+				--no-eff-email \
+				-d pong-br.com \
+				-d portainer.pong-br.com \
+				-d vault.pong-br.com \
+				-d grafana.pong-br.com \
+				-d kibana.pong-br.com " && \
+			echo "📂 Setting permissions on certificate files..." && \
+			chmod 777 --recursive ./srcs/data/certbot/certificates/ || { echo "❌ Failed to set permissions"; exit 1; } && \
 			echo "✅ SSL certificate generation completed successfully."; \
 		fi; \
 	fi
