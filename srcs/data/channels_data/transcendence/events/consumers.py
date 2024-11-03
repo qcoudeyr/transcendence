@@ -415,6 +415,10 @@ class EventConsumer(AsyncWebsocketConsumer):
                         }
                     )
 
+    async def game_leave_queue(self, content):
+        await database_sync_to_async(self.profile.refresh_from_db)()
+        await group_leave_queue(self.profile)
+
     async def game_ready(self, content):
         await update_profile_game_ready(self.profile, True)
         await database_sync_to_async(self.profile.refresh_from_db)()
@@ -1047,3 +1051,10 @@ def get_profile_total_point_scored(profile):
 def get_profile_actual_streak(profile):
     actual_streak = profile.actual_streak
     return actual_streak
+
+@database_sync_to_async
+@transaction.atomic
+def group_leave_queue(profile):
+    group = profile.group
+    group.party_queue = None
+    group.save(update_fields=['party_queue'])
