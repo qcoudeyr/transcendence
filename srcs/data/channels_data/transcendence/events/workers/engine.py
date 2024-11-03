@@ -8,12 +8,13 @@ from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
 from django.core.cache import cache
 from django.db import transaction
+from asgiref.sync import async_to_sync
 
 from profiles.models import Profile
 from game.models import GameHistory
 
 # SERVER
-TICK_RATE = 1.0 / 128
+TICK_RATE = 1.0 / 256
 
 # GAME RULES
 BOUNCE_SPEED_BOOST = 1.01
@@ -32,7 +33,7 @@ DEFAULT_BALL_Z = 0
 # PAD
 PAD_LENGTH = 0.1
 PAD_WIDTH = 0.4
-PAD_MOVE_DISTANCE = 0.12
+PAD_MOVE_DISTANCE = 0.09
 PAD_MAX_MOVE = MAP_WIDTH / 2 - PAD_WIDTH / 2
 DEFAULT_PAD_0_X = MAP_LENGTH / 2
 DEFAULT_PAD_0_Y = MAP_HEIGHT
@@ -59,10 +60,11 @@ DEFAULT_GAME_TIMER_SECONDS = 0
 channel_layer = get_channel_layer()
 
 class PongEngine:
-    def __init__(self, game_id, player_ids):
+    def __init__(self, game_id, player_ids, is_tournament):
         self.game_id = game_id
         self.player_ids = player_ids
         self.game_channel = 'game_' + str(game_id)
+        self.is_tournament = is_tournament
 
     async def game_loop(self):
         self.game_continue = True
@@ -156,7 +158,8 @@ class PongEngine:
 
         # Send game results (as frame message ?)
         # Update profiles status and player things
-        await update_players_exit_game(self.player_ids)
+        if not self.is_tournament:
+            await update_players_exit_game(self.player_ids)
 
         # Send game end
         await channel_layer.group_send(
@@ -166,6 +169,8 @@ class PongEngine:
 
         # Save game history
         await self.save_game_history()
+        winner_id = await self.get_winner_id()
+        return winner_id
 
     async def reset_physic(self):
         self.direction = 1
@@ -217,11 +222,13 @@ class PongEngine:
         self.game_state['TIMER'] = self.game_timer
 
         # Stop the game when timer reach 0
-        if self.game_time_left < 0:
-            self.round_continue = False
-            self.game_continue = False
-            self.game_state['ENDED'] = True
-            return
+        if self.game_time_left <= 0:
+            self.game_time_left = 0
+            if self.game_state['PLAYER_SCORE']['0'] != self.game_state['PLAYER_SCORE']['1']:
+                self.round_continue = False
+                self.game_continue = False
+                self.game_state['ENDED'] = True
+            # return
 
     async def move_pad(self, pad, direction):
         if self.game_movement[pad] == 'left':
@@ -301,6 +308,61 @@ class PongEngine:
         player_0.save(update_fields=['actual_streak', 'best_streak'])
         player_1.save(update_fields=['actual_streak', 'best_streak'])
 
+    @database_sync_to_async
+    @transaction.atomic
+    def get_winner_id(self):
+        history = GameHistory.objects.get(pk=self.game_id)
+        if history.winner_id != None:
+            return history.winner_id
+        return history.player_0_id
+
+async def send_tournament_state(player_ids, game_ids):
+    event = {'type': 'send.game.tournament'}
+    for i in range(0, 7):
+        event['game_' + str(i)] = {'player_0': {'name': 'Unknown', 'avatar': None, 'score': 0},
+                                   'player_1': {'name': 'Unknown', 'avatar': None, 'score': 0},
+                                   'winner': 'unknown'}
+    for i in range(0, len(game_ids)):
+        event['game_' + str(i)] = await get_history_infos(game_ids[i])
+    for player_id in player_ids:
+        await channel_layer.group_send(
+            'notifications_' + str(player_id),
+            event
+        )
+
+async def send_tournament_end(player_ids):
+    for player_id in player_ids:
+        await channel_layer.group_send(
+            'notifications_' + str(player_id),
+            {'type': 'send.tournament.end'}
+        )
+
+async def pong_tournament(player_ids):
+    all_game_ids = []
+    winner_ids = player_ids
+    while len(winner_ids) > 1:
+        # Make groups
+        groups = [winner_ids[i:i+2] for i in range(0, len(winner_ids), 2)]
+
+        # Create games and make players join games channel
+        game_ids = [await create_game(group) for group in groups]
+        all_game_ids += game_ids
+
+        # Inform about games
+        await send_tournament_state(player_ids, all_game_ids)
+
+        # Run games and get winners
+        engines = [PongEngine(game_id, group, True) for game_id, group in zip(game_ids, groups)]
+        tasks = [engine.game_loop() for engine in engines]
+        winner_ids = await asyncio.gather(*tasks)
+
+        # Inform results
+        await send_tournament_state(player_ids, all_game_ids)
+
+    # Inform results
+    await send_tournament_state(player_ids, all_game_ids)
+    await send_tournament_end(player_ids)
+
 class EngineConsumer(AsyncConsumer):
     async def classic_game(self, event):
         await channel_layer.group_send(
@@ -319,12 +381,31 @@ class EngineConsumer(AsyncConsumer):
 
         # Create game instance
         try:
-            engine = PongEngine(game_id, player_ids)
+            engine = PongEngine(game_id, player_ids, False)
             asyncio.create_task(engine.game_loop())
         except Exception:
             logging.error(traceback.format_exc())
 
+    async def tournament(self, event):
+        await channel_layer.group_send(
+            'general_chat',
+            {
+                'type': 'send.chat.message',
+                'name': 'engine',
+                'message': 'tournament'
+            }
+        )
+        if 'player_ids' in event:
+            player_ids = event['player_ids']
+        else:
+            return
+        try:
+            asyncio.create_task(pong_tournament(player_ids))
+        except Exception:
+            logging.error(traceback.format_exc())
+
 @database_sync_to_async
+@transaction.atomic
 def update_players_exit_game(profile_ids):
     for profile_id in profile_ids:
         profile = Profile.objects.get(pk=profile_id)
@@ -332,3 +413,36 @@ def update_players_exit_game(profile_ids):
         profile.is_game_ready = False
         profile.actual_game_id = None
         profile.save(update_fields=['is_in_game', 'is_game_ready', 'actual_game_id'])
+
+@database_sync_to_async
+@transaction.atomic
+def create_game(player_ids):
+    game_history = GameHistory.objects.create(player_0_id=player_ids[0], player_1_id=player_ids[1])
+
+    for player_id in player_ids:
+        player = Profile.objects.get(pk=player_id)
+        game_history.players.add(player)
+        player.actual_game_id = game_history.pk
+        player.save(update_fields=['actual_game_id'])
+        async_to_sync(channel_layer.group_send)(
+            'notifications_' + str(player.pk),
+            {'type': 'join.game.channel'}
+        )
+
+    return game_history.pk
+
+@database_sync_to_async
+@transaction.atomic
+def get_history_infos(game_id):
+    history = GameHistory.objects.get(pk=game_id)
+    player_0 = Profile.objects.get(pk=history.player_0_id)
+    player_1 = Profile.objects.get(pk=history.player_1_id)
+    if history.winner_id == None:
+        winner = 'unknown'
+    elif history.winner_id == history.player_0_id:
+        winner = 'player_0'
+    else:
+        winner = 'player_1'
+    return {'player_0': {'name': player_0.name, 'avatar': player_0.avatar.url, 'score': history.score_0},
+            'player_1': {'name': player_1.name, 'avatar': player_1.avatar.url, 'score': history.score_1},
+            'winner': winner}

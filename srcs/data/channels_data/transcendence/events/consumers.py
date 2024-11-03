@@ -414,6 +414,16 @@ class EventConsumer(AsyncWebsocketConsumer):
                             'player_ids': player_ids,
                         }
                     )
+            elif mode == 'TOURNAMENT' and group_size <= 8:
+                tournament_found, player_ids = await search_tournament(group.pk, group_size)
+                if tournament_found:
+                    await channel_layer.send(
+                        'engine-server',
+                        {
+                            'type': 'tournament',
+                            'player_ids': player_ids,
+                        }
+                    )
 
     async def game_leave_queue(self, content):
         await database_sync_to_async(self.profile.refresh_from_db)()
@@ -686,6 +696,19 @@ class EventConsumer(AsyncWebsocketConsumer):
                 'games_played': event['games_played'],
                 'total_point_scored': event['total_point_scored'],
                 'actual_streak': event['actual_streak'],
+            })
+        )
+
+    async def send_game_tournament(self, event):
+        event['type'] = 'game_tournament'
+        await self.send(text_data=json.dumps({
+                event
+            })
+        )
+
+    async def send_tournament_end(self, event):
+        await self.send(text_data=json.dumps({
+                'type': 'game_tournament_end'
             })
         )
 
