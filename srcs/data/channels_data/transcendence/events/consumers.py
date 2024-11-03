@@ -956,7 +956,7 @@ def search_classic_game(new_group_id, new_group_size):
     queue, created = PartyQueue.objects.get_or_create(mode='CLASSIC')
 
     for member in list(new_group.members.all()):
-        if member.is_in_game:
+        if member.is_in_game or member.is_in_tournament:
             return None, None
     if new_group_size != 2:
         if hasattr(queue, 'groups') and len(queue.groups.all()) != 0:
@@ -1092,7 +1092,7 @@ def search_tournament(new_group_id, new_group_size):
         return False, None
 
     for member in list(new_group.members.all()):
-        if member.is_in_game:
+        if member.is_in_game or member.is_in_tournament:
             return False, None
 
     if new_group_size == 8:
