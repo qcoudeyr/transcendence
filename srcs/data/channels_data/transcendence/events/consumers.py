@@ -457,6 +457,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             )
 
     async def statistics(self, content):
+        await database_sync_to_async(self.profile.refresh_from_db)()
         # Hours played
         hours_played = await get_profile_hours_played(self.profile)
 
