@@ -153,7 +153,7 @@ function openWebsocket(socketurl){
 			}
 			if (content.type === 'game_frame_message')
 			{
-				frameCreated(data.message);
+				frameCreated(content.message);
 			}
 			//if(content.type === 'game_frame_message')
 			// {
