@@ -41,6 +41,7 @@ class EventConsumer(AsyncWebsocketConsumer):
             'game_ready': self.game_ready,
             'game_move_pad': self.game_move_pad,
             'history_list': self.history_list,
+            'statistics': self.statistics,
         }
 
         # Request's user
