@@ -2,6 +2,7 @@ import time
 import asyncio
 import traceback
 import logging
+import math
 
 from channels.layers import get_channel_layer
 from channels.consumer import AsyncConsumer
@@ -18,6 +19,8 @@ TICK_RATE = 1.0 / 128
 
 # GAME RULES
 BOUNCE_SPEED_BOOST = 1.01
+MAX_BOUNCE_ANGLE = 5 * math.pi / 12
+BALL_SPEED = 5
 
 # MAP
 MAP_LENGTH = 10
@@ -98,7 +101,7 @@ class PongEngine:
         self.game_time_left = DEFAULT_GAME_TIMER_MINUTES * 60 + DEFAULT_GAME_TIMER_SECONDS
         self.game_timer = {'minutes': DEFAULT_GAME_TIMER_MINUTES, 'seconds': DEFAULT_GAME_TIMER_SECONDS}
         self.game_state = {'PLAYER_SCORE': {'0': 0, '1': 0}}
-        self.ball_speed = {'x': 3, 'z': 0.1}
+        self.ball_speed = {'x': 5, 'z': 1}
 
         # Set game state
         await self.reset_physic()
@@ -188,7 +191,7 @@ class PongEngine:
 
     async def reset_physic(self):
         self.direction = 1
-        self.ball_speed = {'x': -self.ball_speed['x'] / abs(self.ball_speed['x']), 'z': -self.ball_speed['z'] / abs(self.ball_speed['z'])}
+        self.ball_speed = {'x': -self.ball_speed['x'] / abs(self.ball_speed['x']) * BALL_SPEED, 'z': -self.ball_speed['z'] / abs(self.ball_speed['z'])}
         self.game_state = {
             'type': 'send.game.state',
             'PLAYER_0': self.player_ids[0],
@@ -270,20 +273,47 @@ class PongEngine:
         self.game_state['BALL']['z'] += self.ball_speed['z'] * lap_duration
 
     async def wall_bounce(self):
-        if abs(self.game_state['BALL']['z']) + BALL_RADIUS >= MAP_WIDTH / 2:
+        if self.game_state['BALL']['z'] + BALL_RADIUS >= MAP_WIDTH / 2:
+            self.game_state['BALL']['z'] = MAP_WIDTH / 2 - BALL_RADIUS
+            self.ball_speed['z'] *= -1
+            self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
+            self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
+        if self.game_state['BALL']['z'] - BALL_RADIUS <= -MAP_WIDTH / 2:
+            self.game_state['BALL']['z'] = -MAP_WIDTH / 2 + BALL_RADIUS
             self.ball_speed['z'] *= -1
             self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
             self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
 
     async def pad_bounce(self):
-        for pad in ['PAD_0', 'PAD_1']:
-            if (abs(self.game_state['BALL']['x']) + BALL_RADIUS + PAD_LENGTH / 2 >= abs(self.game_state[pad]['x']) and 
-                self.game_state['BALL']['z'] <= self.game_state[pad]['z'] + PAD_WIDTH / 2 and
-                self.game_state['BALL']['z'] >= self.game_state[pad]['z'] - PAD_WIDTH / 2):
-                self.ball_speed['x'] *= -1
-                self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
-                self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
-                return
+        # PAD 0 intersection
+        if (self.game_state['BALL']['x'] + BALL_RADIUS + PAD_LENGTH / 2 >= self.game_state['PAD_0']['x'] and 
+            self.game_state['BALL']['z'] <= self.game_state['PAD_0']['z'] + PAD_WIDTH / 2 and
+            self.game_state['BALL']['z'] >= self.game_state['PAD_0']['z'] - PAD_WIDTH / 2):
+            # Take care of limits
+            self.game_state['BALL']['x'] = self.game_state['PAD_0']['x'] - BALL_RADIUS - PAD_LENGTH
+            # Change velocity direction accordingly to relative intersection norm
+            relative_intersection = self.game_state['PAD_0']['z'] - self.game_state['BALL']['z']
+            normalized = relative_intersection / (PAD_WIDTH / 2)
+            bounce_angle = normalized * MAX_BOUNCE_ANGLE
+            self.ball_speed['x'] = BALL_SPEED * math.cos(bounce_angle)
+            self.ball_speed['z'] = BALL_SPEED * -math.sin(bounce_angle)
+            self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
+            self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
+        # PAD 1 intersection
+        if (self.game_state['BALL']['x'] - BALL_RADIUS - PAD_LENGTH / 2 <= self.game_state['PAD_1']['x'] and 
+            self.game_state['BALL']['z'] <= self.game_state['PAD_1']['z'] + PAD_WIDTH / 2 and
+            self.game_state['BALL']['z'] >= self.game_state['PAD_1']['z'] - PAD_WIDTH / 2):
+            # Take care of limits
+            self.game_state['BALL']['x'] = self.game_state['PAD_1']['x'] + BALL_RADIUS + PAD_LENGTH
+            # Change velocity direction accordingly to relative intersection norm
+            relative_intersection = self.game_state['PAD_0']['z'] - self.game_state['BALL']['z']
+            normalized = relative_intersection / (PAD_WIDTH / 2)
+            bounce_angle = normalized * MAX_BOUNCE_ANGLE
+            self.ball_speed['x'] = BALL_SPEED * math.cos(bounce_angle)
+            self.ball_speed['z'] = BALL_SPEED * -math.sin(bounce_angle)
+            self.ball_speed['x'] *= -1
+            self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
+            self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
 
     async def ball_scored(self):
         if self.game_state['BALL']['x'] > MAP_LENGTH / 2:
