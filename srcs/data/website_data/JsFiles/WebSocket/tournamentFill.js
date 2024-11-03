@@ -10,7 +10,8 @@ export function fillTournament(data) {
             player1: document.getElementById(`game${i}-p1`)
         });
     }
-
+	console.log(games);
+	console.log(playerElements);
     // Fill player names and set winner/loser classes
     games.forEach((game, index) => {
         const player0 = playerElements[index].player0;
@@ -20,6 +21,7 @@ export function fillTournament(data) {
         player1.textContent = data[`game_${index}`].player_1;
 
         // Set classes based on winner
+		player0.class.clear;
         if (data[`game_${index}`].winner === "player_0") {
             player0.classList.add("winner-team");
             player1.classList.add("loser-team");
