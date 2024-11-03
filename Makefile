@@ -6,7 +6,7 @@ BLUE := $(shell printf "\033[34m")
 NC := $(shell printf "\033[0m")
 
 # Environment variables
-ENABLE_DEVOPS ?= true
+ENABLE_DEVOPS ?= false
 DEV=1
 CERT_SOURCE_DIR := ./srcs/data/certbot/certificates/pong-br.com
 BACKUP_DIR := ./.backup/data/certbot/certificates/pong-br.com
@@ -93,7 +93,7 @@ build-and-up:
 		echo "ℹ️  DevOps services disabled, starting only main services..."; \
 		docker compose -f ./srcs/docker-compose.yml up -d; \
 	fi;
-#sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true;
+	sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true;
 	echo "✨ Build Complete!"
 
 devops:
