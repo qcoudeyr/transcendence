@@ -464,7 +464,7 @@ class EventConsumer(AsyncWebsocketConsumer):
         total_wins = await get_profile_total_wins(self.profile)
 
         # Total loss
-        total_wins = await get_profile_total_loss(self.profile)
+        total_loss = await get_profile_total_loss(self.profile)
 
         # Best streak
         best_streak = await get_profile_best_streak(self.profile)
