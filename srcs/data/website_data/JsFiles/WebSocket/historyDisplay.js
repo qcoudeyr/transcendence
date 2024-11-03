@@ -2,6 +2,8 @@
 
 
 export function createMatchHistory(data) {
+	const historyMatchContainer = document.getElementById("match-history-container");
+
     const matchDiv = document.createElement('div');
     matchDiv.id = data.id;
     if (data.result === "LOSE")
@@ -12,7 +14,7 @@ export function createMatchHistory(data) {
     const matchText = document.createElement('p');
     matchText.textContent = 'Match ' + data.id;
     matchDiv.appendChild(matchText);
-    document.body.appendChild(matchDiv);
+    historyMatchContainer.appendChild(matchDiv);
 }
 
 
