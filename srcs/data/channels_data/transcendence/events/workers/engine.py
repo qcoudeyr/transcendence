@@ -102,6 +102,7 @@ class PongEngine:
         self.game_timer = {'minutes': DEFAULT_GAME_TIMER_MINUTES, 'seconds': DEFAULT_GAME_TIMER_SECONDS}
         self.game_state = {'PLAYER_SCORE': {'0': 0, '1': 0}}
         self.ball_speed = {'x': 5, 'z': 1}
+        self.speed = BALL_SPEED
 
         # Set game state
         await self.reset_physic()
@@ -213,6 +214,7 @@ class PongEngine:
     async def reset_physic(self):
         self.direction = 1
         self.ball_speed = {'x': -self.ball_speed['x'] / abs(self.ball_speed['x']) * BALL_SPEED, 'z': -self.ball_speed['z'] / abs(self.ball_speed['z'])}
+        self.speed = BALL_SPEED
         self.game_state = {
             'type': 'send.game.state',
             'PLAYER_0': self.player_ids[0],
@@ -299,13 +301,13 @@ class PongEngine:
             self.ball_speed['z'] *= -1
             self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
             self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
-            BALL_SPEED = BALL_SPEED + 0.3
+            self.speed += 0.3
         if self.game_state['BALL']['z'] - BALL_RADIUS <= -MAP_WIDTH / 2:
             self.game_state['BALL']['z'] = -MAP_WIDTH / 2 + BALL_RADIUS
             self.ball_speed['z'] *= -1
             self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
             self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
-            BALL_SPEED = BALL_SPEED + 0.3
+            self.speed += 0.3
 
     async def pad_bounce(self):
         # PAD 0 intersection
@@ -318,8 +320,8 @@ class PongEngine:
             relative_intersection = self.game_state['PAD_0']['z'] - self.game_state['BALL']['z']
             normalized = relative_intersection / (PAD_WIDTH / 2)
             bounce_angle = normalized * MAX_BOUNCE_ANGLE
-            self.ball_speed['x'] = BALL_SPEED * -math.cos(bounce_angle)
-            self.ball_speed['z'] = BALL_SPEED * -math.sin(bounce_angle)
+            self.ball_speed['x'] = self.speed * -math.cos(bounce_angle)
+            self.ball_speed['z'] = self.speed * -math.sin(bounce_angle)
             self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
             self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
         # PAD 1 intersection
