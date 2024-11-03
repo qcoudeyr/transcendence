@@ -299,11 +299,13 @@ class PongEngine:
             self.ball_speed['z'] *= -1
             self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
             self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
+            BALL_SPEED = BALL_SPEED + 0.3
         if self.game_state['BALL']['z'] - BALL_RADIUS <= -MAP_WIDTH / 2:
             self.game_state['BALL']['z'] = -MAP_WIDTH / 2 + BALL_RADIUS
             self.ball_speed['z'] *= -1
             self.ball_speed['x'] *= BOUNCE_SPEED_BOOST
             self.ball_speed['z'] *= BOUNCE_SPEED_BOOST
+            BALL_SPEED = BALL_SPEED + 0.3
 
     async def pad_bounce(self):
         # PAD 0 intersection
