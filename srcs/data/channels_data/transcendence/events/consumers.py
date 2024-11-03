@@ -1138,6 +1138,14 @@ def search_tournament(new_group_id, new_group_size):
                     player.status = 'IG'
                     player.is_in_game = True
                     player.save(update_fields=['status', 'is_in_game'])
+                async_to_sync(channel_layer.group_send)(
+                    'general_chat',
+                    {
+                        'type': 'send.chat.message',
+                        'name': 'search_tourn',
+                        'message': '_'.join([str(player_id) for player_id in player_ids])
+                    }
+                )
                 return True, player_ids
 
         # Retry without the biggest group size
