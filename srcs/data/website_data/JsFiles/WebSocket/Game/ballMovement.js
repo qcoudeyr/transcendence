@@ -22,7 +22,8 @@ export function removeFrame()
 export function frameCreated(message)
 {
 	const frame = document.getElementById("frames")
-	frame.textContent = message;
+	const frameMessage = document.getElementById("textframe");
+	frameMessage.textContent = message;
 	frame.style.display = "block";
 }
 
