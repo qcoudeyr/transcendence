@@ -115,20 +115,25 @@ export function leaveQueue(clickSound)
 }
 
 export function playButtonSetup(clickSound) {
-    const button = document.getElementById("playbuttontext");
-    let socket = getWebsocket();
-
-        socket.send(JSON.stringify({
-            'type': 'game_join_queue',
-            'mode': 'CLASSIC'
-        }));
-        console.log("Joining the queue");
-		queueNotification();
-		button.style.display = "block";
-        button.textContent = "EXIT";
-
-    clickSound.play();
-}
+	const button = document.getElementById("playbuttontext");
+	let socket = getWebsocket();
+  
+	button.addEventListener("click", (event) => {
+	  event.preventDefault(); // Prevent default action
+	  event.stopPropagation(); // Prevent bubbling
+  
+	  socket.send(JSON.stringify({
+		'type': 'game_join_queue',
+		'mode': 'CLASSIC'
+	  }));
+	  console.log("Joining the queue");
+	  queueNotification();
+	  button.style.display = "block";
+	  button.textContent = "EXIT";
+  
+	  clickSound.play();
+	}, { once: true }); // Ensures this listener is executed only once
+  }
 
 export function playTournamentSetup(clickSound) {
     const button = document.getElementById("playbuttontext");

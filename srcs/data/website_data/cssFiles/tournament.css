@@ -1,9 +1,8 @@
 .bracket {
 	display: flex;
-}
-
-.bracket {
-	display: flex;
+	content: center;
+	margin-top: 7.5%;
+	margin-bottom: 7.5%;
 }
 
 .round {
@@ -18,14 +17,43 @@
 	margin: 15px 0;
 	overflow: hidden;
 	border-radius: 5px;
+	box-shadow: 0 0 10px rgba(255, 0, 255, 0.6);
 }
 
 .team {
-	color: #fff;
-	padding: 8px;
-	background-color: #74b9ff;
+background: rgba(0, 0, 0, 0.2);
+backdrop-filter: blur(14.1px);
+-webkit-backdrop-filter: blur(14.1px);
+	color: #ffffff;
+	text-shadow: 0 0 10px #ffff;
+	padding: 15px;
+	text-align: center;
+	box-shadow: 0 0 10px rgba(255, 0, 255, 0.6);
 }
 
 .team:nth-child(odd) {
-	border-bottom: 1px solid #8fc7ff;
+	border-bottom: 1px solid #0ef3f3;
+}
+
+.losed-team {
+	background: rgba(0, 0, 0, 0.2);
+	box-shadow: 0 0 10px rgba(255, 0, 255, 0.6);
+	backdrop-filter: blur(14.1px);
+	-webkit-backdrop-filter: blur(14.1px);
+		color: #fb00ff;
+		text-shadow: 0 0 10px #fb00ff;
+		padding: 15px;
+		text-align: center;
+	}
+
+.winner-team {
+	background: rgba(0, 0, 0, 0.2);
+	box-shadow: 0 0 10px rgba(255, 0, 255, 0.6);
+	backdrop-filter: blur(14.1px);
+	-webkit-backdrop-filter: blur(14.1px);
+	color: #0ef3f3; /* Green color for winning team */
+	text-shadow: 0 0 10px #0ef3f3;
+	padding: 15px;
+	font-size: larger;
+	text-align: center;
 }
