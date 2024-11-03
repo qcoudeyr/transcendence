@@ -143,7 +143,7 @@ class PongEngine:
                     'message': 'Ready ?'
                 }
             )
-            await asyncio.sleep(1)
+            await asyncio.sleep(3)
             await channel_layer.group_send(
                 self.game_channel,
                 {'type': 'send.frame.remove'}
@@ -155,7 +155,7 @@ class PongEngine:
                     'message': 'Fight !'
                 }
             )
-            await asyncio.sleep(1)
+            await asyncio.sleep(3)
             await channel_layer.group_send(
                 self.game_channel,
                 {'type': 'send.frame.remove'}
