@@ -26,9 +26,9 @@ export function fillTournament(data) {
         // Set classes based on winner
         if (data[`game_${index}`].winner === "player_0") {
             player0.classList.add("winner-team");
-            player1.classList.add("loser-team");
+            player1.classList.add("losed-team");
         } else {
-            player0.classList.add("loser-team");
+            player0.classList.add("losed-team");
             player1.classList.add("winner-team");
         }
     });
