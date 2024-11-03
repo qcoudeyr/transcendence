@@ -17,6 +17,23 @@ from game.models import PartyQueue, GameHistory
 MIN_MOVE_TIME_DELTA = 1.0 / 256
 MOVE_DIST = 0.3
 
+# DATE
+MONTHS = {
+        1: 'jan',
+        2: 'feb',
+        3: 'mar',
+        4: 'apr',
+        5: 'may',
+        6: 'jun',
+        7: 'jul',
+        8: 'aug',
+        9: 'sep',
+        10: 'oct',
+        11: 'nov',
+        12: 'dec',
+}
+GAME_TIME = 3.0 / 60
+
 channel_layer = get_channel_layer()
 
 class EventConsumer(AsyncWebsocketConsumer):
@@ -984,6 +1001,9 @@ def get_profile_hours_played(profile):
         'nov': 0,
         'dec': 0,
     }
+    historys = list(profile.gamehistory_set.all())
+    for history in historys:
+        hours_played[MONTHS[history.date.month]] += GAME_TIME
     return hours_played
 
 @database_sync_to_async
