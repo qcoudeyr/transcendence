@@ -3,7 +3,7 @@ import { getWebsocket } from "../websocket-open.js";
 export function gameReadySoStart()
 {
 
-document.addEventListener("keydown", handleKeyPress);
+
 // function handleSocketMessage(event) {
 //     const data = JSON.parse(event.data);
 
@@ -48,6 +48,27 @@ export function gameEnd() {
 	const endButton = document.getElementById("unloadButton");
 	endButton.style.display = "block";
 }
+
+let keyPressed = {};
+let intervalId = null;
+
+document.addEventListener("keydown", (event) => {
+    if (!keyPressed[event.key]) {
+        keyPressed[event.key] = true;
+        handleKeyPress(event);
+
+        // Start a repeating interval for continuous key press action
+        intervalId = setInterval(() => {
+            handleKeyPress(event);
+        }, 100); // Adjust the interval time (in milliseconds) as needed
+    }
+});
+
+document.addEventListener("keyup", (event) => {
+    keyPressed[event.key] = false;
+    clearInterval(intervalId); // Stop the interval when the key is released
+    intervalId = null;
+});
 
 function handleKeyPress(event) {
     if (event.key === 'D' || event.key === 'd') {
