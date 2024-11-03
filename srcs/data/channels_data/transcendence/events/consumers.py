@@ -1130,6 +1130,8 @@ def search_tournament(new_group_id, new_group_size):
                 player_ids = [member.pk for member in list(new_group.members.all())]
                 for group_id in matched_group_ids:
                     group = Group.objects.get(pk=group_id)
+                    group.party_queue = None
+                    group.save(update_fields=['party_queue'])
                     player_ids += [member.pk for member in list(group.members.all())]
                 for player_id in player_ids:
                     player = Profile.objects.get(pk=player_id)
