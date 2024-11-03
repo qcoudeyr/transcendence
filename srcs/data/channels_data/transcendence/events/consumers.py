@@ -82,9 +82,6 @@ class EventConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-        # Test history list
-        await self.history_list({})
-
     async def disconnect(self, close_code):
         await update_profile_status(self.profile, 'OF')
         group = await get_profile_group(self.profile)
@@ -458,6 +455,42 @@ class EventConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+    async def statistics(self, content):
+        # Hours played
+        hours_played = await get_profile_hours_played(self.profile)
+
+        # Total wins
+        total_wins = await get_profile_total_wins(self.profile)
+
+        # Total loss
+        total_wins = await get_profile_total_loss(self.profile)
+
+        # Best streak
+        best_streak = await get_profile_best_streak(self.profile)
+
+        # Games played
+        games_played = await get_profile_games_played(self.profile)
+
+        # Total point scored
+        total_point_scored = await get_profile_total_point_scored(self.profile)
+
+        # Actual streak
+        actual_streak = await get_profile_actual_streak(self.profile)
+
+        await self.channel_layer.group_send(
+            self.notifications_group,
+            {
+                'type': 'send.statistics',
+                'hours_played': hours_played,
+                'total_wins': total_wins,
+                'total_loss': total_loss,
+                'best_streak': best_streak,
+                'games_played': games_played,
+                'total_point_scored': total_point_scored,
+                'actual_streak': actual_streak,
+            }
+        )
+
     # group_send functions here
     async def send_chat_message(self, event):
         message = event['message'].strip()
@@ -618,6 +651,21 @@ class EventConsumer(AsyncWebsocketConsumer):
             'score': event['score'],
             'history_id': event['history_id'],
             })
+        )
+
+    async def send_statistics(self, event):
+        await self.channel_layer.group_send(
+            self.notifications_group,
+            {
+                'type': 'send.statistics',
+                'hours_played': event['hours_played'],
+                'total_wins': event['total_wins'],
+                'total_loss': event['total_loss'],
+                'best_streak': event['best_streak'],
+                'games_played': event['games_played'],
+                'total_point_scored': event['total_point_scored'],
+                'actual_streak': event['actual_streak'],
+            }
         )
 
     # Usefull functions
@@ -918,3 +966,64 @@ def update_profile_game_ready(profile, is_game_ready):
 def get_profile_historys(profile):
     historys = list(profile.gamehistory_set.all())
     return historys
+
+@database_sync_to_async
+@transaction.atomic
+def get_profile_hours_played(profile):
+    hours_played = {
+        'jan': 0,
+        'feb': 0,
+        'mar': 0,
+        'apr': 0,
+        'may': 0,
+        'jun': 0,
+        'jul': 0,
+        'aug': 0,
+        'sep': 0,
+        'oct': 0,
+        'nov': 0,
+        'dec': 0,
+    }
+    return hours_played
+
+@database_sync_to_async
+@transaction.atomic
+def get_profile_total_wins(profile):
+    total_wins = len(list(profile.gamehistory_set.filter(winner_id=profile.pk)))
+    return total_wins
+
+@database_sync_to_async
+@transaction.atomic
+def get_profile_total_loss(profile):
+    total_loss = len(list(profile.gamehistory_set.exclude(winner_id=profile.pk)))
+    return total_loss
+
+@database_sync_to_async
+@transaction.atomic
+def get_profile_best_streak(profile):
+    best_streak = profile.best_streak
+    return best_streak
+
+@database_sync_to_async
+@transaction.atomic
+def get_profile_games_played(profile):
+    games_played = len(list(profile.gamehistory_set.all()))
+    return games_played
+
+@database_sync_to_async
+@transaction.atomic
+def get_profile_total_point_scored(profile):
+    total_point_scored = 0
+    historys = list(profile.gamehistory_set.all())
+    for history in historys:
+        if history.player_0_id == profile.pk:
+            total_point_scored += history.score_0
+        else:
+            total_point_scored += history.score_1
+    return total_point_scored
+
+@database_sync_to_async
+@transaction.atomic
+def get_profile_actual_streak(profile):
+    actual_streak = profile.actual_streak
+    return actual_streak
