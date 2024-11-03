@@ -136,10 +136,30 @@ class PongEngine:
             await self.reset_physic()
 
             # Send round start
-            # for i in range(3, 0, -1):
-            #     players_broadcast(player_ids, {'type': 'send.frame.message', 'message': str(i)})
-            #     time.sleep(1)
-            # players_broadcast(player_ids, {'type': 'send.frame.message', 'message': 'Fight !'})
+            await channel_layer.group_send(
+                self.game_channel,
+                {
+                    'type': 'send.game.frame.message',
+                    'message': 'Ready ?'
+                }
+            )
+            await asyncio.sleep(0.25)
+            await channel_layer.group_send(
+                self.game_channel,
+                {'type': 'send.frame.remove'}
+            )
+            await channel_layer.group_send(
+                self.game_channel,
+                {
+                    'type': 'send.game.frame.message',
+                    'message': 'Fight !'
+                }
+            )
+            await asyncio.sleep(0.25)
+            await channel_layer.group_send(
+                self.game_channel,
+                {'type': 'send.frame.remove'}
+            )
 
             # Tick rate setup
             tick_rate = TICK_RATE
@@ -186,6 +206,33 @@ class PongEngine:
 
         # Save game history
         await self.save_game_history()
+
+        # Send result
+        winner_id, loser_id = await self.get_history_winner_loser_id()
+        await channel_layer.group_send(
+            'notifications_' + str(winner_id),
+            {
+                'type': 'send.game.frame.message',
+                'message': 'You Win !',
+            }
+        )
+        await channel_layer.group_send(
+            'notifications_' + str(loser_id),
+            {
+                'type': 'send.game.frame.message',
+                'message': 'You Lose...',
+            }
+        )
+        await asyncio.sleep(4)
+        await channel_layer.group_send(
+            'notifications_' + str(winner_id),
+            {'type': 'send.frame.remove'}
+        )
+        await channel_layer.group_send(
+            'notifications_' + str(loser_id),
+            {'type': 'send.frame.remove'}
+        )
+
         winner_id = await self.get_winner_id()
         return winner_id
 
@@ -352,6 +399,15 @@ class PongEngine:
         history.save(update_fields=['score_0', 'score_1', 'winner_id', 'is_in_progress'])
         player_0.save(update_fields=['actual_streak', 'best_streak'])
         player_1.save(update_fields=['actual_streak', 'best_streak'])
+
+    @database_sync_to_async
+    @transaction.atomic
+    def get_history_winner_loser_id(self):
+        history = GameHistory.objects.get(pk=self.game_id)
+        if history.player_0_id == history.winner_id:
+            return history.winner_id, history.player_1_id
+        else:
+            return history.winner_id, history.player_0_id
 
     @database_sync_to_async
     @transaction.atomic
