@@ -1116,6 +1116,14 @@ def search_tournament(new_group_id, new_group_size):
 
     # Order group sizes by size (from biggest)
     group_sizes = {k: v for k, v in sorted(group_sizes.items(), key=lambda item: item[1], reverse=True) if v <= max_size}
+    async_to_sync(channel_layer.group_send)(
+        'general_chat',
+        {
+            'type': 'send.chat.message',
+            'name': 'search_tourn',
+            'message': str(group_sizes)
+        }
+    )
 
     # Test possibilities
     while len(group_sizes) > 0:
