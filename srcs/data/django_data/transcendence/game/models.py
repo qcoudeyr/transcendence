@@ -12,3 +12,4 @@ class GameHistory(models.Model):
     score_0 = models.IntegerField(default=0)
     score_1 = models.IntegerField(default=0)
     is_in_progress = models.BooleanField(default=True)
+    date = models.DateField(auto_now_add=True)

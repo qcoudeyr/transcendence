@@ -275,11 +275,21 @@ class PongEngine:
         history = GameHistory.objects.get(pk=self.game_id)
         history.score_0 = self.game_state['PLAYER_SCORE']['0']
         history.score_1 = self.game_state['PLAYER_SCORE']['1']
+        player_0 = Profile.objects.get(pk=self.game_state['PLAYER_0'])
+        player_1 = Profile.objects.get(pk=self.game_state['PLAYER_1'])
 
         if self.game_state['PLAYER_SCORE']['0'] > self.game_state['PLAYER_SCORE']['1']:
             history.winner_id = self.game_state['PLAYER_0']
+            player_0.actual_streak += 1
+            player_1.actual_streak = 0
+            if player_0.actual_streak > player_0.best_streak:
+                player_0.best_streak = player_0.actual_streak
         elif self.game_state['PLAYER_SCORE']['1'] > self.game_state['PLAYER_SCORE']['0']:
             history.winner_id = self.game_state['PLAYER_1']
+            player_1.actual_streak += 1
+            player_0.actual_streak = 0
+            if player_1.actual_streak > player_1.best_streak:
+                player_1.best_streak = player_1.actual_streak
         else:
             history.winner_id = None
 
