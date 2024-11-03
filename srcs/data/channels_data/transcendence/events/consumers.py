@@ -722,7 +722,7 @@ class EventConsumer(AsyncWebsocketConsumer):
 
     async def send_frame_remove(self, event):
         await self.send(text_data=json.dumps({
-                'type': 'frame_remove',
+                'type': 'frame_emove',
             })
         )
 
@@ -1147,7 +1147,7 @@ def search_tournament(new_group_id, new_group_size):
         matched_group_ids = []
         group_size_sum = new_group_size
         for group_id in group_sizes:
-            if group_sizes[group_id] + group_size_sum <= 8: * BALL_SPEED
+            if group_sizes[group_id] + group_size_sum <= 8:
                 matched_group_ids.append(group_id)
                 group_size_sum += group_sizes[group_id]
             if group_size_sum == 8:
