@@ -93,7 +93,6 @@ build-and-up:
 		echo "ℹ️  DevOps services disabled, starting only main services..."; \
 		docker compose -f ./srcs/docker-compose.yml up -d; \
 	fi;
-	sleep 5 && docker exec tr_nginx rm /etc/nginx/conf.d/modsecurity.conf && docker exec tr_nginx nginx -s reload || true;
 	echo "✨ Build Complete!"
 
 devops:
