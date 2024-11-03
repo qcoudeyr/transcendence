@@ -655,9 +655,7 @@ class EventConsumer(AsyncWebsocketConsumer):
         )
 
     async def send_statistics(self, event):
-        await self.channel_layer.group_send(
-            self.notifications_group,
-            {
+        await self.send(text_data=json.dumps({
                 'type': 'send.statistics',
                 'hours_played': event['hours_played'],
                 'total_wins': event['total_wins'],
@@ -666,7 +664,7 @@ class EventConsumer(AsyncWebsocketConsumer):
                 'games_played': event['games_played'],
                 'total_point_scored': event['total_point_scored'],
                 'actual_streak': event['actual_streak'],
-            }
+            })
         )
 
     # Usefull functions
