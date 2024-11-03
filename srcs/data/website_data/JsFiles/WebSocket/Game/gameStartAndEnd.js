@@ -50,24 +50,30 @@ export function gameEnd() {
 }
 
 let keyPressed = {};
-let intervalId = null;
+let intervalIds = {};
 
 document.addEventListener("keydown", (event) => {
     if (!keyPressed[event.key]) {
         keyPressed[event.key] = true;
         handleKeyPress(event);
 
-        // Start a repeating interval for continuous key press action
-        intervalId = setInterval(() => {
-            handleKeyPress(event);
-        }, 100); // Adjust the interval time (in milliseconds) as needed
+        // Start a repeating interval for the key if it doesn't already exist
+        if (!intervalIds[event.key]) {
+            intervalIds[event.key] = setInterval(() => {
+                handleKeyPress(event);
+            }, 100); // Adjust interval time as needed
+        }
     }
 });
 
 document.addEventListener("keyup", (event) => {
     keyPressed[event.key] = false;
-    clearInterval(intervalId); // Stop the interval when the key is released
-    intervalId = null;
+
+    // Clear the interval for the released key and remove it from the interval tracker
+    if (intervalIds[event.key]) {
+        clearInterval(intervalIds[event.key]);
+        delete intervalIds[event.key];
+    }
 });
 
 function handleKeyPress(event) {
