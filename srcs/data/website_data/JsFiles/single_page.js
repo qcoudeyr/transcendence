@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	// 	checkToken();
 	// }
 	const playButtonTournament = document.getElementById("tournament-box");
-	playButtonTournament.addEventListener("click", function() {
+	playButtonTournament.addEventListener("click", function () {
 		playTournamentSetup(clickSound);
 	});
 	const playButton = document.getElementById("classic-box");
