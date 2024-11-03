@@ -1081,3 +1081,68 @@ def group_leave_queue(profile):
     group = profile.group
     group.party_queue = None
     group.save(update_fields=['party_queue'])
+
+@database_sync_to_async
+@transaction.atomic
+def search_tournament(new_group_id, new_group_size):
+    new_group = Group.objects.get(pk=new_group_id)
+    queue, created = PartyQueue.objects.get_or_create(mode='TOURNAMENT')
+
+    for member in list(new_group.members.all()):
+        if member.is_in_game:
+            return False, None
+
+    if new_group_size == 8:
+        # Return tournament ids
+        player_ids = [member.pk for member in list(new_group.members.all())]
+        for player_id in player_ids:
+            player = Profile.objects.get(pk=player_id)
+            player.status = 'IG'
+            player.is_in_game = True
+            player.save(update_fields=['status', 'is_in_game'])
+        return True, player_ids
+
+    # Check if queue exist and is not empty
+    if not hasattr(queue, 'groups') or len(queue.groups.all()) == 0:
+            new_group.party_queue = queue
+            new_group.save(update_fields=['party_queue'])
+            return False, None
+
+    queue_groups = list(queue.groups.all())
+    group_sizes = {queue_group.pk: len(queue_group.members.all()) for queue_group in queue_groups}
+
+    # Keep groups not too large
+    max_size = 8 - new_group_size
+
+    # Order group sizes by size (from biggest)
+    group_sizes = {k: v for k, v in sorted(group_sizes.items(), key=lambda item: item[1], reverse=True) if v <= max_size}
+
+    # Test possibilities
+    while len(group_sizes) > 0:
+        matched_group_ids = [new_group_id]
+        group_size_sum = new_group_size
+        for group_id in group_sizes:
+            if group_sizes[group_id] + group_size_sum <= 8:
+                matched_group_ids.append(group_id)
+                group_size_sum += group_sizes[group_id]
+            if group_size_sum == 8:
+                # Remove groups from queue and return tournament ids
+                player_ids = [member.pk for member in list(new_group.members.all())]
+                for group_id in matched_group_ids:
+                    group = Group.objects.get(pk=group_id)
+                    player_ids += [member.pk for member in list(group.members.all())]
+                for player_id in player_ids:
+                    player = Profile.objects.get(pk=player_id)
+                    player.status = 'IG'
+                    player.is_in_game = True
+                    player.save(update_fields=['status', 'is_in_game'])
+                return True, player_ids
+
+        # Retry without the biggest group size
+        max_size = max(group_sizes.values())
+        group_sizes = {k: v for k, v in sorted(group_sizes.items(), key=lambda item: item[1], reverse=True) if v < max_size}
+
+    # Add new_group to queue
+    new_group.party_queue = queue
+    new_group.save(update_fields=['party_queue'])
+    return False, None

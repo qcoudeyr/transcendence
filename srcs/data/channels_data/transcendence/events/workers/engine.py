@@ -216,6 +216,8 @@ class PongEngine:
 
     async def update_game_timer(self, lap_duration):
         self.game_time_left -= lap_duration
+        if self.game_time_left < 0:
+            self.game_time_left = 0
         minutes = int(self.game_time_left // 60)
         seconds = int(self.game_time_left % 60)
         self.game_timer = {'minutes': max(minutes, 0), 'seconds': max(seconds, 0)}
@@ -223,7 +225,6 @@ class PongEngine:
 
         # Stop the game when timer reach 0
         if self.game_time_left <= 0:
-            self.game_time_left = 0
             if self.game_state['PLAYER_SCORE']['0'] != self.game_state['PLAYER_SCORE']['1']:
                 self.round_continue = False
                 self.game_continue = False
